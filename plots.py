@@ -7,12 +7,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import pandas as pd
-
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
-from pymusic.big_array.derived import DerivedFieldArray
+from pymusic.big_array import BigArray
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
+
+from derived_fields import FieldGetter
 
 
 def _music_sim(folder) -> MusicSim:
@@ -20,48 +21,6 @@ def _music_sim(folder) -> MusicSim:
         sorted(folder.glob('*.music')),
         MusicDumpInfo(num_space_dims=2, num_velocities=2, num_scalars=1),
         [PeriodicArrayBC(), PeriodicArrayBC()])
-
-
-def full_ekin(sim_data):
-    """Kinetic energy."""
-    return DerivedFieldArray(
-        sim_data, "var", ["rho", "vel_1", "vel_2"],
-        lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
-
-
-def full_v2(sim_data):
-    """Squared norm of velocity vector."""
-    return DerivedFieldArray(
-        sim_data, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: vel_1**2 + vel_2**2)
-
-
-def full_vr2(sim_data):
-    """Squared radial velocity."""
-    return DerivedFieldArray(
-        sim_data, "var", ["vel_1"],
-        lambda vel_1: vel_1**2)
-
-
-def full_vt2(sim_data):
-    """Squared radial velocity."""
-    return DerivedFieldArray(
-        sim_data, "var", ["vel_2"],
-        lambda vel_2: vel_2**2)
-
-
-def full_vr2_ov2(sim_data):
-    """Squared norm of radial velocity normalized by v2."""
-    return DerivedFieldArray(
-        sim_data, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: vel_1**2 / (vel_1**2 + vel_2**2))
-
-
-def full_vt2_ov2(sim_data):
-    """Squared norm of radial velocity normalized by v2."""
-    return DerivedFieldArray(
-        sim_data, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: vel_2**2 / (vel_1**2 + vel_2**2))
 
 
 def params_1d(folder):
@@ -97,20 +56,9 @@ def tau_conv(folder):
     ).array().mean()
 
 
-DERIVED_FIELDS = {
-    'ekin': full_ekin,
-    'v2': full_v2,
-    'vr2': full_vr2,
-    'vt2': full_vt2,
-    'vr2_ov2': full_vr2_ov2,
-    'vt2_ov2': full_vt2_ov2,
-}
-
-
-def get_var(var, sim_data):
+def get_var(var: str, sim_data: BigArray) -> BigArray:
     """Get a direct output or derived variable."""
-    var_getter = DERIVED_FIELDS.get(var, lambda sd: sd.xs(var, axis="var"))
-    return var_getter(sim_data)
+    return FieldGetter(var)(sim_data)
 
 
 def tseries(folder, var):

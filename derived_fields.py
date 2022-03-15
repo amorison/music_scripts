@@ -21,7 +21,6 @@ if typing.TYPE_CHECKING:
     from typing import Callable, Dict
 
     from pymusic.big_array import BigArray
-    from pymusic.io import MusicDump
 
 
 class DataFetcher(ABC):
@@ -57,5 +56,40 @@ def vel_ampl(music_data: BigArray) -> BigArray:
     """Norm of velocity vector."""
     return DerivedFieldArray(
         music_data, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: np.sqrt(vel_1**2, vel_2**2)
-    )
+        lambda vel_1, vel_2: np.sqrt(vel_1**2 + vel_2**2))
+
+
+@FieldGetter.register
+def ekin(music_data: BigArray) -> BigArray:
+    """Kinetic energy."""
+    return DerivedFieldArray(
+        music_data, "var", ["rho", "vel_1", "vel_2"],
+        lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
+
+
+@FieldGetter.register
+def vr_abs(music_data: BigArray) -> BigArray:
+    """Absolute vr."""
+    return DerivedFieldArray(music_data, "var", ["vel_1"], np.abs)
+
+
+@FieldGetter.register
+def vt_abs(music_data: BigArray) -> BigArray:
+    """Absolute vt."""
+    return DerivedFieldArray(music_data, "var", ["vel_2"], np.abs)
+
+
+@FieldGetter.register
+def vr_normalized(music_data: BigArray) -> BigArray:
+    """Radial velocity normalized by velocity amplitude."""
+    return DerivedFieldArray(
+        music_data, "var", ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: np.sqrt(vel_1**2 / (vel_1**2 + vel_2**2)))
+
+
+@FieldGetter.register
+def vt_normalized(music_data: BigArray) -> BigArray:
+    """Radial velocity normalized by velocity amplitude."""
+    return DerivedFieldArray(
+        music_data, "var", ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)))
