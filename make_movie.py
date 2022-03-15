@@ -69,7 +69,7 @@ if __name__ == "__main__":
         dump_info=MusicDumpInfo(
             num_space_dims=2,
             num_velocities=2,
-            num_scalars=0,
+            num_scalars=1,
         ),
         recenter_bc_list=[PeriodicArrayBC(), PeriodicArrayBC()]
     )
