@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Iterator, Optional
 from dataclasses import dataclass
@@ -11,7 +12,7 @@ from pymusic.plotting import (
 )
 from pymusic.io import MusicSim, PeriodicArrayBC, MusicDumpInfo, MusicDump
 
-from .derived_fields import FieldGetter
+from derived_fields import FieldGetter
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,7 @@ class SphericalPlot(Plot):
     def draw_on(self, ax) -> None:
         rad = self.dump.grid.r_grid.face_points()
         theta = self.dump.grid.theta_grid.face_points()
-        data = self.get_data(self.dump)
+        data = self.get_data(self.dump.big_array()).array()
         vmin, vmax = self.color_bounds(data)
         r_mesh, t_mesh = np.meshgrid(rad, theta, indexing="ij")
         x_mesh = r_mesh * np.cos(t_mesh)
@@ -62,7 +63,7 @@ def main(sim, var) -> None:
 
 
 if __name__ == "__main__":
-    dump_dir = Path("transient")
+    dump_dir = Path()
     sim = MusicSim.from_dump_dir(
         directory=str(dump_dir),
         dump_info=MusicDumpInfo(
