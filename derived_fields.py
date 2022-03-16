@@ -24,18 +24,9 @@ if typing.TYPE_CHECKING:
 
 
 class DataFetcher(ABC):
-    @abstractmethod
-    def __call__(self, music_data: BigArray) -> BigArray:
-        """Get some data from a dump."""
 
-
-@dataclass(frozen=True)
-class FieldGetter(DataFetcher):
-
-    """Get a field from a MUSIC dump."""
-
-    var_name: str
-    _handlers: typing.ClassVar[Dict[str, Callable[[BigArray], BigArray]]] = {}
+    def __init_subclass__(cls):
+        cls._handlers: Dict[str, Callable[[BigArray], BigArray]] = {}
 
     @classmethod
     def register(
@@ -44,11 +35,27 @@ class FieldGetter(DataFetcher):
         cls._handlers[thunk.__name__] = thunk
         return thunk
 
+    @abstractmethod
+    def default_getter(self, music_data: BigArray) -> BigArray:
+        """Fallback method to get the desired data."""
+
     def __call__(self, music_data: BigArray) -> BigArray:
+        """Get some data from a dump."""
         try:
             return self._handlers[self.var_name](music_data)
         except KeyError:
-            return music_data.xs(self.var_name, "var")
+            return self.default_getter(music_data)
+
+
+@dataclass(frozen=True)
+class FieldGetter(DataFetcher):
+
+    """Get a field from a MUSIC dump."""
+
+    var_name: str
+
+    def default_getter(self, music_data: BigArray) -> BigArray:
+        music_data.xs(self.var_name, "var")
 
 
 @FieldGetter.register
