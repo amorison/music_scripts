@@ -60,6 +60,14 @@ def vel_ampl(music_data: BigArray) -> BigArray:
 
 
 @FieldGetter.register
+def vel_square(music_data: BigArray) -> BigArray:
+    """Square of velocity amplitude."""
+    return DerivedFieldArray(
+        music_data, "var", ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: vel_1**2 + vel_2**2)
+
+
+@FieldGetter.register
 def ekin(music_data: BigArray) -> BigArray:
     """Kinetic energy."""
     return DerivedFieldArray(

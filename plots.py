@@ -49,7 +49,7 @@ def tau_conv(folder):
     d_rad = grid.r_grid.cell_widths()
     params = params_1d(folder)
     core_mask = grid.r_grid.cell_centers() < params['rcore']
-    return (get_var('v2', sim_data)
+    return (get_var('vel_square', sim_data)
         .collapse(FixedDtypedFunc(sph_quad.average, np.float64), axis="x2")
         .collapse(FixedDtypedFunc(lambda vrms2: np.sum(d_rad[core_mask] / np.sqrt(vrms2[core_mask])),
                                   np.float64), axis="x1")
