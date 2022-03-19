@@ -4,15 +4,16 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
 from pymusic.big_array import BigArray
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
+from pymusic.plotting import SinglePlotFigure
 
 from derived_fields import FieldGetter
+from plots import SphericalPlot
 from prof1d import Prof1d
 
 
@@ -122,37 +123,20 @@ def plot_tseries(folder, var):
 
 
 def plot_var(folder, var, vel_arrows=False):
-    """Rho from a given folder."""
+    """Field plots in a given folder."""
     figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
     sim = _music_sim(folder)
-    sim_data = sim.big_array()
-    fields = get_var(var, sim_data)
-    if vel_arrows:
-        v_xs = get_var('vel_2', sim_data)
-        v_zs = get_var('vel_1', sim_data)
 
-    times = np.array(sim_data.labels_along_axis("time"))
-    x_coord = sim.grid.theta_grid.face_points()
-    z_coord = sim.grid.r_grid.face_points()
-    x_centers = sim.grid.theta_grid.cell_centers()
-    z_centers = sim.grid.r_grid.cell_centers()
-    for i, time in enumerate(times[-1:], 1):
-        field = fields.xs(time, axis="time").array()
-        fig, axis = plt.subplots(figsize=(9, 6))
-        surf = axis.pcolormesh(x_coord, z_coord, field, vmin=-1e4, vmax=1e4)
-        #axis.set_aspect("equal")
-        cax = make_axes_locatable(axis).append_axes(
-            'right', size="3%", pad=0.15)
-        plt.colorbar(surf, cax=cax)
-        if vel_arrows:
-            v_x = v_xs.xs(time, axis="time").array()
-            v_z = v_zs.xs(time, axis="time").array()
-            sset = slice(None, None, 16)
-            axis.quiver(x_centers[sset], z_centers[sset],
-                        v_x[sset, sset], v_z[sset, sset])
-        fig.savefig(figdir / f'{var}_{i:05d}.png', bbox_inches='tight')
-        plt.close(fig)
+    for i, dump in enumerate(sim.dumps):
+        fig = SinglePlotFigure(
+            plot=SphericalPlot(
+                dump=dump,
+                get_data=FieldGetter(var),
+                with_vel_arrows=vel_arrows,
+            ),
+        )
+        fig.save_to(figdir / f"{var}_{i:05d}.png")
 
 
 if __name__ == "__main__":
