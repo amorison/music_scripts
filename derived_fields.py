@@ -16,6 +16,8 @@ from dataclasses import dataclass
 import numpy as np
 
 from pymusic.big_array import DerivedFieldArray
+from pymusic.big_array.dtyped_func import FixedDtypedFunc
+from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 
 if typing.TYPE_CHECKING:
     from typing import Callable, Dict
@@ -56,6 +58,25 @@ class FieldGetter(DataFetcher):
 
     def default_getter(self, music_data: BigArray) -> BigArray:
         music_data.xs(self.var_name, "var")
+
+
+@dataclass(frozen=True)
+class ProfGetter(DataFetcher):
+
+    """Get a radial profile from a MUSIC dump."""
+
+    var_name: str
+
+    # only works on MusicDumpArray so far. Should have
+    # something similar with MusicSim so that sim, dumps,
+    # and grid info can be recovered. Type annotations would
+    # be better too!
+    def default_getter(self, music_data: BigArray):
+        field = FieldGetter(self.var_name)(music_data)
+        sph_quad = SphericalMidpointQuad1D(music_data.dump.grid.theta_grid)
+        return field.collapse(
+            FixedDtypedFunc(sph_quad.average, np.float64),
+            axis="x2")
 
 
 @FieldGetter.register
