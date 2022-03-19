@@ -6,7 +6,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
-import pandas as pd
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
 from pymusic.big_array import BigArray
@@ -14,6 +13,7 @@ from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 
 from derived_fields import FieldGetter
+from prof1d import Prof1d
 
 
 def _music_sim(folder) -> MusicSim:
@@ -21,21 +21,6 @@ def _music_sim(folder) -> MusicSim:
         sorted(folder.glob('*.music')),
         MusicDumpInfo(num_space_dims=2, num_velocities=2, num_scalars=1),
         [PeriodicArrayBC(), PeriodicArrayBC()])
-
-
-def params_1d(folder):
-    """First two lines of profile1d_scalars."""
-    profile1d_scalars = folder / '..' / 'profile1d_scalars.dat'
-    with profile1d_scalars.open() as p1d:
-        names = p1d.readline().split()
-        values = map(float, p1d.readline().split())
-    return dict(zip(names, values))
-
-
-def profs_1d(folder):
-    """Profiles in profile1d_scalars."""
-    profile1d_scalars = folder / '..' / 'profile1d_scalars.dat'
-    return pd.read_csv(profile1d_scalars, skiprows=2, delim_whitespace=True)
 
 
 # vrms(r, time) = sqrt(mean_theta(v2))
@@ -47,7 +32,7 @@ def tau_conv(folder):
     grid = sim.grid
     sph_quad = SphericalMidpointQuad1D(grid.theta_grid)
     d_rad = grid.r_grid.cell_widths()
-    params = params_1d(folder)
+    params = Prof1d(folder / "..").params
     core_mask = grid.r_grid.cell_centers() < params['rcore']
     return (get_var('vel_square', sim_data)
         .collapse(FixedDtypedFunc(sph_quad.average, np.float64), axis="x2")
