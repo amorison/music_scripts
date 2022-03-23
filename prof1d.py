@@ -1,4 +1,5 @@
 """Utility to read profile1d dat files."""
+from __future__ import annotations
 import typing
 from pathlib import Path
 from types import MappingProxyType
@@ -36,15 +37,15 @@ class Prof1d:
             self._path = self._path_hint
             return self._path
         for p1d in ("profile1d.dat", "profile1d_scalars.dat"):
-            file_path = self._path_hint / "profile1d.dat"
+            file_path = self._path_hint / p1d
             if file_path.exists():
                 if self._path is not None:
-                    RuntimeError(
+                    raise RuntimeError(
                         "Two profile1d files found: {file_path} and "
                         "{self._path}")
                 self._path = file_path
         if self._path is None:
-            RuntimeError("No profile1d file found in {self._path_hint}")
+            raise RuntimeError("No profile1d file found in {self._path_hint}")
         return self._path
 
     @property
