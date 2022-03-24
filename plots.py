@@ -5,17 +5,17 @@ import typing
 from dataclasses import dataclass
 
 import numpy as np
-from pymusic.io import MusicDump
 from pymusic.plotting import Plot, BoundsFromMinMax
 
 if typing.TYPE_CHECKING:
     from typing import Optional
+    from array_on_grid import DumpArrayOnGrid
     from derived_fields import FieldGetter
 
 
 @dataclass(frozen=True)
 class SphericalPlot(Plot):
-    dump: MusicDump
+    dump_arr: DumpArrayOnGrid
     get_data: FieldGetter
     with_vel_arrows: bool = False
     vel_arrows_stride: int = 16
@@ -24,10 +24,10 @@ class SphericalPlot(Plot):
     with_colorbar: bool = True
 
     def draw_on(self, ax) -> None:
-        dump_array = self.dump.big_array()
-        rad = self.dump.grid.r_grid.face_points()
-        theta = self.dump.grid.theta_grid.face_points()
-        data = self.get_data(dump_array).array()
+        grid = self.dump_arr.dump.grid
+        rad = grid.r_grid.face_points()
+        theta = grid.theta_grid.face_points()
+        data = self.get_data(self.dump_arr).array()
         vmin, vmax = self.color_bounds(data)
         r_mesh, t_mesh = np.meshgrid(rad, theta, indexing="ij")
         x_mesh = r_mesh * np.cos(t_mesh)
@@ -38,10 +38,10 @@ class SphericalPlot(Plot):
         ax.set_aspect("equal")
         ax.set_axis_off()
         if self.with_vel_arrows:
-            rad_c = self.dump.grid.r_grid.cell_centers()
-            theta_c = self.dump.grid.theta_grid.cell_centers()
-            vel_r = FieldGetter("vel_1")(dump_array).array()
-            vel_t = FieldGetter("vel_2")(dump_array).array()
+            rad_c = grid.r_grid.cell_centers()
+            theta_c = grid.theta_grid.cell_centers()
+            vel_r = FieldGetter("vel_1")(self.dump_arr).array()
+            vel_t = FieldGetter("vel_2")(self.dump_arr).array()
             radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
             vel_x = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
             vel_y = vel_t * np.cos(thetam) + vel_r * np.sin(thetam)

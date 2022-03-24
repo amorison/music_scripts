@@ -12,6 +12,7 @@ from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 from pymusic.plotting import SinglePlotFigure
 
+from array_on_grid import DumpArrayOnGrid
 from derived_fields import FieldGetter
 from plots import SphericalPlot
 from prof1d import Prof1d
@@ -131,7 +132,7 @@ def plot_var(folder, var, vel_arrows=False):
     for i, dump in enumerate(sim.dumps):
         fig = SinglePlotFigure(
             plot=SphericalPlot(
-                dump=dump,
+                dump=DumpArrayOnGrid(dump),
                 get_data=FieldGetter(var),
                 with_vel_arrows=vel_arrows,
             ),
