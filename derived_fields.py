@@ -10,8 +10,8 @@ user.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-import typing
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 import numpy as np
 
@@ -19,39 +19,46 @@ from pymusic.big_array import DerivedFieldArray
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from typing import Callable, Dict
 
     from pymusic.big_array import BigArray
     from array_on_grid import ArrayOnGrid
 
 
-class DataFetcher(ABC):
+In = TypeVar("In")
+Out = TypeVar("Out")
+
+
+class DataFetcher(ABC, Generic[In, Out]):
 
     def __init_subclass__(cls):
-        cls._handlers: Dict[str, Callable[[ArrayOnGrid], BigArray]] = {}
+        cls._handlers: Dict[str, Callable[[In], Out]] = {}
 
     @classmethod
-    def register(
-        cls, thunk: Callable[[ArrayOnGrid], BigArray]
-    ) -> Callable[[ArrayOnGrid], BigArray]:
+    def register(cls, thunk: Callable[[In], Out]) -> Callable[[In], Out]:
         cls._handlers[thunk.__name__] = thunk
         return thunk
 
+    @property
     @abstractmethod
-    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
+    def var_name(self) -> str:
+        """The variable name an instance is responsible of fetching."""
+
+    @abstractmethod
+    def default_getter(self, obj: In) -> Out:
         """Fallback method to get the desired data."""
 
-    def __call__(self, aog: ArrayOnGrid) -> BigArray:
+    def __call__(self, obj: In) -> Out:
         """Get some data from a dump."""
         try:
-            return self._handlers[self.var_name](aog)
+            return self._handlers[self.var_name](obj)
         except KeyError:
-            return self.default_getter(aog)
+            return self.default_getter(obj)
 
 
 @dataclass(frozen=True)
-class FieldGetter(DataFetcher):
+class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a field from a MUSIC dump."""
 
@@ -62,7 +69,7 @@ class FieldGetter(DataFetcher):
 
 
 @dataclass(frozen=True)
-class ProfGetter(DataFetcher):
+class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a radial profile from a MUSIC dump."""
 
