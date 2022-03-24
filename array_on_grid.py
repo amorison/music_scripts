@@ -47,7 +47,7 @@ class SimArrayOnGrid(ArrayOnGrid):
 
     @property
     def grid(self) -> Grid:
-        return self.grid
+        return self.sim.grid
 
     @cached_property
     def data(self) -> BigArray:
