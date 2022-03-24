@@ -33,7 +33,10 @@ def main(sim, var) -> None:
         ),
         frames_dir=Path(f"frames_{var}"),
     )
-    movie.render_to(f"{var}.mp4")
+    try:
+        movie.render_to(f"{var}.mp4")
+    except FileNotFoundError as err:
+        print(f"Error rendering movie: {err}")
 
 
 if __name__ == "__main__":
