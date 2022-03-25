@@ -147,3 +147,9 @@ def vt_normalized(aog: ArrayOnGrid) -> BigArray:
     return DerivedFieldArray(
         aog.data, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)))
+
+
+@ProfGetter.register
+def vrms(aog: ArrayOnGrid) -> BigArray:
+    """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
+    return ProfGetter("vel_square")(aog).sqrt()

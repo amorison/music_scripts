@@ -24,17 +24,16 @@ def _music_sim(folder) -> SimArrayOnGrid:
     return SimArrayOnGrid(sim)
 
 
-# vrms(r, time) = sqrt(mean_theta(v2))
-# also plot radial profile of time average of vrms(r, time)
 def tau_conv(simog, rcore: float):
     """Convective time scale."""
     grid = simog.grid
     d_rad = grid.r_grid.cell_widths()
     core_mask = grid.r_grid.cell_centers() < rcore
     return (
-        ProfGetter('vel_square')(simog)
-        .collapse(FixedDtypedFunc(lambda vrms2: np.sum(d_rad[core_mask] / np.sqrt(vrms2[core_mask])),
-                                  np.float64), axis="x1")
+        ProfGetter("vrms")(simog).collapse(
+            FixedDtypedFunc(
+                lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]),
+                np.float64), axis="x1")
         ).array().mean()
 
 
