@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 from pymusic.plotting import Plot, BoundsFromMinMax
 
 if typing.TYPE_CHECKING:
-    from typing import Optional
-    from array_on_grid import DumpArrayOnGrid
-    from derived_fields import FieldGetter
+    from typing import Optional, Sequence
+    from array_on_grid import DumpArrayOnGrid, ArrayOnGrid
+    from derived_fields import FieldGetter, TimeAveragedProfGetter
 
 
 @dataclass(frozen=True)
@@ -52,3 +52,24 @@ class SphericalPlot(Plot):
                       vel_x[sset, sset], vel_y[sset, sset])
         if self.with_colorbar:
             ax.figure.colorbar(surf, ax=ax)
+
+
+@dataclass(frozen=True)
+class ProfPlot(Plot):
+    music_data: ArrayOnGrid
+    get_data: TimeAveragedProfGetter
+    markers: Sequence[float] = field(default_factory=list)
+    length_scale: Optional[float] = None
+    log_scale: bool = False
+
+    def draw_on(self, ax) -> None:
+        radius = self.music_data.grid.r_grid.cell_centers()
+        markers = np.array(self.markers)
+        if self.length_scale is not None:
+            radius = radius / self.length_scale
+            markers /= self.length_scale
+        profile = self.get_data(self.music_data).array()
+        if self.log_scale:
+            ax.semilogy(radius, profile)
+        for marker in markers:
+            ax.axvline(marker, linewidth=1, linestyle=":", color="k")
