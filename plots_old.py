@@ -13,7 +13,7 @@ from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 from pymusic.plotting import SinglePlotFigure
 
 from array_on_grid import DumpArrayOnGrid
-from derived_fields import FieldGetter
+from derived_fields import FieldGetter, ProfGetter
 from plots import SphericalPlot
 from prof1d import Prof1d
 
@@ -32,15 +32,14 @@ def tau_conv(folder):
     sim = _music_sim(folder)
     sim_data = sim.big_array()
     grid = sim.grid
-    sph_quad = SphericalMidpointQuad1D(grid.theta_grid)
     d_rad = grid.r_grid.cell_widths()
     params = Prof1d(folder / "..").params
     core_mask = grid.r_grid.cell_centers() < params['rcore']
-    return (get_var('vel_square', sim_data)
-        .collapse(FixedDtypedFunc(sph_quad.average, np.float64), axis="x2")
+    return (
+        ProfGetter('vel_square')(sim_data)
         .collapse(FixedDtypedFunc(lambda vrms2: np.sum(d_rad[core_mask] / np.sqrt(vrms2[core_mask])),
                                   np.float64), axis="x1")
-    ).array().mean()
+        ).array().mean()
 
 
 def get_var(var: str, sim_data: BigArray) -> BigArray:
