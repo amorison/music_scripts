@@ -11,8 +11,10 @@ from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.plotting import SinglePlotFigure
 
 from array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
-from derived_fields import FieldGetter, ProfGetter, TimeAveragedProfGetter
-from plots import SphericalPlot, ProfPlot
+from derived_fields import (
+    FieldGetter, ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
+)
+from plots import SphericalPlot, ProfPlot, TseriesPlot
 from prof1d import Prof1d
 
 
@@ -27,20 +29,6 @@ def tau_conv(simog, rcore: float):
                 lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]),
                 np.float64), axis="x1")
         ).array().mean()
-
-
-def tseries(simog, var):
-    """Time series of a var from a given folder."""
-    grid = simog.sim.grid
-    d_rad = grid.r_grid.cell_widths()
-    sim_data = simog.data
-    rad = grid.r_grid.cell_centers()
-    time = np.array(sim_data.labels_along_axis("time"))
-    var_series = (
-        ProfGetter(var)(simog)
-        .collapse(FixedDtypedFunc(lambda w: np.average(w, weights=d_rad * rad**2), np.float64), axis="x1")
-    ).array()
-    return time, var_series
 
 
 def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
@@ -83,11 +71,15 @@ def plot_tseries(simog, var):
     """Plot time series."""
     figdir = Path('figures')
     figdir.mkdir(parents=True, exist_ok=True)
-    time, data = tseries(simog, var)
-    plt.plot(time, data)
-    plt.legend()
-    plt.savefig(figdir / f"tseries_{var}.pdf", bbox_inches='tight')
-    plt.close()
+
+    fig = SinglePlotFigure(
+        plot=TseriesPlot(
+            music_data=simog,
+            get_data=TimeSeriesGetter(var),
+            log_scale=False,
+        ),
+    )
+    fig.save_to(figdir / f"tseries_{var}.pdf")
 
 
 def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
