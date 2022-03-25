@@ -16,14 +16,6 @@ from plots import SphericalPlot, ProfPlot
 from prof1d import Prof1d
 
 
-def _music_sim(folder) -> SimArrayOnGrid:
-    sim = MusicSim.from_dump_file_names(
-        sorted(folder.glob('*.music')),
-        MusicDumpInfo(num_space_dims=2, num_velocities=2, num_scalars=1),
-        [PeriodicArrayBC(), PeriodicArrayBC()])
-    return SimArrayOnGrid(sim)
-
-
 def tau_conv(simog, rcore: float):
     """Convective time scale."""
     grid = simog.grid
@@ -118,7 +110,12 @@ if __name__ == "__main__":
     simfold = Path("transient")
     compute_tconv = False
 
-    simog = _music_sim(simfold)
+    sim = MusicSim.from_dump_file_names(
+        sorted(simfold.glob('*.music')),
+        MusicDumpInfo(num_space_dims=2, num_velocities=2, num_scalars=1),
+        [PeriodicArrayBC(), PeriodicArrayBC()])
+    simog = SimArrayOnGrid(sim)
+
     profs1d = Prof1d(simfold / "..")
 
     plot_var(simog, 'e_int', vel_arrows=True)
