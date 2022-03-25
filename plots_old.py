@@ -51,12 +51,6 @@ def tseries(simog, var):
     return time, var_series
 
 
-def prof(simog, var):
-    """Time averaged profile."""
-    var_prof = TimeAveragedProfGetter(var)(simog).array()
-    return simog.sim.grid.r_grid.cell_centers(), var_prof
-
-
 def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
     """Plot radial profile of density."""
     figdir = Path('figures')
@@ -79,11 +73,13 @@ def plot_dprof(simog, var):
     figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
 
-    rad, var_prof = prof(simog, var)
+    rad = simog.sim.grid.r_grid.cell_centers()
+    var_prof = TimeAveragedProfGetter(var)(simog).array()
+
     grad = (var_prof[1:] - var_prof[:-1]) / (rad[1:] - rad[:-1])
     rad_grad = (rad[1:] + rad[:-1]) / 2
+
     plt.plot(rad_grad, grad)
-    plt.legend()
 
     plt.xlabel('radius')
     plt.ylabel(var)
