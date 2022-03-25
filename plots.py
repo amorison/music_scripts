@@ -86,9 +86,9 @@ class TseriesPlot(Plot):
     log_scale: bool = False
 
     def draw_on(self, ax) -> None:
-        tseries = self.get_data(self.music_data)
-        time = np.array(tseries.labels_along_axis("time"))
-        tseries = tseries.array()
+        arr = self.get_data(self.music_data)
+        time = np.array(arr.labels_along_axis("time"))
+        tseries = arr.array()
         if self.log_scale:
             ax.semilogy(time, tseries, label=self.get_data.var_name)
         else:
