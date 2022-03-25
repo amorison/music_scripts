@@ -19,7 +19,7 @@ def all_plots(sim: MusicSim, var: str) -> Iterator[Plot]:
         time = dump.time
         yield WithPlotTitle(
             plot=SphericalPlot(
-                dump=DumpArrayOnGrid(dump),
+                dump_arr=DumpArrayOnGrid(dump),
                 get_data=FieldGetter(var),
             ),
             title=f"{var} at time {time:.2e}"

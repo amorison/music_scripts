@@ -40,7 +40,7 @@ def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
         plot=ProfPlot(
             music_data=simog,
             get_data=TimeAveragedProfGetter(var),
-            markers=profs1d.params["rcore"],
+            markers=[profs1d.params["rcore"]],
             length_scale=profs1d.params["rad_surf"],
             log_scale=True,
         ),
@@ -90,7 +90,7 @@ def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
     for i, dump in enumerate(simog.sim.dumps):
         fig = SinglePlotFigure(
             plot=SphericalPlot(
-                dump=DumpArrayOnGrid(dump),
+                dump_arr=DumpArrayOnGrid(dump),
                 get_data=FieldGetter(var),
                 with_vel_arrows=vel_arrows,
             ),
