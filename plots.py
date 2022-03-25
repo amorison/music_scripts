@@ -9,8 +9,10 @@ from pymusic.plotting import Plot, BoundsFromMinMax
 
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence
-    from array_on_grid import DumpArrayOnGrid, ArrayOnGrid
-    from derived_fields import FieldGetter, TimeAveragedProfGetter
+    from array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
+    from derived_fields import (
+        FieldGetter, TimeAveragedProfGetter, TimeSeriesGetter
+    )
 
 
 @dataclass(frozen=True)
@@ -75,3 +77,19 @@ class ProfPlot(Plot):
             ax.plot(radius, profile)
         for marker in markers:
             ax.axvline(marker, linewidth=1, linestyle=":", color="k")
+
+
+@dataclass(frozen=True)
+class TseriesPlot(Plot):
+    music_data: SimArrayOnGrid
+    get_data: TimeSeriesGetter
+    log_scale: bool = False
+
+    def draw_on(self, ax) -> None:
+        tseries = self.get_data(self.music_data)
+        time = np.array(tseries.labels_along_axis("time"))
+        tseries = tseries.array()
+        if self.log_scale:
+            ax.semilogy(time, tseries, label=self.get_data.var_name)
+        else:
+            ax.plot(time, tseries, label=self.get_data.var_name)
