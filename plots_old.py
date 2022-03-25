@@ -13,7 +13,7 @@ from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 from pymusic.plotting import SinglePlotFigure
 
 from array_on_grid import DumpArrayOnGrid
-from derived_fields import FieldGetter, ProfGetter
+from derived_fields import FieldGetter, ProfGetter, TimeAveragedProfGetter
 from plots import SphericalPlot
 from prof1d import Prof1d
 
@@ -68,16 +68,10 @@ def tseries(folder, var):
 
 
 def prof(var, folder):
-    """Profile of a direct output."""
+    """Time averaged profile."""
     sim = _music_sim(folder)
     sim_data = sim.big_array()
-    var_full = get_var(var, sim_data)
-    sph_quad = SphericalMidpointQuad1D(sim.grid.theta_grid)
-    var_prof = (
-        var_full.collapse(FixedDtypedFunc(sph_quad.average, np.float64),
-                          axis="x2")
-        .mean("time")
-    ).array()
+    var_prof = TimeAveragedProfGetter(var)(sim_data).array()
     return sim.grid.r_grid.cell_centers(), var_prof
 
 
