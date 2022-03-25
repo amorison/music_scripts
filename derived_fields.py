@@ -97,6 +97,22 @@ class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
         return field
 
 
+@dataclass(frozen=True)
+class TimeSeriesGetter(DataFetcher[ArrayOnGrid, BigArray]):
+
+    """Get a time series from MUSIC data."""
+
+    var_name: str
+
+    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
+        r_grid = aog.grid.r_grid
+        rad = r_grid.cell_centers()
+        d_rad = r_grid.cell_widths()
+        return ProfGetter(self.var_name)(aog).collapse(
+            FixedDtypedFunc(lambda w: np.average(w, weights=d_rad * rad**2),
+                            np.float64), axis="x1")
+
+
 @FieldGetter.register
 def vel_ampl(aog: ArrayOnGrid) -> BigArray:
     """Norm of velocity vector."""
