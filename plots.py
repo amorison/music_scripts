@@ -71,5 +71,7 @@ class ProfPlot(Plot):
         profile = self.get_data(self.music_data).array()
         if self.log_scale:
             ax.semilogy(radius, profile)
+        else:
+            ax.plot(radius, profile)
         for marker in markers:
             ax.axvline(marker, linewidth=1, linestyle=":", color="k")
