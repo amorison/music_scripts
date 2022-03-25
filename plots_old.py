@@ -12,7 +12,7 @@ from pymusic.plotting import SinglePlotFigure
 
 from array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
 from derived_fields import FieldGetter, ProfGetter, TimeAveragedProfGetter
-from plots import SphericalPlot
+from plots import SphericalPlot, ProfPlot
 from prof1d import Prof1d
 
 
@@ -57,18 +57,21 @@ def prof(simog, var):
     return simog.sim.grid.r_grid.cell_centers(), var_prof
 
 
-def plot_prof(simog, var):
+def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
     """Plot radial profile of density."""
     figdir = Path('figures')
     figdir.mkdir(parents=True, exist_ok=True)
 
-    rad, var_prof = prof(simog, var)
-    plt.semilogy(rad, var_prof)
-    plt.xlabel('radius')
-    plt.ylabel(var)
-    plt.legend()
-    plt.savefig(figdir / f'{var}_prof.pdf', bbox_inches='tight')
-    plt.close()
+    fig = SinglePlotFigure(
+        plot=ProfPlot(
+            music_data=simog,
+            get_data=TimeAveragedProfGetter(var),
+            markers=profs1d.params["rcore"],
+            length_scale=profs1d.params["rad_surf"],
+            log_scale=True,
+        ),
+    )
+    fig.save_to(figdir / f'{var}_prof.pdf')
 
 
 def plot_dprof(simog, var):
@@ -117,13 +120,15 @@ def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
 
 if __name__ == "__main__":
     simfold = Path("transient")
-    simog = _music_sim(simfold)
     compute_tconv = False
+
+    simog = _music_sim(simfold)
+    profs1d = Prof1d(simfold / "..")
 
     plot_var(simog, 'e_int', vel_arrows=True)
     plot_var(simog, "vel_2")
 
-    plot_prof(simog, "vel_2")
+    plot_prof(simog, "vel_2", profs1d)
 
     plot_tseries(simog, "v2")
     plot_tseries(simog, "vr2")
@@ -131,6 +136,5 @@ if __name__ == "__main__":
     plot_tseries(simog, "vel_2")
 
     if compute_tconv:
-        profs1d = Prof1d(simfold / "..")
         tconv = tau_conv(simog, profs1d.params["rcore"])
         print(f'Conv time {simfold.name}: {tconv:.2e}')
