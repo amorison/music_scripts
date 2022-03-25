@@ -60,7 +60,7 @@ class DataFetcher(ABC, Generic[In, Out]):
 @dataclass(frozen=True)
 class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
-    """Get a field from a MUSIC dump."""
+    """Get a field from MUSIC data."""
 
     var_name: str
 
@@ -71,7 +71,7 @@ class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
 @dataclass(frozen=True)
 class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
-    """Get a radial profile from a MUSIC dump."""
+    """Get a radial profile from MUSIC data."""
 
     var_name: str
 
@@ -81,6 +81,20 @@ class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
         return field.collapse(
             FixedDtypedFunc(sph_quad.average, np.float64),
             axis="x2")
+
+
+@dataclass(frozen=True)
+class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
+
+    """Get a radial profile from MUSIC data."""
+
+    var_name: str
+
+    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
+        field = ProfGetter(self.var_name)(aog)
+        if "time" in aog.data.axes:
+            field = field.mean("time")
+        return field
 
 
 @FieldGetter.register
