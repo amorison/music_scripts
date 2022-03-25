@@ -7,9 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
-from pymusic.big_array import BigArray
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
-from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 from pymusic.plotting import SinglePlotFigure
 
 from array_on_grid import DumpArrayOnGrid
@@ -42,11 +40,6 @@ def tau_conv(folder):
         ).array().mean()
 
 
-def get_var(var: str, sim_data: BigArray) -> BigArray:
-    """Get a direct output or derived variable."""
-    return FieldGetter(var)(sim_data)
-
-
 def tseries(folder, var):
     """Time series of a var from a given folder."""
     sim = _music_sim(folder)
@@ -54,14 +47,10 @@ def tseries(folder, var):
     grid = sim.grid
     d_rad = grid.r_grid.cell_widths()
     sim_data = sim.big_array()
-    full_var = get_var(var, sim_data)
-    sph_quad = SphericalMidpointQuad1D(grid.theta_grid)
-
     rad = grid.r_grid.cell_centers()
     time = np.array(sim_data.labels_along_axis("time"))
     var_series = (
-        full_var.collapse(FixedDtypedFunc(sph_quad.average, np.float64),
-                          axis="x2")
+        ProfGetter(var)(sim_data)
         .collapse(FixedDtypedFunc(lambda w: np.average(w, weights=d_rad * rad**2), np.float64), axis="x1")
     ).array()
     return time, var_series

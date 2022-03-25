@@ -64,3 +64,15 @@ class Prof1d:
             return self._profs
         self._profs = pd.read_csv(self.path, skiprows=2, delim_whitespace=True)
         return self._profs
+
+
+if __name__ == "__main__":
+    prof1d = Prof1d(".")
+    profs = prof1d.profs
+    import matplotlib.pyplot as plt
+    rtot = prof1d.params["rad_surf"]
+    plt.semilogy(profs["r_grid"]/rtot, profs["Enuc"])
+    plt.axvline(prof1d.params["rcore/rtot"], lw=1, color='k', ls=":")
+    plt.xlabel("r/rtot")
+    plt.ylabel("Enuc")
+    plt.savefig("enuc_prof.pdf")
