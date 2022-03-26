@@ -9,8 +9,8 @@ from pymusic.plotting import Plot, BoundsFromMinMax
 
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence
-    from array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
-    from derived_fields import (
+    from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
+    from .derived_fields import (
         FieldGetter, TimeAveragedProfGetter, TimeSeriesGetter
     )
 

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from typing import Callable, Dict
 
     from pymusic.big_array import BigArray
-    from array_on_grid import ArrayOnGrid
+    from .array_on_grid import ArrayOnGrid
 
 
 In = TypeVar("In")

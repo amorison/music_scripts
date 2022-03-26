@@ -9,9 +9,9 @@ from pymusic.plotting import (
 )
 from pymusic.io import MusicSim, PeriodicArrayBC, MusicDumpInfo
 
-from array_on_grid import DumpArrayOnGrid
-from derived_fields import FieldGetter
-from plots import SphericalPlot
+from .array_on_grid import DumpArrayOnGrid
+from .derived_fields import FieldGetter
+from .plots import SphericalPlot
 
 
 def all_plots(sim: MusicSim, var: str) -> Iterator[Plot]:

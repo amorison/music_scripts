@@ -10,12 +10,12 @@ from pymusic.io.music_new_format import MusicDumpInfo
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.plotting import SinglePlotFigure
 
-from array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
-from derived_fields import (
+from .array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
+from .derived_fields import (
     FieldGetter, ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
 )
-from plots import SphericalPlot, ProfPlot, TseriesPlot
-from prof1d import Prof1d
+from .plots import SphericalPlot, ProfPlot, TseriesPlot
+from .prof1d import Prof1d
 
 
 def tau_conv(simog, rcore: float):
