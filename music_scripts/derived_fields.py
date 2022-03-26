@@ -19,11 +19,11 @@ from pymusic.big_array import DerivedFieldArray
 from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 
+from pymusic.big_array import BigArray
+from .array_on_grid import ArrayOnGrid
+
 if TYPE_CHECKING:
     from typing import Callable, Dict
-
-    from pymusic.big_array import BigArray
-    from .array_on_grid import ArrayOnGrid
 
 
 In = TypeVar("In")
@@ -40,6 +40,7 @@ class DataFetcher(ABC, Generic[In, Out]):
         cls._handlers[thunk.__name__] = thunk
         return thunk
 
+    @classmethod
     @property
     @abstractmethod
     def var_name(self) -> str:

@@ -7,12 +7,11 @@ from dataclasses import dataclass, field
 import numpy as np
 from pymusic.plotting import Plot, BoundsFromMinMax
 
+from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence
     from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
-    from .derived_fields import (
-        FieldGetter, TimeAveragedProfGetter, TimeSeriesGetter
-    )
+    from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
 
 
 @dataclass(frozen=True)

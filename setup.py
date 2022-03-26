@@ -7,6 +7,7 @@ DEPENDENCIES = [
     "h5py>=3.0",
     "matplotlib>=3.0",
     "pymusic>=0.1.0",
+    "loam==0.5.0",
 ]
 
 setup(
@@ -26,6 +27,9 @@ setup(
     ],
     python_requires=">=3.8",
     packages=find_packages(),
+    entry_points=dict(
+        console_scripts=["mutools = music_scripts.__main__:main"]
+    ),
     install_requires=DEPENDENCIES,
     package_data={"music_scripts": ["py.typed"]},
 )
