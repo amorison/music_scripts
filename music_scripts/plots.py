@@ -5,11 +5,13 @@ import typing
 from dataclasses import dataclass, field
 
 import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pymusic.plotting import Plot, BoundsFromMinMax
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence
+    from matplotlib.axes import Axes
     from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
     from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
 
@@ -24,17 +26,17 @@ class SphericalPlot(Plot):
     color_bounds = BoundsFromMinMax()
     with_colorbar: bool = True
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.dump.grid
         rad = grid.r_grid.face_points()
         theta = grid.theta_grid.face_points()
         data = self.get_data(self.dump_arr).array()
         vmin, vmax = self.color_bounds(data)
         r_mesh, t_mesh = np.meshgrid(rad, theta, indexing="ij")
-        x_mesh = r_mesh * np.cos(t_mesh)
-        y_mesh = r_mesh * np.sin(t_mesh)
+        x_mesh = r_mesh * np.sin(t_mesh)
+        z_mesh = r_mesh * np.cos(t_mesh)
         surf = ax.pcolormesh(
-            x_mesh, y_mesh, data, cmap=self.cmap,
+            x_mesh, z_mesh, data, cmap=self.cmap,
             vmin=vmin, vmax=vmax, shading="flat", rasterized=True)
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -44,15 +46,17 @@ class SphericalPlot(Plot):
             vel_r = FieldGetter("vel_1")(self.dump_arr).array()
             vel_t = FieldGetter("vel_2")(self.dump_arr).array()
             radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
-            vel_x = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
-            vel_y = vel_t * np.cos(thetam) + vel_r * np.sin(thetam)
-            xc_mesh = radm * np.cos(thetam)
-            yc_mesh = radm * np.sin(thetam)
+            vel_x = vel_r * np.sin(thetam) + vel_t * np.cos(thetam)
+            vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
+            xc_mesh = radm * np.sin(thetam)
+            zc_mesh = radm * np.cos(thetam)
             sset = slice(None, None, self.vel_arrows_stride)
-            ax.quiver(xc_mesh[sset, sset], yc_mesh[sset, sset],
-                      vel_x[sset, sset], vel_y[sset, sset])
+            ax.quiver(xc_mesh[sset, sset], zc_mesh[sset, sset],
+                      vel_x[sset, sset], vel_z[sset, sset])
         if self.with_colorbar:
-            ax.figure.colorbar(surf, ax=ax)
+            cax = make_axes_locatable(ax).append_axes("right", size="3%",
+                                                      pad=0.15)
+            ax.figure.colorbar(surf, cax=cax)
 
 
 @dataclass(frozen=True)
@@ -63,7 +67,7 @@ class ProfPlot(Plot):
     length_scale: Optional[float] = None
     log_scale: bool = False
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         radius = self.music_data.grid.r_grid.cell_centers()
         markers = np.array(self.markers)
         if self.length_scale is not None:
