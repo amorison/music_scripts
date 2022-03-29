@@ -25,28 +25,38 @@ if TYPE_CHECKING:
     from typing import Callable, Dict
 
 
-In = TypeVar("In")
-Out = TypeVar("Out")
+T_contra = TypeVar("T_contra", contravariant=True)
+U_co = TypeVar("U_co", covariant=True)
 
 
-class DataFetcher(ABC, Generic[In, Out]):
+# That dataclass is needed to circumvent a bug in mypy with
+# generic abstract dataclasses
+@dataclass(frozen=True)
+class _DCWithVarName:
+    var_name: str
 
-    def __init_subclass__(cls):
-        cls._handlers: Dict[str, Callable[[In], Out]] = {}
+
+class DataFetcher(ABC, Generic[T_contra, U_co], _DCWithVarName):
+
+    def __init_subclass__(cls) -> None:
+        # TYPE SAFETY: mypy doesn't seem to understand __init_subclass__
+        cls._handlers: Dict[str, Callable[[T_contra], U_co]] = {}  # type: ignore
 
     @classmethod
-    def register(cls, thunk: Callable[[In], Out]) -> Callable[[In], Out]:
-        cls._handlers[thunk.__name__] = thunk
+    def register(
+        cls, thunk: Callable[[T_contra], U_co]
+    ) -> Callable[[T_contra], U_co]:
+        cls._handlers[thunk.__name__] = thunk  # type: ignore
         return thunk
 
     @abstractmethod
-    def default_getter(self, obj: In) -> Out:
+    def default_getter(self, obj: T_contra) -> U_co:
         """Fallback method to get the desired data."""
 
-    def __call__(self, obj: In) -> Out:
+    def __call__(self, obj: T_contra) -> U_co:
         """Get some data from a dump."""
         try:
-            return self._handlers[self.var_name](obj)
+            return self._handlers[self.var_name](obj)  # type: ignore
         except KeyError:
             return self.default_getter(obj)
 
@@ -56,8 +66,6 @@ class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a field from MUSIC data."""
 
-    var_name: str
-
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         return aog.data.xs(self.var_name, "var")
 
@@ -66,8 +74,6 @@ class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
 class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a radial profile from MUSIC data."""
-
-    var_name: str
 
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         field = FieldGetter(self.var_name)(aog)
@@ -80,8 +86,6 @@ class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a radial profile from MUSIC data."""
 
-    var_name: str
-
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         field = ProfGetter(self.var_name)(aog)
         if "time" in aog.data.axes:
@@ -93,8 +97,6 @@ class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 class TimeSeriesGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     """Get a time series from MUSIC data."""
-
-    var_name: str
 
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         r_grid = aog.grid.r_grid
