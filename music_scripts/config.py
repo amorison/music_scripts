@@ -8,7 +8,7 @@ from loam.manager import ConfOpt as Conf
 from loam.manager import ConfigurationManager
 from loam.tools import command_flag
 
-from . import field, restart
+from . import field, restart, plot_pendepth
 
 if typing.TYPE_CHECKING:
     from typing import Optional, List, Callable
@@ -36,9 +36,9 @@ CONF_DEF["restart"] = dict(
 )
 
 SUB_CMDS = dict(
-    field=Subcmd("plot a scalar field",
-                 "core", func=field.cmd),
+    field=Subcmd("plot a scalar field", "core", func=field.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
+    pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
 )
 
 
