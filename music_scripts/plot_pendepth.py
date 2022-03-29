@@ -14,11 +14,8 @@ if typing.TYPE_CHECKING:
 
 PENDEPTH_VARS = (
     "pen_depth_conv",
-    "pen_depth_conv_max",
     "pen_depth_ke",
-    "pen_depth_ke_max",
-    "pen_depth_vr_r0neg",
-    "pen_depth_vr_r0pos",
+    "r_schwarz",
 )
 
 
