@@ -42,10 +42,10 @@ SUB_CMDS = dict(
 )
 
 
-def parse_args(
+def parse_args_and_run(
     arglist: Optional[List[str]] = None,
-) -> Callable[[ConfigurationManager], None]:
-    """Parse command line argument, return command to run."""
+) -> None:
+    """Parse command line argument, run requested command."""
     conf = ConfigurationManager.from_dict_(CONF_DEF)
     climan = CLIManager(conf, **SUB_CMDS)
     cmd_args = climan.parse_args(arglist)
