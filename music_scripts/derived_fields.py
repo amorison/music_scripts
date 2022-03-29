@@ -39,12 +39,6 @@ class DataFetcher(ABC, Generic[In, Out]):
         cls._handlers[thunk.__name__] = thunk
         return thunk
 
-    @classmethod
-    @property
-    @abstractmethod
-    def var_name(self) -> str:
-        """The variable name an instance is responsible of fetching."""
-
     @abstractmethod
     def default_getter(self, obj: In) -> Out:
         """Fallback method to get the desired data."""
