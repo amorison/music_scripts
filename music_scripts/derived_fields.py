@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 import numpy as np
 
 from pymusic.big_array import DerivedFieldArray
-from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 
 from pymusic.big_array import BigArray
@@ -79,9 +78,7 @@ class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         field = FieldGetter(self.var_name)(aog)
         sph_quad = SphericalMidpointQuad1D(aog.grid.theta_grid)
-        return field.collapse(
-            FixedDtypedFunc(sph_quad.average, np.float64),
-            axis="x2")
+        return field.collapse(sph_quad.average, axis="x2")
 
 
 @dataclass(frozen=True)
@@ -110,8 +107,7 @@ class TimeSeriesGetter(DataFetcher[ArrayOnGrid, BigArray]):
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
         return ProfGetter(self.var_name)(aog).collapse(
-            FixedDtypedFunc(lambda w: np.average(w, weights=d_rad * rad**2),
-                            np.float64), axis="x1")
+            lambda w: np.average(w, weights=d_rad * rad**2), axis="x1")
 
 
 @FieldGetter.register

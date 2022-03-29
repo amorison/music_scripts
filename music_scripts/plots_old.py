@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
-from pymusic.big_array.dtyped_func import FixedDtypedFunc
 from pymusic.plotting import SinglePlotFigure
 
 from .array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
@@ -25,9 +24,7 @@ def tau_conv(simog, rcore: float):
     core_mask = grid.r_grid.cell_centers() < rcore
     return (
         ProfGetter("vrms")(simog).collapse(
-            FixedDtypedFunc(
-                lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]),
-                np.float64), axis="x1")
+            lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]), axis="x1")
         ).array().mean()
 
 
