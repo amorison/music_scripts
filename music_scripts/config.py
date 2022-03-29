@@ -8,7 +8,7 @@ from loam.manager import ConfOpt as Conf
 from loam.manager import ConfigurationManager
 from loam.tools import command_flag
 
-from . import field
+from . import field, restart
 
 if typing.TYPE_CHECKING:
     from typing import Optional, List, Callable
@@ -29,9 +29,16 @@ CONF_DEF["field"] = dict(
                           help_msg="add velocity arrows to the plot"),
 )
 
+CONF_DEF["restart"] = dict(
+    batch=Conf(default=None, cmd_arg=True, shortname="b",
+               cmd_kwargs={"nargs": "+"},
+               help="batch files to use for restart", comprule="_files")
+)
+
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field",
                  "core", func=field.cmd),
+    restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
 )
 
 

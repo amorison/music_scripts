@@ -1,10 +1,14 @@
-#!/usr/bin/env python3
 from __future__ import annotations
+
 from pathlib import Path
 import shlex
 import subprocess
-import sys
+import typing
+
 import f90nml
+
+if typing.TYPE_CHECKING:
+    from loam.manager import ConfigurationManager
 
 
 def restart_batch(batchfile: Path):
@@ -39,6 +43,10 @@ def restart_batch(batchfile: Path):
     subprocess.run(shlex.split(f"sbatch '{batchfile}'"), check=True)
 
 
-if __name__ == "__main__":
-    for batch in sys.argv[1:]:
+def cmd(conf: ConfigurationManager):
+    if conf.restart.batch is None:
+        batch_files = tuple(Path().glob("batch*"))
+    else:
+        batch_files = conf.restart.batch
+    for batch in batch_files:
         restart_batch(Path(batch))
