@@ -79,16 +79,29 @@ def schwarz_series_in_file(h5file: Path) -> SchwarzSeries:
     with h5py.File(h5file) as h5f:
         checks = h5f["checkpoints"]
         time = np.zeros(len(checks))
-        values = np.zeroes(len(checks))
+        values = np.zeros(len(checks))
         for i, check in enumerate(checks.values()):
             time[i] = check["parameters"]["time"][()].item()
             values[i] = check["pp_parameters"]["ave_r_schwarz_max"][()].item()
     return SchwarzSeries(values, time)
 
 
+def schwarz_series_from_set(h5files: Iterable[Path]) -> SchwarzSeries:
+    files_iter = iter(h5files)
+    series = schwarz_series_in_file(next(files_iter))
+    for file in files_iter:
+        new_series = schwarz_series_in_file(file)
+        series = SchwarzSeries(
+            values=np.append(series.values, new_series.values),
+            time=np.append(series.time, new_series.time),
+        )
+    return series
+
+
 def cmd(conf: ConfigurationManager) -> None:
+    folder = Path()
     idump = 7800
-    h5file = Path("post_es.h5")
+    h5file = folder / Path("post_es.h5")
 
     fig = SinglePlotFigure(
         plot=SameAxesPlot(
@@ -99,7 +112,9 @@ def cmd(conf: ConfigurationManager) -> None:
     )
     fig.save_to("pendepth.pdf")
 
+    all_h5s = sorted(folder.glob("post_transient*.h5"))
+    all_h5s.extend(sorted(folder.glob("post_es*.h5")))
     fig = SinglePlotFigure(
-        plot=SchwarzSeriesPlot(schwarz_series_in_file(h5file)),
+        plot=SchwarzSeriesPlot(schwarz_series_from_set(all_h5s)),
     )
     fig.save_to("series_r_schwarz.pdf")
