@@ -11,14 +11,14 @@ from pymusic.io import MusicSim, PeriodicArrayBC, MusicDumpInfo
 
 from .array_on_grid import DumpArrayOnGrid
 from .derived_fields import FieldGetter
-from .plots import SphericalPlot
+from .plots import SphericalScalarPlot
 
 
 def all_plots(sim: MusicSim, var: str) -> Iterator[Plot]:
     for dump in sim.dumps:
         time = dump.time
         yield WithPlotTitle(
-            plot=SphericalPlot(
+            plot=SphericalScalarPlot(
                 dump_arr=DumpArrayOnGrid(dump),
                 get_data=FieldGetter(var),
             ),

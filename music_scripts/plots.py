@@ -17,17 +17,15 @@ if typing.TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class SphericalPlot(Plot):
+class SphericalScalarPlot(Plot):
     dump_arr: DumpArrayOnGrid
     get_data: FieldGetter
-    with_vel_arrows: bool = False
-    vel_arrows_stride: int = 16
     cmap: Optional[str] = None
     color_bounds = BoundsFromMinMax()
     with_colorbar: bool = True
 
     def draw_on(self, ax: Axes) -> None:
-        grid = self.dump_arr.dump.grid
+        grid = self.dump_arr.grid
         rad = grid.r_grid.face_points()
         theta = grid.theta_grid.face_points()
         data = self.get_data(self.dump_arr).array()
@@ -40,23 +38,35 @@ class SphericalPlot(Plot):
             vmin=vmin, vmax=vmax, shading="flat", rasterized=True)
         ax.set_aspect("equal")
         ax.set_axis_off()
-        if self.with_vel_arrows:
-            rad_c = grid.r_grid.cell_centers()
-            theta_c = grid.theta_grid.cell_centers()
-            vel_r = FieldGetter("vel_1")(self.dump_arr).array()
-            vel_t = FieldGetter("vel_2")(self.dump_arr).array()
-            radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
-            vel_x = vel_r * np.sin(thetam) + vel_t * np.cos(thetam)
-            vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
-            xc_mesh = radm * np.sin(thetam)
-            zc_mesh = radm * np.cos(thetam)
-            sset = slice(None, None, self.vel_arrows_stride)
-            ax.quiver(xc_mesh[sset, sset], zc_mesh[sset, sset],
-                      vel_x[sset, sset], vel_z[sset, sset])
         if self.with_colorbar:
             cax = make_axes_locatable(ax).append_axes("right", size="3%",
                                                       pad=0.15)
             ax.figure.colorbar(surf, cax=cax)
+
+
+@dataclass(frozen=True)
+class SphericalVectorPlot(Plot):
+    dump_arr: DumpArrayOnGrid
+    get_rvec: FieldGetter
+    get_tvec: FieldGetter
+    arrow_stride: int = 16
+
+    def draw_on(self, ax: Axes) -> None:
+        grid = self.dump_arr.grid
+        rad_c = grid.r_grid.cell_centers()
+        theta_c = grid.theta_grid.cell_centers()
+        vel_r = self.get_rvec(self.dump_arr).array()
+        vel_t = self.get_tvec(self.dump_arr).array()
+        radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
+        vel_x = vel_r * np.sin(thetam) + vel_t * np.cos(thetam)
+        vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
+        xc_mesh = radm * np.sin(thetam)
+        zc_mesh = radm * np.cos(thetam)
+        sset = slice(None, None, self.vel_arrows_stride)
+        ax.quiver(xc_mesh[sset, sset], zc_mesh[sset, sset],
+                  vel_x[sset, sset], vel_z[sset, sset])
+        ax.set_aspect("equal")
+        ax.set_axis_off()
 
 
 @dataclass(frozen=True)
