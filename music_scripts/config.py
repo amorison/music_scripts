@@ -7,6 +7,7 @@ from loam.cli import Subcmd, CLIManager
 from loam.manager import ConfOpt as Conf
 from loam.manager import ConfigurationManager
 from loam.tools import command_flag
+import loam.types
 
 from . import field, restart, plot_pendepth, fort_pp
 
@@ -35,20 +36,33 @@ CONF_DEF["restart"] = dict(
                help="batch files to use for restart", comprule="_files")
 )
 
-CONF_DEF["field_pp"] = dict(
+CONF_DEF["fort_pp"] = dict(
     postfile=Conf(default="post.h5", cmd_arg=True, shortname="p",
                   help="path to master h5 file from post_par"),
     idump=Conf(default=1, cmd_arg=True, shortname="d",
                help="dump number to process"),
+)
+
+CONF_DEF["field_pp"] = dict(
     plot=Conf(default="rho", cmd_arg=True, shortname="o",
               help="variable to plot"),
+)
+
+CONF_DEF["contour_pp"] = dict(
+    plot=Conf(default="pen_depth_conv,pen_depth_ke,r_schwarz_max",
+              cmd_arg=True, shortname="o",
+              cmd_kwargs=dict(type=loam.types.list_of(str)),
+              help="variables to plot"),
 )
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
-    field_pp=Subcmd("plot a field from PP data", func=fort_pp.field_cmd),
+    field_pp=Subcmd("plot a field from PP data", "fort_pp",
+                    func=fort_pp.field_cmd),
+    contour_pp=Subcmd("plot a contour field from PP data", "fort_pp",
+                      func=fort_pp.contour_cmd),
 )
 
 

@@ -2,11 +2,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import typing
 
-from pymusic.plotting import SinglePlotFigure
+from pymusic.plotting import SinglePlotFigure, Plot
 import h5py
 import numpy as np
 
-from .plots import RawSphericalScalarPlot
+from .plots import RawSphericalScalarPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
     from typing import Union
@@ -19,6 +19,15 @@ class Contour:
     name: str
     values: np.ndarray
     theta: np.ndarray
+
+
+@dataclass(frozen=True)
+class ContourPlot(Plot):
+    contour: Contour
+
+    def draw_on(self, ax) -> None:
+        ax.plot(self.contour.theta, self.contour.values,
+                label=self.contour.name)
 
 
 @dataclass(frozen=True)
@@ -73,7 +82,7 @@ class FortPpCheckpoint:
 
 def field_cmd(conf: ConfigurationManager) -> None:
     checkpoint = FortPpCheckpoint(
-        master_h5=conf.field_pp.postfile, idump=conf.field_pp.idump)
+        master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     field = checkpoint.field(conf.field_pp.plot)
     fig = SinglePlotFigure(
         plot=RawSphericalScalarPlot(
@@ -83,3 +92,15 @@ def field_cmd(conf: ConfigurationManager) -> None:
         ),
     )
     fig.save_to(f"field_{field.name}.pdf")
+
+
+def contour_cmd(conf: ConfigurationManager) -> None:
+    checkpoint = FortPpCheckpoint(
+        master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
+    varstr = "_".join(conf.contour_pp.plot)
+    SinglePlotFigure(
+        plot=SameAxesPlot(
+            plots=(ContourPlot(checkpoint.contour_field(var))
+                   for var in conf.contour_pp.plot),
+        ),
+    ).save_to(f"contour_{varstr}.pdf")

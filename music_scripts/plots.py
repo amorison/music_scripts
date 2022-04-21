@@ -10,7 +10,7 @@ from pymusic.plotting import Plot, BoundsFromMinMax
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
-    from typing import Optional, Sequence, Union
+    from typing import Optional, Sequence, Union, Iterable
     from matplotlib.axes import Axes
     from matplotlib.scale import ScaleBase
     from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
@@ -132,3 +132,15 @@ class WithScales(Plot):
         self.plot.draw_on(ax)
         ax.set_xscale(self.xscale)
         ax.set_yscale(self.yscale)
+
+
+@dataclass(frozen=True)
+class SameAxesPlot(Plot):
+    plots: Iterable[Plot]
+    legend: bool = True
+
+    def draw_on(self, ax) -> None:
+        for plot in self.plots:
+            plot.draw_on(ax)
+        if self.legend:
+            ax.legend()

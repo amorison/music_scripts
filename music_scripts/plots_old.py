@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
-from pymusic.plotting import SinglePlotFigure, PlotOnSameAxes
+from pymusic.plotting import SinglePlotFigure
 
 from .array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
 from .derived_fields import (
@@ -15,7 +15,7 @@ from .derived_fields import (
 )
 from .plots import (
     SphericalScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot,
-    WithScales
+    WithScales, SameAxesPlot
 )
 from .prof1d import Prof1d
 
@@ -91,18 +91,19 @@ def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
     for i, dump in enumerate(simog.sim.dumps):
         dump_arr = DumpArrayOnGrid(dump)
         fig = SinglePlotFigure(
-            plot=PlotOnSameAxes(
+            plot=SameAxesPlot(
                 plots=(
+                    SphericalScalarPlot(
+                        dump_arr=dump_arr,
+                        get_data=FieldGetter(var),
+                    ),
                     SphericalVectorPlot(
                         dump_arr=dump_arr,
                         get_rvec=FieldGetter("vel_1"),
                         get_tvec=FieldGetter("vel_2"),
                     ),
-                    SphericalScalarPlot(
-                        dump_arr=dump_arr,
-                        get_data=FieldGetter(var),
-                    ),
-                )
+                ),
+                legend=False,
             ),
         )
         fig.save_to(figdir / f"{var}_{i:05d}.png")
