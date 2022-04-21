@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
     from typing import Union
     from os import PathLike
     from loam.manager import ConfigurationManager
+    from matplotlib.axes import Axes
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,19 @@ class ContourPlot(Plot):
     def draw_on(self, ax) -> None:
         ax.plot(self.contour.theta, self.contour.values,
                 label=self.contour.name)
+
+
+@dataclass(frozen=True)
+class ContourSphericalPlot(Plot):
+    contour: Contour
+    color: str = "black"
+
+    def draw_on(self, ax: Axes) -> None:
+        rad = self.contour.values
+        theta = self.contour.theta
+        x_pos = rad * np.sin(theta)
+        z_pos = rad * np.cos(theta)
+        ax.plot(x_pos, z_pos, color=self.color)
 
 
 @dataclass(frozen=True)
@@ -98,9 +112,25 @@ def contour_cmd(conf: ConfigurationManager) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     varstr = "_".join(conf.contour_pp.plot)
-    SinglePlotFigure(
-        plot=SameAxesPlot(
-            plots=(ContourPlot(checkpoint.contour_field(var))
-                   for var in conf.contour_pp.plot),
-        ),
-    ).save_to(f"contour_{varstr}.pdf")
+    if conf.contour_pp.over:
+        field = checkpoint.field(conf.contour_pp.over)
+        field_plot = RawSphericalScalarPlot(
+            r_coord=field.r_walls(),
+            t_coord=field.t_walls(),
+            data=field.values
+        )
+        SinglePlotFigure(
+            plot=SameAxesPlot(
+                plots=[field_plot] + [
+                    ContourSphericalPlot(checkpoint.contour_field(var))
+                    for var in conf.contour_pp.plot],
+                legend=False,
+            ),
+        ).save_to(f"contour_{varstr}__over_{conf.contour_pp.over}.pdf")
+    else:
+        SinglePlotFigure(
+            plot=SameAxesPlot(
+                plots=(ContourPlot(checkpoint.contour_field(var))
+                       for var in conf.contour_pp.plot),
+            ),
+        ).save_to(f"contour_{varstr}.pdf")

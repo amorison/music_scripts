@@ -53,6 +53,8 @@ CONF_DEF["contour_pp"] = dict(
               cmd_arg=True, shortname="o",
               cmd_kwargs=dict(type=loam.types.list_of(str)),
               help="variables to plot"),
+    over=Conf(default="", cmd_arg=True,
+              help="plot the contour over a field variable"),
 )
 
 SUB_CMDS = dict(
