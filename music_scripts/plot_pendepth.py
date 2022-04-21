@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing
 from dataclasses import dataclass
+from functools import reduce
 from pathlib import Path
 
 import h5py
@@ -53,6 +54,12 @@ class SchwarzSeries:
     values: np.ndarray
     time: np.ndarray
 
+    def append(self, other: SchwarzSeries) -> SchwarzSeries:
+        return SchwarzSeries(
+            values=np.append(self.values, other.values),
+            time=np.append(self.time, other.time),
+        )
+
 
 @dataclass(frozen=True)
 class SchwarzSeriesPlot(Plot):
@@ -87,15 +94,10 @@ def schwarz_series_in_file(h5file: Path) -> SchwarzSeries:
 
 
 def schwarz_series_from_set(h5files: Iterable[Path]) -> SchwarzSeries:
-    files_iter = iter(h5files)
-    series = schwarz_series_in_file(next(files_iter))
-    for file in files_iter:
-        new_series = schwarz_series_in_file(file)
-        series = SchwarzSeries(
-            values=np.append(series.values, new_series.values),
-            time=np.append(series.time, new_series.time),
-        )
-    return series
+    return reduce(
+        SchwarzSeries.append,
+        map(schwarz_series_in_file, h5files)
+    )
 
 
 def cmd(conf: ConfigurationManager) -> None:
