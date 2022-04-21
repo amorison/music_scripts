@@ -14,7 +14,8 @@ from .derived_fields import (
     FieldGetter, ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
 )
 from .plots import (
-    SphericalScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot
+    SphericalScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot,
+    WithScales
 )
 from .prof1d import Prof1d
 
@@ -36,12 +37,14 @@ def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
     figdir.mkdir(parents=True, exist_ok=True)
 
     fig = SinglePlotFigure(
-        plot=ProfPlot(
-            music_data=simog,
-            get_data=TimeAveragedProfGetter(var),
-            markers=[profs1d.params["rcore"]],
-            length_scale=profs1d.params["rad_surf"],
-            log_scale=True,
+        plot=WithScales(
+            plot=ProfPlot(
+                music_data=simog,
+                get_data=TimeAveragedProfGetter(var),
+                markers=[profs1d.params["rcore"]],
+                length_scale=profs1d.params["rad_surf"],
+            ),
+            yscale="log",
         ),
     )
     fig.save_to(figdir / f'{var}_prof.pdf')
@@ -75,7 +78,6 @@ def plot_tseries(simog, var):
         plot=TseriesPlot(
             music_data=simog,
             get_data=TimeSeriesGetter(var),
-            log_scale=False,
         ),
     )
     fig.save_to(figdir / f"tseries_{var}.pdf")

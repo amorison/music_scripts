@@ -10,8 +10,9 @@ from pymusic.plotting import Plot, BoundsFromMinMax
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
-    from typing import Optional, Sequence
+    from typing import Optional, Sequence, Union
     from matplotlib.axes import Axes
+    from matplotlib.scale import ScaleBase
     from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
     from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
 
@@ -75,7 +76,6 @@ class ProfPlot(Plot):
     get_data: TimeAveragedProfGetter
     markers: Sequence[float] = field(default_factory=list)
     length_scale: Optional[float] = None
-    log_scale: bool = False
 
     def draw_on(self, ax: Axes) -> None:
         radius = self.music_data.grid.r_grid.cell_centers()
@@ -84,10 +84,7 @@ class ProfPlot(Plot):
             radius = radius / self.length_scale
             markers /= self.length_scale
         profile = self.get_data(self.music_data).array()
-        if self.log_scale:
-            ax.semilogy(radius, profile)
-        else:
-            ax.plot(radius, profile)
+        ax.plot(radius, profile)
         for marker in markers:
             ax.axvline(marker, linewidth=1, linestyle=":", color="k")
 
@@ -96,13 +93,21 @@ class ProfPlot(Plot):
 class TseriesPlot(Plot):
     music_data: SimArrayOnGrid
     get_data: TimeSeriesGetter
-    log_scale: bool = False
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         arr = self.get_data(self.music_data)
         time = np.array(arr.labels_along_axis("time"))
         tseries = arr.array()
-        if self.log_scale:
-            ax.semilogy(time, tseries, label=self.get_data.var_name)
-        else:
-            ax.plot(time, tseries, label=self.get_data.var_name)
+        ax.plot(time, tseries, label=self.get_data.var_name)
+
+
+@dataclass(frozen=True)
+class WithScales(Plot):
+    plot: Plot
+    xscale: Union[str, ScaleBase] = "linear"
+    yscale: Union[str, ScaleBase] = "linear"
+
+    def draw_on(self, ax: Axes) -> None:
+        self.plot.draw_on(ax)
+        ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale)
