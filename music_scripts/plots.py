@@ -18,6 +18,35 @@ if typing.TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
+class RawSphericalScalarPlot(Plot):
+    r_coord: np.ndarray
+    t_coord: np.ndarray
+    data: np.ndarray
+    cmap: Optional[str] = None
+    color_bounds = BoundsFromMinMax()
+    with_colorbar: bool = True
+
+    def draw_on(self, ax: Axes) -> None:
+        vmin, vmax = self.color_bounds(self.data)
+
+        # project from (r,t) to (x,z)
+        r_mesh, t_mesh = np.meshgrid(self.r_coord, self.t_coord, indexing="ij")
+        x_mesh = r_mesh * np.sin(t_mesh)
+        z_mesh = r_mesh * np.cos(t_mesh)
+
+        surf = ax.pcolormesh(
+            x_mesh, z_mesh, self.data, cmap=self.cmap,
+            vmin=vmin, vmax=vmax, shading="flat", rasterized=True)
+
+        ax.set_aspect("equal")
+        ax.set_axis_off()
+        if self.with_colorbar:
+            cax = make_axes_locatable(ax).append_axes("right", size="3%",
+                                                      pad=0.15)
+            ax.figure.colorbar(surf, cax=cax)
+
+
+@dataclass(frozen=True)
 class SphericalScalarPlot(Plot):
     dump_arr: DumpArrayOnGrid
     get_data: FieldGetter
@@ -27,22 +56,14 @@ class SphericalScalarPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
-        rad = grid.r_grid.face_points()
-        theta = grid.theta_grid.face_points()
-        data = self.get_data(self.dump_arr).array()
-        vmin, vmax = self.color_bounds(data)
-        r_mesh, t_mesh = np.meshgrid(rad, theta, indexing="ij")
-        x_mesh = r_mesh * np.sin(t_mesh)
-        z_mesh = r_mesh * np.cos(t_mesh)
-        surf = ax.pcolormesh(
-            x_mesh, z_mesh, data, cmap=self.cmap,
-            vmin=vmin, vmax=vmax, shading="flat", rasterized=True)
-        ax.set_aspect("equal")
-        ax.set_axis_off()
-        if self.with_colorbar:
-            cax = make_axes_locatable(ax).append_axes("right", size="3%",
-                                                      pad=0.15)
-            ax.figure.colorbar(surf, cax=cax)
+        RawSphericalScalarPlot(
+            r_coord=grid.r_grid.face_points(),
+            t_coord=grid.theta_grid.face_points(),
+            data=self.get_data(self.dump_arr).array(),
+            cmap=self.cmap,
+            color_bounds=self.color_bounds,
+            with_colorbar=self.with_colorbar,
+        ).draw_on(ax)
 
 
 @dataclass(frozen=True)
