@@ -9,9 +9,12 @@ import h5py
 import numpy as np
 from pymusic.plotting import Plot, SinglePlotFigure
 
+from .fort_pp import FortPpCheckpoint
+
 if typing.TYPE_CHECKING:
     from typing import Iterable
     from loam.manager import ConfigurationManager
+    from .fort_pp import Contour
 
 
 PENDEPTH_VARS = (
@@ -19,13 +22,6 @@ PENDEPTH_VARS = (
     "pen_depth_ke",
     "r_schwarz_max",
 )
-
-
-@dataclass(frozen=True)
-class Contour:
-    name: str
-    values: np.ndarray
-    theta: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -71,17 +67,6 @@ class SchwarzSeriesPlot(Plot):
         ax.set_ylabel("Schwarzschild radius")
 
 
-def get_contour(h5file: str, idump: int, name: str) -> Contour:
-    with h5py.File(h5file) as h5f:
-        chkp = h5f["checkpoints"][f"{idump:05d}"]
-        data = Contour(
-            name=name,
-            values=chkp["Contour_field"][name][()].squeeze(),
-            theta=chkp["pp_parameters"]["eval_grid"]["theta"][()].squeeze()
-        )
-    return data
-
-
 def schwarz_series_in_file(h5file: Path) -> SchwarzSeries:
     with h5py.File(h5file) as h5f:
         checks = h5f["checkpoints"]
@@ -102,12 +87,15 @@ def schwarz_series_from_set(h5files: Iterable[Path]) -> SchwarzSeries:
 
 def cmd(conf: ConfigurationManager) -> None:
     folder = Path()
-    idump = 7800
-    h5file = folder / Path("post_es.h5")
+
+    checkpoint = FortPpCheckpoint(
+        master_h5=folder / Path("post_es.h5"),
+        idump=7800,
+    )
 
     fig = SinglePlotFigure(
         plot=SameAxesPlot(
-            plots=(ContourPlot(get_contour(h5file, idump, var))
+            plots=(ContourPlot(checkpoint.contour_field(var))
                    for var in PENDEPTH_VARS),
             legend=True,
         ),
