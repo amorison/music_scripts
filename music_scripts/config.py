@@ -8,10 +8,10 @@ from loam.manager import ConfOpt as Conf
 from loam.manager import ConfigurationManager
 from loam.tools import command_flag
 
-from . import field, restart, plot_pendepth
+from . import field, restart, plot_pendepth, fort_pp
 
 if typing.TYPE_CHECKING:
-    from typing import Optional, List, Callable
+    from typing import Optional, List
 
 
 CONF_DEF = {}
@@ -35,10 +35,20 @@ CONF_DEF["restart"] = dict(
                help="batch files to use for restart", comprule="_files")
 )
 
+CONF_DEF["field_pp"] = dict(
+    postfile=Conf(default="post.h5", cmd_arg=True, shortname="p",
+                  help="path to master h5 file from post_par"),
+    idump=Conf(default=1, cmd_arg=True, shortname="d",
+               help="dump number to process"),
+    plot=Conf(default="rho", cmd_arg=True, shortname="o",
+              help="variable to plot"),
+)
+
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
+    field_pp=Subcmd("plot a field from PP data", func=fort_pp.field_cmd),
 )
 
 
