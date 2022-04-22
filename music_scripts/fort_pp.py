@@ -1,5 +1,7 @@
 from __future__ import annotations
+from contextlib import contextmanager
 from dataclasses import dataclass
+import dataclasses
 import typing
 
 from pymusic.plotting import SinglePlotFigure, Plot
@@ -9,7 +11,7 @@ import numpy as np
 from .plots import RawSphericalScalarPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
-    from typing import Union
+    from typing import Union, Optional, Generator
     from os import PathLike
     from loam.manager import ConfigurationManager
     from matplotlib.axes import Axes
@@ -71,25 +73,44 @@ class Field:
 class FortPpCheckpoint:
     master_h5: Union[str, PathLike]
     idump: int
+    _chkgroup: Optional[h5py.Group] = dataclasses.field(
+        default=None, init=False, repr=False, compare=False)
+
+    @contextmanager
+    def _chk(self) -> Generator[h5py.Group, None, None]:
+        """Reentrant context manager to access the checkpoint data."""
+        if self._chkgroup is not None:
+            yield self._chkgroup
+            return
+        try:
+            with h5py.File(self.master_h5) as h5f:
+                object.__setattr__(
+                    self, "_chkgroup", h5f["checkpoints"][f"{self.idump:05d}"])
+                yield self._chkgroup
+        finally:
+            object.__setattr__(
+                self, "_chkgroup", None)
+
+    def pp_grid(self, direction: str) -> np.ndarray:
+        with self._chk() as chk:
+            return chk["pp_parameters"]["eval_grid"][direction][()].squeeze()
 
     def contour_field(self, name: str) -> Contour:
-        with h5py.File(self.master_h5) as h5f:
-            chkp = h5f["checkpoints"][f"{self.idump:05d}"]
+        with self._chk() as chk:
             contour = Contour(
                 name=name,
-                values=chkp["Contour_field"][name][()].squeeze(),
-                theta=chkp["pp_parameters"]["eval_grid"]["theta"][()].squeeze()
+                values=chk["Contour_field"][name][()].squeeze(),
+                theta=self.pp_grid("theta")
             )
         return contour
 
     def field(self, name: str) -> Field:
-        with h5py.File(self.master_h5) as h5f:
-            chkp = h5f["checkpoints"][f"{self.idump:05d}"]
+        with self._chk() as chk:
             field = Field(
                 name=name,
-                values=chkp["Field"][name][()].squeeze().T,
-                radius=chkp["pp_parameters"]["eval_grid"]["rad"][()].squeeze(),
-                theta=chkp["pp_parameters"]["eval_grid"]["theta"][()].squeeze()
+                values=chk["Field"][name][()].squeeze().T,
+                radius=self.pp_grid("rad"),
+                theta=self.pp_grid("theta")
             )
         return field
 
