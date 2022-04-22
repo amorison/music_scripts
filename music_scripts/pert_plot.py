@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+import typing
 
 import h5py
 import numpy as np
@@ -8,15 +9,18 @@ import matplotlib.pyplot as plt
 
 from .prof1d import Prof1d
 
+if typing.TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
 
 @dataclass(frozen=True)
 class ProfData:
-    label: float
+    label: str
     rad: np.ndarray
     pressure: np.ndarray
     temperature: np.ndarray
 
-    def pert_to(self, other: ProfData):
+    def pert_to(self, other: ProfData) -> ProfData:
         """Responsibility of caller that rads are the same."""
         return ProfData(
             rad=self.rad,
@@ -51,7 +55,7 @@ def get_prof1d_at(profile1d: Prof1d, rad: np.ndarray) -> ProfData:
 
 
 def draw_prof_on(
-    prof: ProfData, profile1d: Prof1d, axis, xlbl: bool = True
+    prof: ProfData, profile1d: Prof1d, axis: Axes, xlbl: bool = True
 ) -> None:
     rad_adim = prof.rad / profile1d.params["rad_surf"]
     axis.plot(rad_adim, prof.pressure, label="Pressure")

@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
     from loam.manager import ConfigurationManager
 
 
-def restart_batch(batchfile: Path):
+def restart_batch(batchfile: Path) -> None:
     """Restart MUSIC run using info in batchfile."""
     content = batchfile.read_text()
     content_parts = content.strip().split()
@@ -43,7 +43,7 @@ def restart_batch(batchfile: Path):
     subprocess.run(shlex.split(f"sbatch '{batchfile}'"), check=True)
 
 
-def cmd(conf: ConfigurationManager):
+def cmd(conf: ConfigurationManager) -> None:
     if conf.restart.batch is None:
         batch_files = tuple(Path().glob("batch*"))
     else:
