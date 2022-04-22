@@ -130,14 +130,25 @@ def field_cmd(conf: ConfigurationManager) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     field = checkpoint.field(conf.field_pp.plot)
-    fig = SinglePlotFigure(
-        plot=RawSphericalScalarPlot(
+    plots = [
+        RawSphericalScalarPlot(
             r_coord=field.r_walls(),
             t_coord=field.t_walls(),
             data=field.values
         ),
-    )
-    fig.save_to(f"field_{field.name}.pdf")
+    ]
+    if conf.plotting.rmarks:
+        tmin, tmax = checkpoint.pp_grid("theta")[[0, -1]]
+        plots.extend(
+            ContourSphericalPlot(Contour.constant(rad, tmin, tmax, ""))
+            for rad in conf.plotting.rmarks)
+
+    SinglePlotFigure(
+        plot=SameAxesPlot(
+            plots=plots,
+            legend=False,
+        )
+    ).save_to(f"field_{field.name}.pdf")
 
 
 def contour_cmd(conf: ConfigurationManager) -> None:
@@ -163,11 +174,11 @@ def contour_cmd(conf: ConfigurationManager) -> None:
     plots.extend(
         cont_plot(checkpoint.contour_field(var))
         for var in conf.contour_pp.plot)
-    if conf.contour_pp.rmarks:
+    if conf.plotting.rmarks:
         tmin, tmax = checkpoint.pp_grid("theta")[[0, -1]]
         plots.extend(
             cont_plot(Contour.constant(rad, tmin, tmax, ""))
-            for rad in conf.contour_pp.rmarks)
+            for rad in conf.plotting.rmarks)
 
     SinglePlotFigure(
         plot=SameAxesPlot(

@@ -43,6 +43,12 @@ CONF_DEF["fort_pp"] = dict(
                help="dump number to process"),
 )
 
+CONF_DEF["plotting"] = dict(
+    rmarks=Conf(default="", cmd_arg=True,
+                cmd_kwargs=dict(type=loam.types.list_of(float)),
+                help="add contours at constant values"),
+)
+
 CONF_DEF["field_pp"] = dict(
     plot=Conf(default="rho", cmd_arg=True, shortname="o",
               help="variable to plot"),
@@ -55,18 +61,17 @@ CONF_DEF["contour_pp"] = dict(
               help="variables to plot"),
     over=Conf(default="", cmd_arg=True,
               help="plot the contour over a field variable"),
-    rmarks=Conf(default="", cmd_arg=True,
-                cmd_kwargs=dict(type=loam.types.list_of(float)),
-                help="add contours at constant values"),
 )
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
-    field_pp=Subcmd("plot a field from PP data", "fort_pp",
+    field_pp=Subcmd("plot a field from PP data",
+                    "fort_pp", "plotting",
                     func=fort_pp.field_cmd),
-    contour_pp=Subcmd("plot a contour field from PP data", "fort_pp",
+    contour_pp=Subcmd("plot a contour field from PP data",
+                      "fort_pp", "plotting",
                       func=fort_pp.contour_cmd),
 )
 
