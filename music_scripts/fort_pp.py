@@ -47,14 +47,14 @@ class ContourPlot(Plot):
 @dataclass(frozen=True)
 class ContourSphericalPlot(Plot):
     contour: Contour
-    color: str = "black"
+    color: str = "red"
 
     def draw_on(self, ax: Axes) -> None:
         rad = self.contour.values
         theta = self.contour.theta
         x_pos = rad * np.sin(theta)
         z_pos = rad * np.cos(theta)
-        ax.plot(x_pos, z_pos, color=self.color)
+        ax.plot(x_pos, z_pos, color=self.color, lw=1)
 
 
 @dataclass(frozen=True)
