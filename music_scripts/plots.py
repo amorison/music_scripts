@@ -23,12 +23,9 @@ class RawSphericalScalarPlot(Plot):
     t_coord: np.ndarray
     data: np.ndarray
     cmap: Optional[str] = None
-    color_bounds = BoundsFromMinMax()
     with_colorbar: bool = True
 
     def draw_on(self, ax: Axes) -> None:
-        vmin, vmax = self.color_bounds(self.data)
-
         # project from (r,t) to (x,z)
         r_mesh, t_mesh = np.meshgrid(self.r_coord, self.t_coord, indexing="ij")
         x_mesh = r_mesh * np.sin(t_mesh)
@@ -36,7 +33,7 @@ class RawSphericalScalarPlot(Plot):
 
         surf = ax.pcolormesh(
             x_mesh, z_mesh, self.data, cmap=self.cmap,
-            vmin=vmin, vmax=vmax, shading="flat", rasterized=True)
+            shading="flat", rasterized=True)
 
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -51,7 +48,6 @@ class SphericalScalarPlot(Plot):
     dump_arr: DumpArrayOnGrid
     get_data: FieldGetter
     cmap: Optional[str] = None
-    color_bounds = BoundsFromMinMax()
     with_colorbar: bool = True
 
     def draw_on(self, ax: Axes) -> None:
@@ -61,7 +57,6 @@ class SphericalScalarPlot(Plot):
             t_coord=grid.theta_grid.face_points(),
             data=self.get_data(self.dump_arr).array(),
             cmap=self.cmap,
-            color_bounds=self.color_bounds,
             with_colorbar=self.with_colorbar,
         ).draw_on(ax)
 
@@ -84,7 +79,7 @@ class SphericalVectorPlot(Plot):
         vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
         xc_mesh = radm * np.sin(thetam)
         zc_mesh = radm * np.cos(thetam)
-        sset = slice(None, None, self.vel_arrows_stride)
+        sset = slice(None, None, self.arrow_stride)
         ax.quiver(xc_mesh[sset, sset], zc_mesh[sset, sset],
                   vel_x[sset, sset], vel_z[sset, sset])
         ax.set_aspect("equal")
@@ -139,7 +134,7 @@ class SameAxesPlot(Plot):
     plots: Iterable[Plot]
     legend: bool = True
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         for plot in self.plots:
             plot.draw_on(ax)
         if self.legend:
