@@ -20,17 +20,17 @@ if typing.TYPE_CHECKING:
 @dataclass(frozen=True)
 class Contour:
     name: str
-    values: np.ndarray
+    radius: np.ndarray
     theta: np.ndarray
 
     @staticmethod
-    def constant(
+    def const_rad(
         radius: float, theta_min: float, theta_max: float, label: str,
         npoints: int = 100,
     ) -> Contour:
         return Contour(
             name=label,
-            values=np.full(npoints, radius),
+            radius=np.full(npoints, radius),
             theta=np.linspace(theta_min, theta_max, npoints)
         )
 
@@ -40,7 +40,7 @@ class ContourPlot(Plot):
     contour: Contour
 
     def draw_on(self, ax) -> None:
-        ax.plot(self.contour.theta, self.contour.values,
+        ax.plot(self.contour.theta, self.contour.radius,
                 label=self.contour.name)
 
 
@@ -50,7 +50,7 @@ class ContourSphericalPlot(Plot):
     color: str = "red"
 
     def draw_on(self, ax: Axes) -> None:
-        rad = self.contour.values
+        rad = self.contour.radius
         theta = self.contour.theta
         x_pos = rad * np.sin(theta)
         z_pos = rad * np.cos(theta)
@@ -110,7 +110,7 @@ class FortPpCheckpoint:
         with self._chk() as chk:
             contour = Contour(
                 name=name,
-                values=chk["Contour_field"][name][()].squeeze(),
+                radius=chk["Contour_field"][name][()].squeeze(),
                 theta=self.pp_grid("theta")
             )
         return contour
@@ -140,7 +140,7 @@ def field_cmd(conf: ConfigurationManager) -> None:
     if conf.plotting.rmarks:
         tmin, tmax = checkpoint.pp_grid("theta")[[0, -1]]
         plots.extend(
-            ContourSphericalPlot(Contour.constant(rad, tmin, tmax, ""))
+            ContourSphericalPlot(Contour.const_rad(rad, tmin, tmax, ""))
             for rad in conf.plotting.rmarks)
 
     SinglePlotFigure(
@@ -177,7 +177,7 @@ def contour_cmd(conf: ConfigurationManager) -> None:
     if conf.plotting.rmarks:
         tmin, tmax = checkpoint.pp_grid("theta")[[0, -1]]
         plots.extend(
-            cont_plot(Contour.constant(rad, tmin, tmax, ""))
+            cont_plot(Contour.const_rad(rad, tmin, tmax, ""))
             for rad in conf.plotting.rmarks)
 
     SinglePlotFigure(
