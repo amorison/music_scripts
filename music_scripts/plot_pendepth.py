@@ -12,6 +12,7 @@ from pymusic.plotting import Plot, SinglePlotFigure
 if typing.TYPE_CHECKING:
     from typing import Iterable
     from loam.manager import ConfigurationManager
+    from matplotlib.axes import Axes
 
 
 @dataclass(frozen=True)
@@ -30,7 +31,7 @@ class SchwarzSeries:
 class SchwarzSeriesPlot(Plot):
     series: SchwarzSeries
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         ax.plot(self.series.time, self.series.values)
         ax.set_xlabel("time")
         ax.set_ylabel("Schwarzschild radius")

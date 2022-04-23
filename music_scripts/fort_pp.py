@@ -11,7 +11,7 @@ import numpy as np
 from .plots import RawSphericalScalarPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
-    from typing import Union, Optional, Generator
+    from typing import Union, Optional, Generator, List, Type
     from os import PathLike
     from loam.manager import ConfigurationManager
     from matplotlib.axes import Axes
@@ -39,7 +39,7 @@ class Contour:
 class ContourPlot(Plot):
     contour: Contour
 
-    def draw_on(self, ax) -> None:
+    def draw_on(self, ax: Axes) -> None:
         ax.plot(self.contour.theta, self.contour.radius,
                 label=self.contour.name)
 
@@ -130,7 +130,7 @@ def field_cmd(conf: ConfigurationManager) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     field = checkpoint.field(conf.field_pp.plot)
-    plots = [
+    plots: List[Plot] = [
         RawSphericalScalarPlot(
             r_coord=field.r_walls(),
             t_coord=field.t_walls(),
@@ -156,8 +156,8 @@ def contour_cmd(conf: ConfigurationManager) -> None:
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     varstr = "_".join(conf.contour_pp.plot)
     over_str = ""
-    plots = []
-    cont_plot = ContourPlot
+    plots: List[Plot] = []
+    cont_plot: Type[Union[ContourPlot, ContourSphericalPlot]] = ContourPlot
     legend = True
     if conf.contour_pp.over:
         field = checkpoint.field(conf.contour_pp.over)
