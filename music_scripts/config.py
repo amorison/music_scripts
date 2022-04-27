@@ -63,6 +63,13 @@ CONF_DEF["contour_pp"] = dict(
               help="plot the contour over a field variable"),
 )
 
+CONF_DEF["rprof_pp"] = dict(
+    plot=Conf(default="rho", cmd_arg=True, shortname="o",
+              help="variable to plot"),
+    degree=Conf(default=1, cmd_arg=True, shortname="D",
+                help="degree of rprof"),
+)
+
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
@@ -73,6 +80,9 @@ SUB_CMDS = dict(
     contour_pp=Subcmd("plot a contour field from PP data",
                       "fort_pp", "plotting",
                       func=fort_pp.contour_cmd),
+    rprof_pp=Subcmd("plot a rprof field from PP data",
+                    "fort_pp",
+                    func=fort_pp.rprof_cmd),
 )
 
 

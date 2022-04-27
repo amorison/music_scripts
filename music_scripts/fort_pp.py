@@ -81,6 +81,22 @@ class Field:
 
 
 @dataclass(frozen=True)
+class Rprof:
+    name: str
+    degree: int
+    values: np.ndarray
+    radius: np.ndarray
+
+
+@dataclass(frozen=True)
+class RprofPlot(Plot):
+    rprof: Rprof
+
+    def draw_on(self, ax: Axes) -> None:
+        ax.plot(self.rprof.radius, self.rprof.values, label=self.rprof.name)
+
+
+@dataclass(frozen=True)
 class FortPpCheckpoint:
     master_h5: Union[str, PathLike]
     idump: int
@@ -124,6 +140,18 @@ class FortPpCheckpoint:
                 theta=self.pp_grid("theta")
             )
         return field
+
+    def rprof(self, name: str, degree: int) -> Rprof:
+        with self._chk() as chk:
+            i_deg = chk["Moment_rad"][name].attr["degree"].index(degree)
+            values = chk["Moment_rad"][name][..., i_deg].squeeze()
+            rprof = Rprof(
+                name=name,
+                degree=degree,
+                values=values,
+                radius=self.pp_grid("rad")
+            )
+        return rprof
 
 
 def field_cmd(conf: ConfigurationManager) -> None:
@@ -186,3 +214,15 @@ def contour_cmd(conf: ConfigurationManager) -> None:
             legend=legend,
         ),
     ).save_to(f"contour_{varstr}{over_str}.pdf")
+
+
+def rprof_cmd(conf: ConfigurationManager) -> None:
+    checkpoint = FortPpCheckpoint(
+        master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
+    var = conf.rprof_pp.plot
+    rprof = checkpoint.rprof(var, conf.rprof_pp.degree)
+    SinglePlotFigure(
+        plot=RprofPlot(
+            rprof=rprof,
+        ),
+    ).save_to(f"rprof_{var}.pdf")
