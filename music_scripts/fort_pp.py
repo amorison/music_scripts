@@ -11,7 +11,7 @@ import numpy as np
 from .plots import RawSphericalScalarPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
-    from typing import Union, Optional, Generator, List, Type
+    from typing import Union, Optional, Generator, List, Type, Tuple
     from os import PathLike
     from loam.manager import ConfigurationManager
     from matplotlib.axes import Axes
@@ -91,9 +91,12 @@ class Rprof:
 @dataclass(frozen=True)
 class RprofPlot(Plot):
     rprof: Rprof
+    marks: Tuple[float]
 
     def draw_on(self, ax: Axes) -> None:
         ax.plot(self.rprof.radius, self.rprof.values, label=self.rprof.name)
+        for mark in self.marks:
+            ax.axvline(mark)
 
 
 @dataclass(frozen=True)
@@ -225,5 +228,6 @@ def rprof_cmd(conf: ConfigurationManager) -> None:
     SinglePlotFigure(
         plot=RprofPlot(
             rprof=rprof,
+            marks=conf.plotting.rmarks,
         ),
     ).save_to(f"rprof_{var}.pdf")

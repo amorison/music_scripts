@@ -81,7 +81,7 @@ SUB_CMDS = dict(
                       "fort_pp", "plotting",
                       func=fort_pp.contour_cmd),
     rprof_pp=Subcmd("plot a rprof field from PP data",
-                    "fort_pp",
+                    "fort_pp", "plotting",
                     func=fort_pp.rprof_cmd),
 )
 
