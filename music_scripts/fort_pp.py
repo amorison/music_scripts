@@ -145,7 +145,7 @@ class FortPpCheckpoint:
         with self._chk() as chk:
             mom_rad = chk["Moment_rad"][name]
             i_deg = mom_rad.attrs["degree"].tolist().index(degree)
-            values = mom_rad[..., i_deg].squeeze()
+            values = mom_rad[i_deg].squeeze()
             rprof = Rprof(
                 name=name,
                 degree=degree,
