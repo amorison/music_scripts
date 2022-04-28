@@ -9,7 +9,7 @@ from loam.cli import Subcmd, CLIManager
 from loam.tools import command_flag, path_entry
 import loam.parsers
 
-from . import field, restart, plot_pendepth, fort_pp
+from . import field, restart, plot_pendepth, fort_pp, lmax
 
 
 @dataclass
@@ -91,6 +91,7 @@ SUB_CMDS = dict(
     rprof_pp=Subcmd("plot a rprof field from PP data",
                     "fort_pp", "plotting",
                     func=fort_pp.rprof_cmd),
+    lmax=Subcmd("plot lmax histogram", "fort_pp", func=lmax.cmd)
 )
 
 
