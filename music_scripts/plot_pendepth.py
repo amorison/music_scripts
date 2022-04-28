@@ -11,8 +11,8 @@ from pymusic.plotting import Plot, SinglePlotFigure
 
 if typing.TYPE_CHECKING:
     from typing import Iterable
-    from loam.manager import ConfigurationManager
     from matplotlib.axes import Axes
+    from .config import Config
 
 
 @dataclass(frozen=True)
@@ -55,7 +55,7 @@ def schwarz_series_from_set(h5files: Iterable[Path]) -> SchwarzSeries:
     )
 
 
-def cmd(conf: ConfigurationManager) -> None:
+def cmd(conf: Config) -> None:
     folder = Path()
 
     all_h5s = sorted(folder.glob("post_transient*.h5"))

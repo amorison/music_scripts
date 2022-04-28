@@ -8,7 +8,7 @@ import typing
 import f90nml
 
 if typing.TYPE_CHECKING:
-    from loam.manager import ConfigurationManager
+    from .config import Config
 
 
 def restart_batch(batchfile: Path) -> None:
@@ -43,10 +43,10 @@ def restart_batch(batchfile: Path) -> None:
     subprocess.run(shlex.split(f"sbatch '{batchfile}'"), check=True)
 
 
-def cmd(conf: ConfigurationManager) -> None:
-    if conf.restart.batch is None:
+def cmd(conf: Config) -> None:
+    if not conf.restart.batch:
         batch_files = tuple(Path().glob("batch*"))
     else:
-        batch_files = conf.restart.batch
+        batch_files = tuple(map(Path, conf.restart.batch))
     for batch in batch_files:
-        restart_batch(Path(batch))
+        restart_batch(batch)

@@ -13,8 +13,8 @@ from .plots import RawSphericalScalarPlot, SameAxesPlot
 if typing.TYPE_CHECKING:
     from typing import Union, Optional, Generator, List, Type, Tuple
     from os import PathLike
-    from loam.manager import ConfigurationManager
     from matplotlib.axes import Axes
+    from .config import Config
 
 
 @dataclass(frozen=True)
@@ -91,7 +91,7 @@ class Rprof:
 @dataclass(frozen=True)
 class RprofPlot(Plot):
     rprof: Rprof
-    marks: Tuple[float]
+    marks: Tuple[float, ...]
 
     def draw_on(self, ax: Axes) -> None:
         ax.plot(self.rprof.radius, self.rprof.values, label=self.rprof.name)
@@ -158,7 +158,7 @@ class FortPpCheckpoint:
         return rprof
 
 
-def field_cmd(conf: ConfigurationManager) -> None:
+def field_cmd(conf: Config) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     field = checkpoint.field(conf.field_pp.plot)
@@ -183,7 +183,7 @@ def field_cmd(conf: ConfigurationManager) -> None:
     ).save_to(f"field_{field.name}.pdf")
 
 
-def contour_cmd(conf: ConfigurationManager) -> None:
+def contour_cmd(conf: Config) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     varstr = "_".join(conf.contour_pp.plot)
@@ -220,7 +220,7 @@ def contour_cmd(conf: ConfigurationManager) -> None:
     ).save_to(f"contour_{varstr}{over_str}.pdf")
 
 
-def rprof_cmd(conf: ConfigurationManager) -> None:
+def rprof_cmd(conf: Config) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump)
     var = conf.rprof_pp.plot

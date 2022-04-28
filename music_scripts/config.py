@@ -1,74 +1,82 @@
 from __future__ import annotations
 
-import typing
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, List, Tuple
 
+from loam.base import entry, Section, ConfigBase
 from loam.cli import Subcmd, CLIManager
-from loam.manager import ConfOpt as Conf
-from loam.manager import ConfigurationManager
-from loam.tools import command_flag
-import loam.types
+from loam.tools import command_flag, path_entry
+import loam.parsers
 
 from . import field, restart, plot_pendepth, fort_pp
 
-if typing.TYPE_CHECKING:
-    from typing import Optional, List
+
+@dataclass
+class Core(Section):
+    path: Path = path_entry(path=".", cli_short="P",
+                            doc="path of music directory")
 
 
-CONF_DEF = {}
+@dataclass
+class Field(Section):
+    plot: str = entry(val="vel_ampl", cli_short="o", doc="variable to plot")
+    velarrow: bool = command_flag("add velocity arrows to the plot")
 
-CONF_DEF["core"] = dict(
-    path=Conf(default=Path(), cmd_arg=True, shortname="p",
-              cmd_kwargs={"type": Path}, help="path of music directory",
-              comprule="_files"),
-)
 
-CONF_DEF["field"] = dict(
-    plot=Conf(default="vel_ampl", cmd_arg=True, shortname="o",
-              help="variable to plot"),
-    velarrow=command_flag(shortname=None,
-                          help_msg="add velocity arrows to the plot"),
-)
+@dataclass
+class Restart(Section):
+    batch: Tuple[str, ...] = entry(
+        val=tuple(), cli_short="b", cli_kwargs={"nargs": "+"},
+        from_str=loam.parsers.tuple_of(str),
+        doc="batch files to use for restart", cli_zsh_comprule="_files")
 
-CONF_DEF["restart"] = dict(
-    batch=Conf(default=None, cmd_arg=True, shortname="b",
-               cmd_kwargs={"nargs": "+"},
-               help="batch files to use for restart", comprule="_files")
-)
 
-CONF_DEF["fort_pp"] = dict(
-    postfile=Conf(default="post.h5", cmd_arg=True, shortname="p",
-                  help="path to master h5 file from post_par"),
-    idump=Conf(default=1, cmd_arg=True, shortname="d",
-               help="dump number to process"),
-)
+@dataclass
+class FortPP(Section):
+    postfile: Path = path_entry(path="post.h5", cli_short="p",
+                                doc="path to master h5 file from post_par")
+    idump: int = entry(val=1, cli_short="d", doc="dump number to process")
 
-CONF_DEF["plotting"] = dict(
-    rmarks=Conf(default="", cmd_arg=True,
-                cmd_kwargs=dict(type=loam.types.list_of(float)),
-                help="add contours at constant values"),
-)
 
-CONF_DEF["field_pp"] = dict(
-    plot=Conf(default="rho", cmd_arg=True, shortname="o",
-              help="variable to plot"),
-)
+@dataclass
+class Plotting(Section):
+    rmarks: Tuple[float, ...] = entry(
+        val_str="", from_str=loam.parsers.tuple_of(float),
+        doc="add contours at constant values")
 
-CONF_DEF["contour_pp"] = dict(
-    plot=Conf(default="pen_depth_conv,pen_depth_ke,r_schwarz_max",
-              cmd_arg=True, shortname="o",
-              cmd_kwargs=dict(type=loam.types.list_of(str)),
-              help="variables to plot"),
-    over=Conf(default="", cmd_arg=True,
-              help="plot the contour over a field variable"),
-)
 
-CONF_DEF["rprof_pp"] = dict(
-    plot=Conf(default="rho", cmd_arg=True, shortname="o",
-              help="variable to plot"),
-    degree=Conf(default=1, cmd_arg=True, shortname="D",
-                help="degree of rprof"),
-)
+@dataclass
+class FieldPP(Section):
+    plot: str = entry(val="rho", cli_short="o", doc="variable to plot")
+
+
+@dataclass
+class ContourPP(Section):
+    plot: Tuple[str, ...] = entry(
+        val_str="pen_depth_conv,pen_depth_ke,r_schwarz_max",
+        cli_short="o", from_str=loam.parsers.tuple_of(str),
+        doc="variables to plot")
+    over: str = entry(val="", doc="plot the contour over a field variable")
+
+
+@dataclass
+class RprofPP(Section):
+    plot: str = entry(val="rho", cli_short="o", doc="variable to plot")
+    degree: int = entry(val=1, cli_short="D", doc="degree of rprof")
+
+
+@dataclass
+class Config(ConfigBase):
+    core: Core
+    field: Field
+    restart: Restart
+    fort_pp: FortPP
+    plotting: Plotting
+    field_pp: FieldPP
+    contour_pp: ContourPP
+    rprof_pp: RprofPP
+
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
@@ -90,7 +98,7 @@ def parse_args_and_run(
     arglist: Optional[List[str]] = None,
 ) -> None:
     """Parse command line argument, run requested command."""
-    conf = ConfigurationManager.from_dict_(CONF_DEF)
+    conf = Config.default_()
     climan = CLIManager(conf, **SUB_CMDS)
     cmd_args = climan.parse_args(arglist)
     cmd_args.func(conf)
