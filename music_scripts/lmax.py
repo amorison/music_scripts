@@ -54,7 +54,7 @@ class LMax:
             time = np.zeros(n_points)
             values = np.zeros(n_points)
             for i, chk in enumerate(chkpts.values()):
-                time[i] = chk["parameters"]["time"].item()
+                time[i] = chk["parameters"]["time"][()].item()
                 values[i] = chk["Contour_field"][
                     f"pen_depth_{self.criteria}"][()].max()
             return TimeSeries(
