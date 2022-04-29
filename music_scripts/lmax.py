@@ -8,6 +8,7 @@ import h5py
 import numpy as np
 from pymusic.plotting import Plot, MatrixOfPlotsFigure
 
+from .fort_pp import FortPpCheckpoint
 from .plots import SameAxesPlot
 
 if typing.TYPE_CHECKING:
@@ -53,11 +54,12 @@ class LMax:
             n_points = len(chkpts)
             time = np.zeros(n_points)
             values = np.zeros(n_points)
-            for i, chk in enumerate(chkpts.values()):
-                r_schwarz = chk["pp_parameters"]["r_schwarz_preset"][()].item()
-                time[i] = chk["parameters"]["time"][()].item()
-                values[i] = chk["Contour_field"][
-                    f"pen_depth_{self.criteria}"][()].max() - r_schwarz
+            for i, idump in enumerate(map(int, chkpts.keys())):
+                chk = FortPpCheckpoint(master_h5=h5f, idump=idump)
+                r_schwarz = chk.pp_param("r_schwarz_preset").item()
+                time[i] = chk.param("time").item()
+                values[i] = chk.contour_field(
+                    f"pen_depth_{self.criteria}").radius.max() - r_schwarz
             return TimeSeries(
                 name=f"lmax_{self.criteria}",
                 values=values,
