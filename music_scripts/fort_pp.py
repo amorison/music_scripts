@@ -127,6 +127,14 @@ class FortPpCheckpoint:
             object.__setattr__(
                 self, "_chkgroup", None)
 
+    def pp_param(self, name: str) -> np.ndarray:
+        with self._chk() as chk:
+            return chk["pp_parameters"][name][()]
+
+    def param(self, name: str) -> np.ndarray:
+        with self._chk() as chk:
+            return chk["parameters"][name][()]
+
     def pp_grid(self, direction: str) -> np.ndarray:
         with self._chk() as chk:
             return chk["pp_parameters"]["eval_grid"][direction][()].squeeze()
