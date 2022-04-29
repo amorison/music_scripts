@@ -31,6 +31,8 @@ class SeriesPlot(Plot):
     def draw_on(self, ax: Axes) -> None:
         ax.plot(self.tseries.time, self.tseries.values,
                 label=self.tseries.name)
+        ax.set_xlabel("time")
+        ax.set_ylabel(self.tseries.name)
 
 
 @dataclass
