@@ -101,10 +101,16 @@ class RprofPlot(Plot):
 
 @dataclass(frozen=True)
 class FortPpCheckpoint:
-    master_h5: Union[str, PathLike]
+    master_h5: Union[str, PathLike, h5py.Group]
     idump: int
     _chkgroup: Optional[h5py.Group] = dataclasses.field(
         default=None, init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        if isinstance(self.master_h5, h5py.Group):
+            object.__setattr__(
+                self, "_chkgroup",
+                self.master_h5["checkpoints"][f"{self.idump:05d}"])
 
     @contextmanager
     def _chk(self) -> Generator[h5py.Group, None, None]:
