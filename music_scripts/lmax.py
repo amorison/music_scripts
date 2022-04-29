@@ -47,6 +47,7 @@ class SeriesHist(Plot):
 class LMax:
     main_h5: Path
     criteria: str
+    normalize_dr: bool = False
 
     def series(self) -> TimeSeries:
         with h5py.File(self.main_h5) as h5f:
@@ -60,6 +61,9 @@ class LMax:
                 time[i] = chk.param("time").item()
                 values[i] = chk.contour_field(
                     f"pen_depth_{self.criteria}").radius.max() - r_schwarz
+                if self.normalize_dr:
+                    dr = np.diff(chk.pp_grid("rad")).mean()
+                    values /= dr
             return TimeSeries(
                 name=f"lmax_{self.criteria}",
                 values=values,
@@ -76,6 +80,7 @@ def cmd(conf: Config) -> None:
         lmax = LMax(
             main_h5=post_h5,
             criteria=criteria,
+            normalize_dr=conf.lmax.normdr,
         ).series()
         all_plots.append(SeriesHist(tseries=lmax))
         series_plots.append(SeriesPlot(tseries=lmax))

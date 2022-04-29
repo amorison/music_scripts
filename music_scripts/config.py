@@ -67,6 +67,11 @@ class RprofPP(Section):
 
 
 @dataclass
+class Lmax(Section):
+    normdr: bool = command_flag("normalize lmax by average dr")
+
+
+@dataclass
 class Config(ConfigBase):
     core: Core
     field: Field
@@ -76,6 +81,7 @@ class Config(ConfigBase):
     field_pp: FieldPP
     contour_pp: ContourPP
     rprof_pp: RprofPP
+    lmax: Lmax
 
 
 SUB_CMDS = dict(
