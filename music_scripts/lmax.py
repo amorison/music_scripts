@@ -65,7 +65,7 @@ class LMax:
             )
 
 
-def cmd(conf: Config):
+def cmd(conf: Config) -> None:
     """Implementation of the lmax command."""
     post_h5 = conf.fort_pp.postfile
     all_plots: List[Plot] = []
