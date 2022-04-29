@@ -65,7 +65,7 @@ class LMax:
                     f"pen_depth_{self.criteria}").radius.max() - r_schwarz
                 if self.normalize_dr:
                     dr = np.diff(chk.pp_grid("rad")).mean()
-                    values /= dr
+                    values[i] /= dr
             return TimeSeries(
                 name=f"lmax_{self.criteria}",
                 values=values,
