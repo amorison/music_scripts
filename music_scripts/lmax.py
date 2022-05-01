@@ -38,9 +38,14 @@ class SeriesPlot(Plot):
 @dataclass
 class SeriesHist(Plot):
     tseries: TimeSeries
+    group_by_unique: bool = False
 
     def draw_on(self, ax: Axes) -> None:
-        ax.hist(self.tseries.values, label=self.tseries.name)
+        if self.group_by_unique:
+            ax.bar(*np.unique(self.tseries.values, return_counts=True),
+                   label=self.tseries.name)
+        else:
+            ax.hist(self.tseries.values, label=self.tseries.name)
         ax.set_xlabel(self.tseries.name)
         ax.set_ylabel("ndumps")
 
@@ -65,7 +70,7 @@ class LMax:
                     f"pen_depth_{self.criteria}").radius.max() - r_schwarz
                 if self.normalize_dr:
                     dr = np.diff(chk.pp_grid("rad")).mean()
-                    values[i] /= dr
+                    values[i] = np.rint(values[i] / dr)
             return TimeSeries(
                 name=f"lmax_{self.criteria}",
                 values=values,
@@ -84,7 +89,10 @@ def cmd(conf: Config) -> None:
             criteria=criteria,
             normalize_dr=conf.lmax.normdr,
         ).series()
-        all_plots.append(SeriesHist(tseries=lmax))
+        all_plots.append(SeriesHist(
+            tseries=lmax,
+            group_by_unique=conf.lmax.normdr
+        ))
         series_plots.append(SeriesPlot(tseries=lmax))
     all_plots.append(SameAxesPlot(plots=series_plots))
     MatrixOfPlotsFigure(
