@@ -6,8 +6,8 @@ from typing import Optional, List, Tuple
 
 from loam.base import entry, Section, ConfigBase
 from loam.cli import Subcmd, CLIManager
+from loam.collections import TupleEntry
 from loam.tools import command_flag, path_entry
-import loam.parsers
 
 from . import field, restart, plot_pendepth, fort_pp, lmax
 
@@ -26,10 +26,9 @@ class Field(Section):
 
 @dataclass
 class Restart(Section):
-    batch: Tuple[str, ...] = entry(
-        val=tuple(), cli_short="b", cli_kwargs={"nargs": "+"},
-        from_str=loam.parsers.tuple_of(str),
-        doc="batch files to use for restart", cli_zsh_comprule="_files")
+    batch: Tuple[str, ...] = TupleEntry(str).entry(
+        doc="batch files to use for restart", cli_short="b",
+        cli_zsh_comprule="_files")
 
 
 @dataclass
@@ -41,8 +40,7 @@ class FortPP(Section):
 
 @dataclass
 class Plotting(Section):
-    rmarks: Tuple[float, ...] = entry(
-        val_str="", from_str=loam.parsers.tuple_of(float),
+    rmarks: Tuple[float, ...] = TupleEntry(float).entry(
         doc="add contours at constant values")
 
 
@@ -53,10 +51,9 @@ class FieldPP(Section):
 
 @dataclass
 class ContourPP(Section):
-    plot: Tuple[str, ...] = entry(
-        val_str="pen_depth_conv,pen_depth_ke,r_schwarz_max",
-        cli_short="o", from_str=loam.parsers.tuple_of(str),
-        doc="variables to plot")
+    plot: Tuple[str, ...] = TupleEntry(str).entry(
+        default="pen_depth_conv,pen_depth_ke,r_schwarz_max",
+        cli_short="o", doc="variables to plot")
     over: str = entry(val="", doc="plot the contour over a field variable")
 
 
