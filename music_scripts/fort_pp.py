@@ -92,11 +92,13 @@ class Rprof:
 class RprofPlot(Plot):
     rprof: Rprof
     marks: Tuple[float, ...]
+    scale: str = "linear"
 
     def draw_on(self, ax: Axes) -> None:
         ax.plot(self.rprof.radius, self.rprof.values, label=self.rprof.name)
         for mark in self.marks:
             ax.axvline(mark)
+        ax.set_yscale(self.scale)
 
 
 @dataclass(frozen=True)
@@ -243,5 +245,6 @@ def rprof_cmd(conf: Config) -> None:
         plot=RprofPlot(
             rprof=rprof,
             marks=conf.plotting.rmarks,
+            scale="log" if conf.rprof_pp.log else "linear",
         ),
     ).save_to(f"rprof_{var}.pdf")
