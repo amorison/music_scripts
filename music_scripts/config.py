@@ -42,6 +42,7 @@ class FortPP(Section):
 class Plotting(Section):
     rmarks: Tuple[float, ...] = TupleEntry(float).entry(
         doc="add contours at constant values")
+    log: bool = command_flag("set log scale")
 
 
 @dataclass
@@ -61,7 +62,6 @@ class ContourPP(Section):
 class RprofPP(Section):
     plot: str = entry(val="rho", cli_short="o", doc="variable to plot")
     degree: int = entry(val=1, cli_short="D", doc="degree of rprof")
-    log: bool = command_flag("set log scale")
 
 
 @dataclass

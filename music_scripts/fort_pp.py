@@ -245,6 +245,6 @@ def rprof_cmd(conf: Config) -> None:
         plot=RprofPlot(
             rprof=rprof,
             marks=conf.plotting.rmarks,
-            scale="log" if conf.rprof_pp.log else "linear",
+            scale="log" if conf.plotting.log else "linear",
         ),
     ).save_to(f"rprof_{var}.pdf")
