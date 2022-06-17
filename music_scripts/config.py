@@ -9,7 +9,7 @@ from loam.cli import Subcmd, CLIManager
 from loam.collections import TupleEntry
 from loam.tools import command_flag, path_entry
 
-from . import field, restart, plot_pendepth, fort_pp, lmax
+from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d
 
 
 @dataclass
@@ -70,6 +70,14 @@ class Lmax(Section):
 
 
 @dataclass
+class Lyon1d(Section):
+    mfile: Path = path_entry("fort50", doc="path to the file to read",
+                             cli_short="m")
+    plot: Tuple[str, ...] = TupleEntry(str).entry(
+        default="temperature", doc="list of variables to plot", cli_short="o")
+
+
+@dataclass
 class Config(ConfigBase):
     core: Core
     field: Field
@@ -80,6 +88,7 @@ class Config(ConfigBase):
     contour_pp: ContourPP
     rprof_pp: RprofPP
     lmax: Lmax
+    lyon1d: Lyon1d
 
 
 SUB_CMDS = dict(
@@ -95,6 +104,7 @@ SUB_CMDS = dict(
     rprof_pp=Subcmd("plot a rprof field from PP data",
                     "fort_pp", "plotting",
                     func=fort_pp.rprof_cmd),
+    lyon1d=Subcmd("plot 1D data from Lyon model", func=lyon1d.cmd),
     lmax=Subcmd("plot lmax histogram", "fort_pp", func=lmax.cmd)
 )
 
