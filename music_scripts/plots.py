@@ -44,7 +44,28 @@ class RawSphericalScalarPlot(Plot):
 
 
 @dataclass(frozen=True)
-class SphericalScalarPlot(Plot):
+class RawCartesianScalarPlot(Plot):
+    x_coord: np.ndarray
+    y_coord: np.ndarray
+    data: np.ndarray
+    cmap: Optional[str] = None
+    with_colorbar: bool = True
+
+    def draw_on(self, ax: Axes) -> None:
+        surf = ax.pcolormesh(
+            self.x_coord, self.y_coord, self.data, cmap=self.cmap,
+            shading="flat", rasterized=True)
+
+        ax.set_aspect("equal")
+        ax.set_axis_off()
+        if self.with_colorbar:
+            cax = make_axes_locatable(ax).append_axes("right", size="3%",
+                                                      pad=0.15)
+            ax.figure.colorbar(surf, cax=cax)
+
+
+@dataclass(frozen=True)
+class ScalarPlot(Plot):
     dump_arr: DumpArrayOnGrid
     get_data: FieldGetter
     cmap: Optional[str] = None
@@ -52,13 +73,23 @@ class SphericalScalarPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
-        RawSphericalScalarPlot(
-            r_coord=grid.r_grid.face_points(),
-            t_coord=grid.theta_grid.face_points(),
-            data=self.get_data(self.dump_arr).array(),
-            cmap=self.cmap,
-            with_colorbar=self.with_colorbar,
-        ).draw_on(ax)
+        if hasattr(grid, "r_grid"):
+            plot = RawSphericalScalarPlot(
+                r_coord=grid.r_grid.face_points(),
+                t_coord=grid.theta_grid.face_points(),
+                data=self.get_data(self.dump_arr).array(),
+                cmap=self.cmap,
+                with_colorbar=self.with_colorbar,
+            )
+        else:
+            plot = RawCartesianScalarPlot(
+                x_coord=grid.x_grid.face_points(),
+                y_coord=grid.y_grid.face_points(),
+                data=self.get_data(self.dump_arr).array(),
+                cmap=self.cmap,
+                with_colorbar=self.with_colorbar,
+            )
+        plot.draw_on(ax)
 
 
 @dataclass(frozen=True)

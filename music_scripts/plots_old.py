@@ -14,7 +14,7 @@ from .derived_fields import (
     FieldGetter, ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
 )
 from .plots import (
-    SphericalScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot,
+    ScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot,
     WithScales, SameAxesPlot
 )
 from .prof1d import Prof1d
@@ -90,23 +90,23 @@ def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
 
     for i, dump in enumerate(simog.sim.dumps):
         dump_arr = DumpArrayOnGrid(dump)
-        fig = SinglePlotFigure(
-            plot=SameAxesPlot(
-                plots=(
-                    SphericalScalarPlot(
-                        dump_arr=dump_arr,
-                        get_data=FieldGetter(var),
-                    ),
-                    SphericalVectorPlot(
-                        dump_arr=dump_arr,
-                        get_rvec=FieldGetter("vel_1"),
-                        get_tvec=FieldGetter("vel_2"),
-                    ),
-                ),
-                legend=False,
+        plots = [
+            ScalarPlot(
+                dump_arr=dump_arr,
+                get_data=FieldGetter(var),
             ),
-        )
-        fig.save_to(figdir / f"{var}_{i:05d}.png")
+        ]
+        if vel_arrows:
+            plots.append(
+                SphericalVectorPlot(
+                    dump_arr=dump_arr,
+                    get_rvec=FieldGetter("vel_1"),
+                    get_tvec=FieldGetter("vel_2"),
+                )
+            )
+        SinglePlotFigure(
+            plot=SameAxesPlot(plots=plots, legend=False),
+        ).save_to(figdir / f"{var}_{i:05d}.png")
 
 
 if __name__ == "__main__":
