@@ -37,7 +37,7 @@ class Header:
 
 
 @dataclass(frozen=True)
-class Mesa1dData:
+class Lyon1dData:
     header: Header
     yzi: NDArray[np.uint8]
     u: NDArray[np.float64]
@@ -65,10 +65,10 @@ class Mesa1dData:
     brunt_vaisala: NDArray[np.float64]
 
     @staticmethod
-    def from_file(filepath: Union[str, PathLike]) -> Mesa1dData:
+    def from_file(filepath: Union[str, PathLike]) -> Lyon1dData:
         with Path(filepath).open("rb") as fid:
             hdr = Header.read_from(fid)
-            flds = list(fields(Mesa1dData))[1:]
+            flds = list(fields(Lyon1dData))[1:]
             type_count = {fld.name: (np.float64, 1) for fld in flds}
             type_count["yzi"] = (np.uint8, 1)
             type_count["chem"] = (np.float64, hdr.n_species)
@@ -78,7 +78,7 @@ class Mesa1dData:
                 for fld in flds:
                     dtype, count = type_count[fld.name]
                     vals[fld.name][irow] = np.fromfile(fid, dtype, count)
-        return Mesa1dData(header=hdr, **vals)
+        return Lyon1dData(header=hdr, **vals)
 
     @property
     def he3(self) -> NDArray[np.float64]:
@@ -98,8 +98,8 @@ class Mesa1dData:
 
 
 def cmd(conf: Config) -> None:
-    mesadata = Mesa1dData.from_file(conf.mesa1d.mfile)
-    for var in conf.mesa1d.plot:
+    mesadata = Lyon1dData.from_file(conf.lyon1d.mfile)
+    for var in conf.lyon1d.plot:
         SinglePlotFigure(
             plot=RprofPlot(
                 rprof=mesadata.get_rprof(var),
