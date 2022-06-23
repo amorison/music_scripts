@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib import colors
 from pymusic.plotting import Plot, BoundsFromMinMax
 
 from .derived_fields import FieldGetter
@@ -33,6 +34,7 @@ class RawSphericalScalarPlot(Plot):
 
         surf = ax.pcolormesh(
             x_mesh, z_mesh, self.data, cmap=self.cmap,
+            norm=colors.SymLogNorm(linthresh=1e-6),
             shading="flat", rasterized=True)
 
         ax.set_aspect("equal")
