@@ -14,8 +14,8 @@ from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d, lscale
 
 @dataclass
 class Core(Section):
-    path: Path = path_entry(path=".", cli_short="P",
-                            doc="path of music directory")
+    path: Path = path_entry(path="params.nml", cli_short="P",
+                            doc="path of music parameter file")
 
 
 @dataclass
