@@ -11,6 +11,7 @@ from .musicdata import MusicData
 from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
+    from .array_on_grid import ArrayOnGrid
     from .config import Config
 
 
@@ -42,6 +43,12 @@ def cmd(conf: Config) -> None:
 
     var = conf.field.plot
     mdat = MusicData(conf.core.path)
+
+    @FieldGetter.register
+    def temp(aog: ArrayOnGrid):
+        """Temperature."""
+        return mdat.eos.temperature(aog.data)
+
     for snap in mdat[conf.core.dumps]:
         fig = plot_field(snap.dump_arr, var, conf.field.velarrow)
         fig.save_to(figdir / f"{var}_{snap.idump:08d}.png")

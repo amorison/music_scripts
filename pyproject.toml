@@ -23,6 +23,7 @@ dependencies = [
     "pandas>=1.0",
     "h5py>=3.0",
     "matplotlib>=3.0",
+    "music_mesa_tables>=0.1",
     "pymusic>=0.1.0",
     "loam>=0.7.0,<0.8.0",
 ]

@@ -11,6 +11,7 @@ from pymusic.io import (
 )
 
 from .array_on_grid import SimArrayOnGrid, DumpArrayOnGrid
+from . import eos
 
 if typing.TYPE_CHECKING:
     from pathlib import Path
@@ -62,6 +63,15 @@ class MusicData:
         """Run parameters from Fortran namelist."""
         return f90nml.read(self.parfile)
 
+    @cached_property
+    def eos(self) -> eos.EoS:
+        metallicity = self.params["physics"]["zz"]
+        if self.params["scalars"].get("nscalars", 0) > 0:
+            # soon to be deprecated logic in MUSIC, this always meant variable
+            # He content in scalar_1, enough for now but should be revisited
+            return eos.MesaCstMetalEos(metallicity)
+        return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
+
     @property
     def _out_pattern(self) -> str:
         return self.params["io"]["dataoutput"] + "*.music"
@@ -76,7 +86,7 @@ class MusicData:
         return MusicDumpInfo(
             num_space_dims=2,
             num_velocities=2,
-            num_scalars=self.params["scalars"]["nscalars"]
+            num_scalars=self.params["scalars"].get("nscalars", 0)
         )
 
     def _recenter_bc(self) -> list:
