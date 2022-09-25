@@ -2,20 +2,26 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 
 from loam.base import entry, Section, ConfigBase
 from loam.cli import Subcmd, CLIManager
 from loam.collections import TupleEntry
+from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
 from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d, lscale
+
+
+_idx = TupleEntry(slice_or_int_parser)
 
 
 @dataclass
 class Core(Section):
     path: Path = path_entry(path="params.nml", cli_short="P",
                             doc="path of music parameter file")
+    dumps: Tuple[Union[int, slice], ...] = _idx.entry(
+        default=(-1,), doc="sequence of dumps to process", cli_short="d")
 
 
 @dataclass
@@ -35,7 +41,7 @@ class Restart(Section):
 class FortPP(Section):
     postfile: Path = path_entry(path="post.h5", cli_short="p",
                                 doc="path to master h5 file from post_par")
-    idump: int = entry(val=1, cli_short="d", doc="dump number to process")
+    idump: int = entry(val=1, cli_short="i", doc="dump number to process")
 
 
 @dataclass

@@ -9,14 +9,11 @@ from pymusic.io.music import MusicSim, PeriodicArrayBC
 from pymusic.io.music_new_format import MusicDumpInfo
 from pymusic.plotting import SinglePlotFigure
 
-from .array_on_grid import DumpArrayOnGrid, SimArrayOnGrid
+from .array_on_grid import SimArrayOnGrid
 from .derived_fields import (
-    FieldGetter, ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
+    ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
 )
-from .plots import (
-    ScalarPlot, SphericalVectorPlot, ProfPlot, TseriesPlot,
-    WithScales, SameAxesPlot
-)
+from .plots import ProfPlot, TseriesPlot, WithScales
 from .prof1d import Prof1d
 
 
@@ -83,32 +80,6 @@ def plot_tseries(simog, var):
     fig.save_to(figdir / f"tseries_{var}.pdf")
 
 
-def plot_var(simog: SimArrayOnGrid, var, vel_arrows=False):
-    """Field plots in a given folder."""
-    figdir = Path("figures")
-    figdir.mkdir(parents=True, exist_ok=True)
-
-    for i, dump in enumerate(simog.sim.dumps):
-        dump_arr = DumpArrayOnGrid(dump)
-        plots = [
-            ScalarPlot(
-                dump_arr=dump_arr,
-                get_data=FieldGetter(var),
-            ),
-        ]
-        if vel_arrows:
-            plots.append(
-                SphericalVectorPlot(
-                    dump_arr=dump_arr,
-                    get_rvec=FieldGetter("vel_1"),
-                    get_tvec=FieldGetter("vel_2"),
-                )
-            )
-        SinglePlotFigure(
-            plot=SameAxesPlot(plots=plots, legend=False),
-        ).save_to(figdir / f"{var}_{i:05d}.png")
-
-
 if __name__ == "__main__":
     simfold = Path("transient")
     compute_tconv = False
@@ -120,9 +91,6 @@ if __name__ == "__main__":
     simog = SimArrayOnGrid(sim)
 
     profs1d = Prof1d(simfold / "..")
-
-    plot_var(simog, 'e_int', vel_arrows=True)
-    plot_var(simog, "vel_2")
 
     plot_prof(simog, "vel_2", profs1d)
 
