@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import colors
-from pymusic.plotting import Plot, BoundsFromMinMax
+from pymusic.plotting import Plot
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
