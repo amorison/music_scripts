@@ -26,20 +26,27 @@ class RawSphericalScalarPlot(Plot):
     cmap: Optional[str] = None
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
+    costh: bool = False
 
     def draw_on(self, ax: Axes) -> None:
         # project from (r,t) to (x,z)
-        r_mesh, t_mesh = np.meshgrid(self.r_coord, self.t_coord, indexing="ij")
-        x_mesh = r_mesh * np.sin(t_mesh)
-        z_mesh = r_mesh * np.cos(t_mesh)
+        if self.costh:
+            x_mesh = np.cos(self.t_coord)
+            z_mesh = self.r_coord
+        else:
+            r_mesh, t_mesh = np.meshgrid(
+                self.r_coord, self.t_coord, indexing="ij")
+            x_mesh = r_mesh * np.sin(t_mesh)
+            z_mesh = r_mesh * np.cos(t_mesh)
 
         surf = ax.pcolormesh(
             x_mesh, z_mesh, self.data, cmap=self.cmap,
             norm=self.norm,
             shading="flat", rasterized=True)
 
-        ax.set_aspect("equal")
-        ax.set_axis_off()
+        if not self.costh:
+            ax.set_aspect("equal")
+            ax.set_axis_off()
         if self.with_colorbar:
             cax = make_axes_locatable(ax).append_axes("right", size="3%",
                                                       pad=0.15)
@@ -76,6 +83,7 @@ class ScalarPlot(Plot):
     cmap: Optional[str] = None
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
+    costh: bool = False
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
@@ -87,6 +95,7 @@ class ScalarPlot(Plot):
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
+                costh=self.costh,
             )
         else:
             plot = RawCartesianScalarPlot(

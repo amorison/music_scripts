@@ -30,6 +30,7 @@ class Field(Section):
     velarrow: bool = command_flag("add velocity arrows to the plot")
     perturbation: bool = command_flag("perturbation")
     cmap: Optional[str] = MaybeEntry(str).entry(doc="matplotlib color map")
+    costh: bool = command_flag("plot spherical in (cos th, r) cartesian")
 
 
 @dataclass

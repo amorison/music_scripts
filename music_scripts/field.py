@@ -40,6 +40,7 @@ def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> Figure:
             cmap=cmap,
             norm=(None if not conf_field.perturbation
                   else colors.SymLogNorm(linthresh=1e-6)),
+            costh=conf_field.costh,
         ),
     ]
     if conf_field.velarrow:
