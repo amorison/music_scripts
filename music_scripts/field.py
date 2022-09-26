@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import typing
 
-from pymusic.plotting import Figure, SinglePlotFigure
+from pymusic.plotting import SinglePlotFigure, Plot
 from matplotlib import colors
 import numpy as np
 
@@ -13,13 +13,15 @@ from .musicdata import MusicData
 from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:
+    from typing import List
+
     from pymusic.big_array import BigArray
 
     from .array_on_grid import ArrayOnGrid
     from .config import Config, Field
 
 
-def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> Figure:
+def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> List[Plot]:
     var = conf_field.plot
     cmap = conf_field.cmap
     if conf_field.perturbation:
@@ -52,9 +54,7 @@ def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> Figure:
                 get_tvec=FieldGetter("vel_2"),
             )
         )
-    return SinglePlotFigure(
-        plot=SameAxesPlot(plots=plots, legend=False),
-    )
+    return plots
 
 
 def cmd(conf: Config) -> None:
@@ -70,5 +70,7 @@ def cmd(conf: Config) -> None:
         return mdat.eos.temperature(aog.data)
 
     for snap in mdat[conf.core.dumps]:
-        fig = plot_field(snap.dump_arr, conf.field)
-        fig.save_to(figdir / f"{var}_{snap.idump:08d}.png")
+        plots = plot_field(snap.dump_arr, conf.field)
+        SinglePlotFigure(
+            plot=SameAxesPlot(plots=plots, legend=False),
+        ).save_to(figdir / f"{var}_{snap.idump:08d}.png")
