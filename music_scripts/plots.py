@@ -6,13 +6,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib import colors
 from pymusic.plotting import Plot
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence, Union, Iterable
     from matplotlib.axes import Axes
+    from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
     from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
     from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
@@ -25,6 +25,7 @@ class RawSphericalScalarPlot(Plot):
     data: np.ndarray
     cmap: Optional[str] = None
     with_colorbar: bool = True
+    norm: Optional[Normalize] = None
 
     def draw_on(self, ax: Axes) -> None:
         # project from (r,t) to (x,z)
@@ -34,7 +35,7 @@ class RawSphericalScalarPlot(Plot):
 
         surf = ax.pcolormesh(
             x_mesh, z_mesh, self.data, cmap=self.cmap,
-            norm=colors.SymLogNorm(linthresh=1e-6),
+            norm=self.norm,
             shading="flat", rasterized=True)
 
         ax.set_aspect("equal")
@@ -52,10 +53,12 @@ class RawCartesianScalarPlot(Plot):
     data: np.ndarray
     cmap: Optional[str] = None
     with_colorbar: bool = True
+    norm: Optional[Normalize] = None
 
     def draw_on(self, ax: Axes) -> None:
         surf = ax.pcolormesh(
             self.x_coord, self.y_coord, self.data, cmap=self.cmap,
+            norm=self.norm,
             shading="flat", rasterized=True)
 
         ax.set_aspect("equal")
@@ -72,6 +75,7 @@ class ScalarPlot(Plot):
     get_data: FieldGetter
     cmap: Optional[str] = None
     with_colorbar: bool = True
+    norm: Optional[Normalize] = None
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
@@ -82,6 +86,7 @@ class ScalarPlot(Plot):
                 data=self.get_data(self.dump_arr).array(),
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
+                norm=self.norm,
             )
         else:
             plot = RawCartesianScalarPlot(
@@ -90,6 +95,7 @@ class ScalarPlot(Plot):
                 data=self.get_data(self.dump_arr).array(),
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
+                norm=self.norm,
             )
         plot.draw_on(ax)
 

@@ -28,6 +28,7 @@ class Core(Section):
 class Field(Section):
     plot: str = entry(val="vel_ampl", cli_short="o", doc="variable to plot")
     velarrow: bool = command_flag("add velocity arrows to the plot")
+    perturbation: bool = command_flag("perturbation")
 
 
 @dataclass

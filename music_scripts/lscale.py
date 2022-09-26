@@ -4,6 +4,7 @@ from pathlib import Path
 import typing
 
 import numpy as np
+from matplotlib import colors
 from pymusic.plotting import SinglePlotFigure
 
 from .plots import RawSphericalScalarPlot
@@ -74,5 +75,6 @@ def cmd(conf: Config) -> None:
             t_coord=data.theta_i,
             data=data.temp_pert[:-1, :-1] / data.temp_prof[:-1, :-1],
             cmap="RdBu_r",
+            norm=colors.SymLogNorm(linthresh=1e-6),
         ),
     ).save_to("lscale_temp_pert.pdf")
