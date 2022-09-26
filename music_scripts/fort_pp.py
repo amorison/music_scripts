@@ -38,16 +38,17 @@ class Contour:
 @dataclass(frozen=True)
 class ContourPlot(Plot):
     contour: Contour
+    color: str = "black"
 
     def draw_on(self, ax: Axes) -> None:
         ax.plot(self.contour.theta, self.contour.radius,
-                label=self.contour.name)
+                color=self.color, label=self.contour.name)
 
 
 @dataclass(frozen=True)
 class ContourSphericalPlot(Plot):
     contour: Contour
-    color: str = "red"
+    color: str = "black"
 
     def draw_on(self, ax: Axes) -> None:
         rad = self.contour.radius

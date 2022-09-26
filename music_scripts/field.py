@@ -11,6 +11,7 @@ from .array_on_grid import DumpArrayOnGrid
 from .derived_fields import FieldGetter, ProfGetter
 from .musicdata import MusicData
 from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
+from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
 
 if typing.TYPE_CHECKING:
     from typing import List
@@ -21,7 +22,7 @@ if typing.TYPE_CHECKING:
     from .config import Config, Field
 
 
-def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> List[Plot]:
+def plot_field(dump: DumpArrayOnGrid, conf_field: Field, radii) -> List[Plot]:
     var = conf_field.plot
     cmap = conf_field.cmap
     if conf_field.perturbation:
@@ -54,6 +55,17 @@ def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> List[Plot]:
                 get_tvec=FieldGetter("vel_2"),
             )
         )
+    contours = [
+        Contour(
+            "rmark",
+            np.full_like(theta := dump.grid.theta_grid.cell_centers(), rad),
+            theta if not conf_field.costh else np.cos(theta))
+        for rad in radii
+    ]
+    if conf_field.costh:
+        plots.extend(ContourPlot(ctr) for ctr in contours)
+    else:
+        plots.extend(ContourSphericalPlot(ctr) for ctr in contours)
     return plots
 
 
@@ -63,6 +75,13 @@ def cmd(conf: Config) -> None:
 
     var = conf.field.plot
     mdat = MusicData(conf.core.path)
+    try:
+        renv = mdat.prof1d.params["renv"]
+        rcore = mdat.prof1d.params["rcore"]
+    except RuntimeError:
+        renv = 0.0
+        rcore = 0.0
+    rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
 
     @FieldGetter.register
     def temp(aog: ArrayOnGrid) -> BigArray:
@@ -70,7 +89,7 @@ def cmd(conf: Config) -> None:
         return mdat.eos.temperature(aog.data)
 
     for snap in mdat[conf.core.dumps]:
-        plots = plot_field(snap.dump_arr, conf.field)
+        plots = plot_field(snap.dump_arr, conf.field, radii=rschwarz)
         SinglePlotFigure(
             plot=SameAxesPlot(plots=plots, legend=False),
         ).save_to(figdir / f"{var}_{snap.idump:08d}.png")
