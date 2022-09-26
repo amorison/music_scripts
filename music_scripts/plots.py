@@ -10,7 +10,7 @@ from pymusic.plotting import Plot
 
 from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
-    from typing import Optional, Sequence, Union, Iterable
+    from typing import Optional, Sequence, Union, Iterable, Tuple
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
@@ -27,6 +27,7 @@ class RawSphericalScalarPlot(Plot):
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
     costh: bool = False
+    rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
 
     def draw_on(self, ax: Axes) -> None:
         # project from (r,t) to (x,z)
@@ -44,7 +45,9 @@ class RawSphericalScalarPlot(Plot):
             norm=self.norm,
             shading="flat", rasterized=True)
 
-        if not self.costh:
+        if self.costh:
+            ax.set_ylim(*self.rbounds)
+        else:
             ax.set_aspect("equal")
             ax.set_axis_off()
         if self.with_colorbar:
@@ -84,6 +87,7 @@ class ScalarPlot(Plot):
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
     costh: bool = False
+    rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
@@ -96,6 +100,7 @@ class ScalarPlot(Plot):
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
                 costh=self.costh,
+                rbounds=self.rbounds,
             )
         else:
             plot = RawCartesianScalarPlot(

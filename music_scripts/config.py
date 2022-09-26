@@ -31,6 +31,10 @@ class Field(Section):
     perturbation: bool = command_flag("perturbation")
     cmap: Optional[str] = MaybeEntry(str).entry(doc="matplotlib color map")
     costh: bool = command_flag("plot spherical in (cos th, r) cartesian")
+    rmin: Optional[float] = MaybeEntry(float).entry(
+        doc="min radius on plot (with costh)")
+    rmax: Optional[float] = MaybeEntry(float).entry(
+        doc="max radius on plot (with costh)")
 
 
 @dataclass
