@@ -6,7 +6,7 @@ from typing import Optional, List, Tuple, Union
 
 from loam.base import entry, Section, ConfigBase
 from loam.cli import Subcmd, CLIManager
-from loam.collections import TupleEntry
+from loam.collections import TupleEntry, MaybeEntry
 from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
@@ -29,6 +29,7 @@ class Field(Section):
     plot: str = entry(val="vel_ampl", cli_short="o", doc="variable to plot")
     velarrow: bool = command_flag("add velocity arrows to the plot")
     perturbation: bool = command_flag("perturbation")
+    cmap: Optional[str] = MaybeEntry(str).entry(doc="matplotlib color map")
 
 
 @dataclass

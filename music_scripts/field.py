@@ -16,20 +16,20 @@ if typing.TYPE_CHECKING:
     from pymusic.big_array import BigArray
 
     from .array_on_grid import ArrayOnGrid
-    from .config import Config
+    from .config import Config, Field
 
 
-def plot_field(
-    dump: DumpArrayOnGrid, var: str, vel_arrows: bool = False,
-    perturbation: bool = False,
-) -> Figure:
-
-    if perturbation:
+def plot_field(dump: DumpArrayOnGrid, conf_field: Field) -> Figure:
+    var = conf_field.plot
+    cmap = conf_field.cmap
+    if conf_field.perturbation:
         def field_getter(aog: ArrayOnGrid) -> BigArray:
             """Temperature perturbation."""
             field = FieldGetter(var)(aog)
             prof = ProfGetter(var)(aog).array()
             return field.apply(lambda f: (f - prof[:, np.newaxis]) / f)
+        if cmap is None:
+            cmap = "RdBu_r"
     else:
         field_getter = FieldGetter(var)
 
@@ -37,11 +37,12 @@ def plot_field(
         ScalarPlot(
             dump_arr=dump,
             get_data=field_getter,
-            norm=(None if not perturbation
+            cmap=cmap,
+            norm=(None if not conf_field.perturbation
                   else colors.SymLogNorm(linthresh=1e-6)),
         ),
     ]
-    if vel_arrows:
+    if conf_field.velarrow:
         plots.append(
             SphericalVectorPlot(
                 dump_arr=dump,
@@ -67,7 +68,5 @@ def cmd(conf: Config) -> None:
         return mdat.eos.temperature(aog.data)
 
     for snap in mdat[conf.core.dumps]:
-        fig = plot_field(
-            snap.dump_arr, var, conf.field.velarrow, conf.field.perturbation
-        )
+        fig = plot_field(snap.dump_arr, conf.field)
         fig.save_to(figdir / f"{var}_{snap.idump:08d}.png")
