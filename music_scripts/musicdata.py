@@ -11,6 +11,7 @@ from pymusic.io import (
 )
 
 from .array_on_grid import SimArrayOnGrid, DumpArrayOnGrid
+from .prof1d import Prof1d
 from . import eos
 
 if typing.TYPE_CHECKING:
@@ -100,6 +101,10 @@ class MusicData:
             recenter_bc_list=self._recenter_bc(),
         )
         return SimArrayOnGrid(sim)
+
+    @cached_property
+    def prof1d(self) -> Prof1d:
+        return Prof1d(self.path)
 
     @cached_property
     def _len(self) -> int:
