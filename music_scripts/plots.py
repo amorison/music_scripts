@@ -28,6 +28,7 @@ class RawSphericalScalarPlot(Plot):
     norm: Optional[Normalize] = None
     costh: bool = False
     rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
+    vbounds: Tuple[Optional[float], Optional[float]] = (None, None)
 
     def draw_on(self, ax: Axes) -> None:
         # project from (r,t) to (x,z)
@@ -43,6 +44,7 @@ class RawSphericalScalarPlot(Plot):
         surf = ax.pcolormesh(
             x_mesh, z_mesh, self.data, cmap=self.cmap,
             norm=self.norm,
+            vmin=self.vbounds[0], vmax=self.vbounds[1],
             shading="flat", rasterized=True)
 
         if self.costh:
@@ -64,11 +66,13 @@ class RawCartesianScalarPlot(Plot):
     cmap: Optional[str] = None
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
+    vbounds: Tuple[Optional[float], Optional[float]] = (None, None)
 
     def draw_on(self, ax: Axes) -> None:
         surf = ax.pcolormesh(
             self.x_coord, self.y_coord, self.data, cmap=self.cmap,
             norm=self.norm,
+            vmin=self.vbounds[0], vmax=self.vbounds[1],
             shading="flat", rasterized=True)
 
         ax.set_aspect("equal")
@@ -88,6 +92,7 @@ class ScalarPlot(Plot):
     norm: Optional[Normalize] = None
     costh: bool = False
     rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
+    vbounds: Tuple[Optional[float], Optional[float]] = (None, None)
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
@@ -101,6 +106,7 @@ class ScalarPlot(Plot):
                 norm=self.norm,
                 costh=self.costh,
                 rbounds=self.rbounds,
+                vbounds=self.vbounds,
             )
         else:
             plot = RawCartesianScalarPlot(
@@ -110,6 +116,7 @@ class ScalarPlot(Plot):
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
+                vbounds=self.vbounds,
             )
         plot.draw_on(ax)
 

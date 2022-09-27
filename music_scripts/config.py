@@ -35,6 +35,10 @@ class Field(Section):
         doc="min radius on plot (with costh)")
     rmax: Optional[float] = MaybeEntry(float).entry(
         doc="max radius on plot (with costh)")
+    vmin: Optional[float] = MaybeEntry(float).entry(
+        doc="min field value on plot")
+    vmax: Optional[float] = MaybeEntry(float).entry(
+        doc="max field value on plot")
 
 
 @dataclass

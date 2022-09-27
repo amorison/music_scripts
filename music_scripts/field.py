@@ -45,6 +45,7 @@ def plot_field(dump: DumpArrayOnGrid, conf_field: Field, radii) -> List[Plot]:
                   else colors.SymLogNorm(linthresh=1e-6)),
             costh=conf_field.costh,
             rbounds=(conf_field.rmin, conf_field.rmax),
+            vbounds=(conf_field.vmin, conf_field.vmax),
         ),
     ]
     if conf_field.velarrow:
