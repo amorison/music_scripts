@@ -93,12 +93,16 @@ class ScalarPlot(Plot):
     costh: bool = False
     rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
     vbounds: Tuple[Optional[float], Optional[float]] = (None, None)
+    normalize_r: Optional[float] = None
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
         if hasattr(grid, "r_grid"):
+            r_coord = grid.r_grid.face_points()
+            if self.normalize_r is not None:
+                r_coord /= self.normalize_r
             plot = RawSphericalScalarPlot(
-                r_coord=grid.r_grid.face_points(),
+                r_coord=r_coord,
                 t_coord=grid.theta_grid.face_points(),
                 data=self.get_data(self.dump_arr).array(),
                 cmap=self.cmap,

@@ -39,6 +39,7 @@ class Field(Section):
         doc="min field value on plot")
     vmax: Optional[float] = MaybeEntry(float).entry(
         doc="max field value on plot")
+    full_r: bool = command_flag("do not try to normalize r by rtot")
 
 
 @dataclass

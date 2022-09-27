@@ -14,7 +14,7 @@ from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
 
 if typing.TYPE_CHECKING:
-    from typing import List
+    from typing import List, Sequence, Optional
 
     from pymusic.big_array import BigArray
 
@@ -22,7 +22,12 @@ if typing.TYPE_CHECKING:
     from .config import Config, Field
 
 
-def plot_field(dump: DumpArrayOnGrid, conf_field: Field, radii) -> List[Plot]:
+def plot_field(
+    dump: DumpArrayOnGrid,
+    conf_field: Field,
+    radii: Sequence[float],
+    rtot: Optional[float] = None,
+) -> List[Plot]:
     var = conf_field.plot
     cmap = conf_field.cmap
     if conf_field.perturbation:
@@ -46,6 +51,7 @@ def plot_field(dump: DumpArrayOnGrid, conf_field: Field, radii) -> List[Plot]:
             costh=conf_field.costh,
             rbounds=(conf_field.rmin, conf_field.rmax),
             vbounds=(conf_field.vmin, conf_field.vmax),
+            normalize_r=rtot,
         ),
     ]
     if conf_field.velarrow:
@@ -76,10 +82,15 @@ def cmd(conf: Config) -> None:
 
     var = conf.field.plot
     mdat = MusicData(conf.core.path)
+
+    normr = not conf.field.full_r
+
     try:
-        renv = mdat.prof1d.params["renv"]
-        rcore = mdat.prof1d.params["rcore"]
+        rtot = mdat.prof1d.params["rad_surf"] if normr else None
+        renv = mdat.prof1d.params["renv/rtot" if normr else "renv"]
+        rcore = mdat.prof1d.params["rcore/rtot" if normr else "rcore"]
     except RuntimeError:
+        rtot = None
         renv = 0.0
         rcore = 0.0
     rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
@@ -95,7 +106,7 @@ def cmd(conf: Config) -> None:
         return mdat.eos.pressure(aog.data)
 
     for snap in mdat[conf.core.dumps]:
-        plots = plot_field(snap.dump_arr, conf.field, radii=rschwarz)
+        plots = plot_field(snap.dump_arr, conf.field, rschwarz, rtot)
         SinglePlotFigure(
             plot=SameAxesPlot(plots=plots, legend=False),
         ).save_to(figdir / f"{var}_{snap.idump:08d}.png")
