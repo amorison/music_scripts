@@ -14,12 +14,16 @@ class EoS(ABC):
     """Equation of state."""
 
     @abstractmethod
+    def _derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
+        """Build an array with the desired state variable."""
+
     def temperature(self, array: BigArray) -> BigArray:
         """Compute temperature from MUSIC state."""
+        return self._derive_arr(array, mmt.StateVar.LogTemperature)
 
-    @abstractmethod
     def pressure(self, array: BigArray) -> BigArray:
         """Compute pressure from MUSIC state."""
+        return self._derive_arr(array, mmt.StateVar.LogPressure)
 
 
 class MesaCstMetalEos(EoS):
@@ -35,12 +39,6 @@ class MesaCstMetalEos(EoS):
         return DerivedFieldArray(
             array, "var", ["rho", "e_int", "scalar_1"], calculator)
 
-    def temperature(self, array: BigArray) -> BigArray:
-        return self._derive_arr(array, mmt.StateVar.LogTemperature)
-
-    def pressure(self, array: BigArray) -> BigArray:
-        return self._derive_arr(array, mmt.StateVar.LogPressure)
-
 
 class MesaCstCompoEos(EoS):
     """MESA EoS at constant metallicity and helium fraction."""
@@ -53,9 +51,3 @@ class MesaCstCompoEos(EoS):
             state = mmt.CstCompoState(self._eos, rho, e_int)
             return 10**state.compute(var)
         return DerivedFieldArray(array, "var", ["rho", "e_int"], calculator)
-
-    def temperature(self, array: BigArray) -> BigArray:
-        return self._derive_arr(array, mmt.StateVar.LogTemperature)
-
-    def pressure(self, array: BigArray) -> BigArray:
-        return self._derive_arr(array, mmt.StateVar.LogPressure)
