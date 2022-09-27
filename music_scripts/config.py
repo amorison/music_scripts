@@ -10,7 +10,7 @@ from loam.collections import TupleEntry, MaybeEntry
 from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
-from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d, lscale
+from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d
 
 
 _idx = TupleEntry(slice_or_int_parser)
@@ -96,14 +96,6 @@ class Lyon1d(Section):
 
 
 @dataclass
-class Lscale(Section):
-    tfile: Path = path_entry("temp.cont", doc="path to the file to read",
-                             cli_short="t")
-    plot: Tuple[str, ...] = TupleEntry(str).entry(
-        default="temperature", doc="list of variables to plot", cli_short="o")
-
-
-@dataclass
 class Config(ConfigBase):
     core: Core
     field: Field
@@ -115,7 +107,6 @@ class Config(ConfigBase):
     rprof_pp: RprofPP
     lmax: Lmax
     lyon1d: Lyon1d
-    lscale: Lscale
 
 
 SUB_CMDS = dict(
@@ -133,7 +124,6 @@ SUB_CMDS = dict(
                     func=fort_pp.rprof_cmd),
     lyon1d=Subcmd("plot 1D data from Lyon model", func=lyon1d.cmd),
     lmax=Subcmd("plot lmax histogram", "fort_pp", func=lmax.cmd),
-    lscale=Subcmd("plot data from lscale output", func=lscale.cmd),
 )
 
 
