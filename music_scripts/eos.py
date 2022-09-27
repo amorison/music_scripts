@@ -7,9 +7,6 @@ from pymusic.big_array import DerivedFieldArray
 import music_mesa_tables as mmt
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Callable
-
-    from numpy.typing import NDArray
     from pymusic.big_array import BigArray
 
 
@@ -27,17 +24,15 @@ class MesaCstMetalEos(EoS):
     def __init__(self, metallicity: float):
         self._eos = mmt.CstMetalEos(metallicity)
 
-    def _calc_var(self, var: mmt.StateVar) -> Callable[Any, NDArray]:
+    def _derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
         def calculator(rho, e_int, he_frac):
             state = mmt.CstMetalState(self._eos, he_frac, rho, e_int)
             return 10**state.compute(var)
-        return calculator
+        return DerivedFieldArray(
+            array, "var", ["rho", "e_int", "scalar_1"], calculator)
 
     def temperature(self, array: BigArray) -> BigArray:
-        return DerivedFieldArray(
-            array, "var", ["rho", "e_int", "scalar_1"],
-            self._calc_var(mmt.StateVar.LogTemperature),
-        )
+        return self._derive_arr(array, mmt.StateVar.LogTemperature)
 
 
 class MesaCstCompoEos(EoS):
@@ -46,14 +41,11 @@ class MesaCstCompoEos(EoS):
     def __init__(self, metallicity: float, he_frac: float):
         self._eos = mmt.CstCompoEos(metallicity, he_frac)
 
-    def _calc_var(self, var: mmt.StateVar) -> Callable[Any, NDArray]:
+    def _derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
         def calculator(rho, e_int):
             state = mmt.CstCompoState(self._eos, rho, e_int)
             return 10**state.compute(var)
-        return calculator
+        return DerivedFieldArray(array, "var", ["rho", "e_int"], calculator)
 
     def temperature(self, array: BigArray) -> BigArray:
-        return DerivedFieldArray(
-            array, "var", ["rho", "e_int"],
-            self._calc_var(mmt.StateVar.LogTemperature),
-        )
+        return self._derive_arr(array, mmt.StateVar.LogTemperature)
