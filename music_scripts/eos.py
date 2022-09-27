@@ -15,7 +15,11 @@ class EoS(ABC):
 
     @abstractmethod
     def temperature(self, array: BigArray) -> BigArray:
-        """Compute temperature from rho and e_int."""
+        """Compute temperature from MUSIC state."""
+
+    @abstractmethod
+    def pressure(self, array: BigArray) -> BigArray:
+        """Compute pressure from MUSIC state."""
 
 
 class MesaCstMetalEos(EoS):
@@ -34,6 +38,9 @@ class MesaCstMetalEos(EoS):
     def temperature(self, array: BigArray) -> BigArray:
         return self._derive_arr(array, mmt.StateVar.LogTemperature)
 
+    def pressure(self, array: BigArray) -> BigArray:
+        return self._derive_arr(array, mmt.StateVar.LogPressure)
+
 
 class MesaCstCompoEos(EoS):
     """MESA EoS at constant metallicity and helium fraction."""
@@ -49,3 +56,6 @@ class MesaCstCompoEos(EoS):
 
     def temperature(self, array: BigArray) -> BigArray:
         return self._derive_arr(array, mmt.StateVar.LogTemperature)
+
+    def pressure(self, array: BigArray) -> BigArray:
+        return self._derive_arr(array, mmt.StateVar.LogPressure)

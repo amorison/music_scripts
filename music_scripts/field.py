@@ -88,6 +88,11 @@ def cmd(conf: Config) -> None:
         """Temperature."""
         return mdat.eos.temperature(aog.data)
 
+    @FieldGetter.register
+    def press(aog: ArrayOnGrid) -> BigArray:
+        """Pressure."""
+        return mdat.eos.pressure(aog.data)
+
     for snap in mdat[conf.core.dumps]:
         plots = plot_field(snap.dump_arr, conf.field, radii=rschwarz)
         SinglePlotFigure(
