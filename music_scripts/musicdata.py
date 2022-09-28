@@ -19,8 +19,9 @@ if typing.TYPE_CHECKING:
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
 
 
-@dataclass
+@dataclass(frozen=True)
 class Snap:
+    mdat: MusicData
     idump: int
     dump_arr: DumpArrayOnGrid
 
@@ -148,4 +149,4 @@ class MusicData:
             self._recenter_bc(),
             KnownMusicVariables(),
         )
-        return Snap(idump, DumpArrayOnGrid(dump))
+        return Snap(self, idump, DumpArrayOnGrid(dump))
