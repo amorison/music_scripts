@@ -143,7 +143,7 @@ class MusicData:
 
     @typing.overload
     def __getitem__(
-        self, idump: Union[slice, Tuple[Union[int, slice]]]
+        self, idump: Union[slice, Tuple[Union[int, slice], ...]]
     ) -> _SnapsView:
         ...
 
