@@ -106,6 +106,11 @@ def cmd(conf: Config) -> None:
         """Pressure."""
         return mdat.eos.pressure(aog.data)
 
+    @FieldGetter.register
+    def entropy(aog: ArrayOnGrid) -> BigArray:
+        """Pressure."""
+        return mdat.eos.entropy(aog.data)
+
     for snap in mdat[conf.core.dumps]:
         plots = plot_field(snap, conf.field)
         SinglePlotFigure(

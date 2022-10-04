@@ -25,6 +25,10 @@ class EoS(ABC):
         """Compute pressure from MUSIC state."""
         return self._derive_arr(array, mmt.StateVar.LogPressure)
 
+    def entropy(self, array: BigArray) -> BigArray:
+        """Compute entropy from MUSIC state."""
+        return self._derive_arr(array, mmt.StateVar.LogEntropy)
+
 
 class MesaCstMetalEos(EoS):
     """MESA EoS at constant metallicity."""
