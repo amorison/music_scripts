@@ -15,7 +15,7 @@ from .plots import ProfPlot, TseriesPlot, WithScales
 from .prof1d import Prof1d
 
 
-def tau_conv(simog):
+def tau_conv(simog: MusicData) -> float:
     """Convective time scale."""
     grid = simog.grid
     d_rad = grid.r_grid.cell_widths()
@@ -45,7 +45,7 @@ def plot_prof(simog: MusicData, var: str, profs1d: Prof1d) -> None:
     fig.save_to(figdir / f'{var}_prof.pdf')
 
 
-def plot_dprof(simog, var):
+def plot_dprof(simog: MusicData, var: str) -> None:
     """Plot radial gradient profile of var."""
     figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
@@ -64,7 +64,7 @@ def plot_dprof(simog, var):
     plt.close()
 
 
-def plot_tseries(simog, var):
+def plot_tseries(simog: MusicData, var: str) -> None:
     """Plot time series."""
     figdir = Path('figures')
     figdir.mkdir(parents=True, exist_ok=True)
