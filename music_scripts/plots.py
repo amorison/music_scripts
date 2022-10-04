@@ -97,6 +97,7 @@ class ScalarPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         grid = self.dump_arr.grid
+        plot: Plot
         if hasattr(grid, "r_grid"):
             r_coord = grid.r_grid.face_points()
             if self.normalize_r is not None:

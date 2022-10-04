@@ -13,7 +13,7 @@ from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
 
 if typing.TYPE_CHECKING:
-    from typing import List, Callable
+    from typing import Sequence, Callable, List
 
     from pymusic.big_array import BigArray
 
@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
 def plot_field(
     snap: Snap,
     conf_field: Field,
-) -> List[Plot]:
+) -> Sequence[Plot]:
     var = conf_field.plot
     cmap = conf_field.cmap
 
@@ -53,7 +53,7 @@ def plot_field(
         rcore = 0.0
     rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
 
-    plots = [
+    plots: List[Plot] = [
         ScalarPlot(
             dump_arr=snap,
             get_data=field_getter,
