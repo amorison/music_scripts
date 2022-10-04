@@ -13,13 +13,12 @@ from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
 
 if typing.TYPE_CHECKING:
-    from typing import List
+    from typing import List, Callable
 
     from pymusic.big_array import BigArray
 
-    from .array_on_grid import ArrayOnGrid
     from .config import Config, Field
-    from .musicdata import Snap
+    from .musicdata import BaseMusicData, Snap
 
 
 def plot_field(
@@ -29,11 +28,12 @@ def plot_field(
     var = conf_field.plot
     cmap = conf_field.cmap
 
+    field_getter: Callable[[BaseMusicData], BigArray]
     if conf_field.perturbation:
-        def field_getter(aog: ArrayOnGrid) -> BigArray:
+        def field_getter(bmdat: BaseMusicData) -> BigArray:
             """Temperature perturbation."""
-            field = FieldGetter(var)(aog)
-            prof = ProfGetter(var)(aog).array()
+            field = FieldGetter(var)(bmdat)
+            prof = ProfGetter(var)(bmdat).array()
             return field.apply(lambda f: (f - prof[:, np.newaxis]) / f)
         if cmap is None:
             cmap = "RdBu_r"
@@ -94,21 +94,6 @@ def cmd(conf: Config) -> None:
 
     var = conf.field.plot
     mdat = MusicData(conf.core.path)
-
-    @FieldGetter.register
-    def temp(aog: ArrayOnGrid) -> BigArray:
-        """Temperature."""
-        return mdat.eos.temperature(aog.big_array)
-
-    @FieldGetter.register
-    def press(aog: ArrayOnGrid) -> BigArray:
-        """Pressure."""
-        return mdat.eos.pressure(aog.big_array)
-
-    @FieldGetter.register
-    def entropy(aog: ArrayOnGrid) -> BigArray:
-        """Pressure."""
-        return mdat.eos.entropy(aog.big_array)
 
     for snap in mdat[conf.core.dumps]:
         plots = plot_field(snap, conf.field)

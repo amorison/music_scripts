@@ -1,10 +1,7 @@
 """Helpers to treat output and derived fields in the same way.
 
-Most functions/callables in this module accept a ArrayOnGrid built from a MusicSim
-or a MusicDump.  In particular, they expect this ArrayOnGrid to contain a "var"
-axis with "rho", "vel_N", and "e_int" labels.  These requirements cannot be
-expressed through the type system and therefore are the responsibility of the
-user.
+Most functions/callables in this module accept a BaseMusicData, the main
+implementations of which being Snap and MusicData.
 """
 
 from __future__ import annotations
@@ -17,9 +14,9 @@ import numpy as np
 
 from pymusic.big_array import DerivedFieldArray
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
-
 from pymusic.big_array import BigArray
-from .array_on_grid import ArrayOnGrid
+
+from .musicdata import BaseMusicData
 
 if TYPE_CHECKING:
     from typing import Callable, Dict
@@ -62,103 +59,121 @@ class DataFetcher(ABC, Generic[T_contra, U_co], _DCWithVarName):
 
 
 @dataclass(frozen=True)
-class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
+class FieldGetter(DataFetcher[BaseMusicData, BigArray]):
 
     """Get a field from MUSIC data."""
 
-    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
-        return aog.big_array.xs(self.var_name, "var")
+    def default_getter(self, bmdat: BaseMusicData) -> BigArray:
+        return bmdat.big_array.xs(self.var_name, "var")
 
 
 @dataclass(frozen=True)
-class ProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
+class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
 
     """Get a radial profile from MUSIC data."""
 
-    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
-        field = FieldGetter(self.var_name)(aog)
-        sph_quad = SphericalMidpointQuad1D(aog.grid.theta_grid)
+    def default_getter(self, bmdat: BaseMusicData) -> BigArray:
+        field = FieldGetter(self.var_name)(bmdat)
+        sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
         return field.collapse(sph_quad.average, axis="x2")
 
 
 @dataclass(frozen=True)
-class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
+class TimeAveragedProfGetter(DataFetcher[BaseMusicData, BigArray]):
 
     """Get a radial profile from MUSIC data."""
 
-    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
-        field = ProfGetter(self.var_name)(aog)
-        if "time" in aog.big_array.axes:
+    def default_getter(self, bmdat: BaseMusicData) -> BigArray:
+        field = ProfGetter(self.var_name)(bmdat)
+        if "time" in bmdat.big_array.axes:
             field = field.mean("time")
         return field
 
 
 @dataclass(frozen=True)
-class TimeSeriesGetter(DataFetcher[ArrayOnGrid, BigArray]):
+class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
 
     """Get a time series from MUSIC data."""
 
-    def default_getter(self, aog: ArrayOnGrid) -> BigArray:
-        r_grid = aog.grid.r_grid
+    def default_getter(self, bmdat: BaseMusicData) -> BigArray:
+        r_grid = bmdat.grid.r_grid
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
-        return ProfGetter(self.var_name)(aog).collapse(
+        return ProfGetter(self.var_name)(bmdat).collapse(
             lambda w: np.average(w, weights=d_rad * rad**2), axis="x1")
 
 
 @FieldGetter.register
-def vel_ampl(aog: ArrayOnGrid) -> BigArray:
+def vel_ampl(bmdat: BaseMusicData) -> BigArray:
     """Norm of velocity vector."""
     return DerivedFieldArray(
-        aog.big_array, "var", ["vel_1", "vel_2"],
+        bmdat.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_1**2 + vel_2**2))
 
 
 @FieldGetter.register
-def vel_square(aog: ArrayOnGrid) -> BigArray:
+def vel_square(bmdat: BaseMusicData) -> BigArray:
     """Square of velocity amplitude."""
     return DerivedFieldArray(
-        aog.big_array, "var", ["vel_1", "vel_2"],
+        bmdat.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: vel_1**2 + vel_2**2)
 
 
 @FieldGetter.register
-def ekin(aog: ArrayOnGrid) -> BigArray:
+def ekin(bmdat: BaseMusicData) -> BigArray:
     """Kinetic energy."""
     return DerivedFieldArray(
-        aog.big_array, "var", ["rho", "vel_1", "vel_2"],
+        bmdat.big_array, "var", ["rho", "vel_1", "vel_2"],
         lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
 
 
 @FieldGetter.register
-def vr_abs(aog: ArrayOnGrid) -> BigArray:
+def vr_abs(bmdat: BaseMusicData) -> BigArray:
     """Absolute vr."""
-    return DerivedFieldArray(aog.big_array, "var", ["vel_1"], np.abs)
+    return DerivedFieldArray(bmdat.big_array, "var", ["vel_1"], np.abs)
 
 
 @FieldGetter.register
-def vt_abs(aog: ArrayOnGrid) -> BigArray:
+def vt_abs(bmdat: BaseMusicData) -> BigArray:
     """Absolute vt."""
-    return DerivedFieldArray(aog.big_array, "var", ["vel_2"], np.abs)
+    return DerivedFieldArray(bmdat.big_array, "var", ["vel_2"], np.abs)
 
 
 @FieldGetter.register
-def vr_normalized(aog: ArrayOnGrid) -> BigArray:
+def vr_normalized(bmdat: BaseMusicData) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        aog.big_array, "var", ["vel_1", "vel_2"],
+        bmdat.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_1**2 / (vel_1**2 + vel_2**2)))
 
 
 @FieldGetter.register
-def vt_normalized(aog: ArrayOnGrid) -> BigArray:
+def vt_normalized(bmdat: BaseMusicData) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        aog.big_array, "var", ["vel_1", "vel_2"],
+        bmdat.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)))
 
 
+@FieldGetter.register
+def temp(bmdat: BaseMusicData) -> BigArray:
+    """Temperature."""
+    return bmdat.eos.temperature(bmdat.big_array)
+
+
+@FieldGetter.register
+def press(bmdat: BaseMusicData) -> BigArray:
+    """Pressure."""
+    return bmdat.eos.pressure(bmdat.big_array)
+
+
+@FieldGetter.register
+def entropy(bmdat: BaseMusicData) -> BigArray:
+    """Pressure."""
+    return bmdat.eos.entropy(bmdat.big_array)
+
+
 @ProfGetter.register
-def vrms(aog: ArrayOnGrid) -> BigArray:
+def vrms(bmdat: BaseMusicData) -> BigArray:
     """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
-    return ProfGetter("vel_square")(aog).sqrt()
+    return ProfGetter("vel_square")(bmdat).sqrt()

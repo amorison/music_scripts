@@ -14,9 +14,8 @@ if typing.TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
-    from .array_on_grid import ArrayOnGrid
     from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
-    from .musicdata import MusicData, Snap
+    from .musicdata import MusicData, Snap, BaseMusicData
 
 
 @dataclass(frozen=True)
@@ -153,7 +152,7 @@ class SphericalVectorPlot(Plot):
 
 @dataclass(frozen=True)
 class ProfPlot(Plot):
-    music_data: ArrayOnGrid
+    music_data: BaseMusicData
     get_data: TimeAveragedProfGetter
     markers: Sequence[float] = field(default_factory=list)
     length_scale: Optional[float] = None

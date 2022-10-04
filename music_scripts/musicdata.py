@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 import typing
@@ -20,6 +21,26 @@ if typing.TYPE_CHECKING:
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
 
 
+class BaseMusicData(typing.Protocol):
+
+    """MUSIC simulation data wrapper, either a full sim or a single dump."""
+
+    @property
+    @abstractmethod
+    def grid(self) -> Grid:
+        """Grid object relevant for the wrapped data."""
+
+    @property
+    @abstractmethod
+    def big_array(self) -> BigArray:
+        """The data itself."""
+
+    @property
+    @abstractmethod
+    def eos(self) -> eos.EoS:
+        """The relevant EoS."""
+
+
 @dataclass(frozen=True)
 class Snap:
     mdat: MusicData
@@ -33,6 +54,10 @@ class Snap:
     @cached_property
     def big_array(self) -> BigArray:
         return self.dump.big_array()
+
+    @property
+    def eos(self) -> eos.EoS:
+        return self.mdat.eos
 
 
 class _SnapsView:
