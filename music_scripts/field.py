@@ -26,7 +26,6 @@ def plot_field(
     snap: Snap,
     conf_field: Field,
 ) -> List[Plot]:
-    dump = snap.dump_arr
     var = conf_field.plot
     cmap = conf_field.cmap
 
@@ -56,7 +55,7 @@ def plot_field(
 
     plots = [
         ScalarPlot(
-            dump_arr=dump,
+            dump_arr=snap,
             get_data=field_getter,
             cmap=cmap,
             norm=(None if not conf_field.perturbation
@@ -70,7 +69,7 @@ def plot_field(
     if conf_field.velarrow:
         plots.append(
             SphericalVectorPlot(
-                dump_arr=dump,
+                dump_arr=snap,
                 get_rvec=FieldGetter("vel_1"),
                 get_tvec=FieldGetter("vel_2"),
             )
@@ -78,7 +77,7 @@ def plot_field(
     contours = [
         Contour(
             "rschwarz",
-            np.full_like(theta := dump.grid.theta_grid.cell_centers(), rad),
+            np.full_like(theta := snap.grid.theta_grid.cell_centers(), rad),
             theta if not conf_field.costh else np.cos(theta))
         for rad in rschwarz
     ]
@@ -99,17 +98,17 @@ def cmd(conf: Config) -> None:
     @FieldGetter.register
     def temp(aog: ArrayOnGrid) -> BigArray:
         """Temperature."""
-        return mdat.eos.temperature(aog.data)
+        return mdat.eos.temperature(aog.big_array)
 
     @FieldGetter.register
     def press(aog: ArrayOnGrid) -> BigArray:
         """Pressure."""
-        return mdat.eos.pressure(aog.data)
+        return mdat.eos.pressure(aog.big_array)
 
     @FieldGetter.register
     def entropy(aog: ArrayOnGrid) -> BigArray:
         """Pressure."""
-        return mdat.eos.entropy(aog.data)
+        return mdat.eos.entropy(aog.big_array)
 
     for snap in mdat[conf.core.dumps]:
         plots = plot_field(snap, conf.field)

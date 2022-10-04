@@ -67,7 +67,7 @@ class FieldGetter(DataFetcher[ArrayOnGrid, BigArray]):
     """Get a field from MUSIC data."""
 
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
-        return aog.data.xs(self.var_name, "var")
+        return aog.big_array.xs(self.var_name, "var")
 
 
 @dataclass(frozen=True)
@@ -88,7 +88,7 @@ class TimeAveragedProfGetter(DataFetcher[ArrayOnGrid, BigArray]):
 
     def default_getter(self, aog: ArrayOnGrid) -> BigArray:
         field = ProfGetter(self.var_name)(aog)
-        if "time" in aog.data.axes:
+        if "time" in aog.big_array.axes:
             field = field.mean("time")
         return field
 
@@ -110,7 +110,7 @@ class TimeSeriesGetter(DataFetcher[ArrayOnGrid, BigArray]):
 def vel_ampl(aog: ArrayOnGrid) -> BigArray:
     """Norm of velocity vector."""
     return DerivedFieldArray(
-        aog.data, "var", ["vel_1", "vel_2"],
+        aog.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_1**2 + vel_2**2))
 
 
@@ -118,7 +118,7 @@ def vel_ampl(aog: ArrayOnGrid) -> BigArray:
 def vel_square(aog: ArrayOnGrid) -> BigArray:
     """Square of velocity amplitude."""
     return DerivedFieldArray(
-        aog.data, "var", ["vel_1", "vel_2"],
+        aog.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: vel_1**2 + vel_2**2)
 
 
@@ -126,27 +126,27 @@ def vel_square(aog: ArrayOnGrid) -> BigArray:
 def ekin(aog: ArrayOnGrid) -> BigArray:
     """Kinetic energy."""
     return DerivedFieldArray(
-        aog.data, "var", ["rho", "vel_1", "vel_2"],
+        aog.big_array, "var", ["rho", "vel_1", "vel_2"],
         lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
 
 
 @FieldGetter.register
 def vr_abs(aog: ArrayOnGrid) -> BigArray:
     """Absolute vr."""
-    return DerivedFieldArray(aog.data, "var", ["vel_1"], np.abs)
+    return DerivedFieldArray(aog.big_array, "var", ["vel_1"], np.abs)
 
 
 @FieldGetter.register
 def vt_abs(aog: ArrayOnGrid) -> BigArray:
     """Absolute vt."""
-    return DerivedFieldArray(aog.data, "var", ["vel_2"], np.abs)
+    return DerivedFieldArray(aog.big_array, "var", ["vel_2"], np.abs)
 
 
 @FieldGetter.register
 def vr_normalized(aog: ArrayOnGrid) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        aog.data, "var", ["vel_1", "vel_2"],
+        aog.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_1**2 / (vel_1**2 + vel_2**2)))
 
 
@@ -154,7 +154,7 @@ def vr_normalized(aog: ArrayOnGrid) -> BigArray:
 def vt_normalized(aog: ArrayOnGrid) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        aog.data, "var", ["vel_1", "vel_2"],
+        aog.big_array, "var", ["vel_1", "vel_2"],
         lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)))
 
 

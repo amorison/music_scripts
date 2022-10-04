@@ -14,8 +14,9 @@ if typing.TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
-    from .array_on_grid import DumpArrayOnGrid, ArrayOnGrid, SimArrayOnGrid
+    from .array_on_grid import ArrayOnGrid
     from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
+    from .musicdata import MusicData, Snap
 
 
 @dataclass(frozen=True)
@@ -85,7 +86,7 @@ class RawCartesianScalarPlot(Plot):
 
 @dataclass(frozen=True)
 class ScalarPlot(Plot):
-    dump_arr: DumpArrayOnGrid
+    dump_arr: Snap
     get_data: FieldGetter
     cmap: Optional[str] = None
     with_colorbar: bool = True
@@ -127,7 +128,7 @@ class ScalarPlot(Plot):
 
 @dataclass(frozen=True)
 class SphericalVectorPlot(Plot):
-    dump_arr: DumpArrayOnGrid
+    dump_arr: Snap
     get_rvec: FieldGetter
     get_tvec: FieldGetter
     arrow_stride: int = 16
@@ -171,7 +172,7 @@ class ProfPlot(Plot):
 
 @dataclass(frozen=True)
 class TseriesPlot(Plot):
-    music_data: SimArrayOnGrid
+    music_data: MusicData
     get_data: TimeSeriesGetter
 
     def draw_on(self, ax: Axes) -> None:

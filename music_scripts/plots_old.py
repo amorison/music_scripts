@@ -5,30 +5,28 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pymusic.io.music import MusicSim, PeriodicArrayBC
-from pymusic.io.music_new_format import MusicDumpInfo
 from pymusic.plotting import SinglePlotFigure
 
-from .array_on_grid import SimArrayOnGrid
 from .derived_fields import (
     ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
 )
+from .musicdata import MusicData
 from .plots import ProfPlot, TseriesPlot, WithScales
 from .prof1d import Prof1d
 
 
-def tau_conv(simog, rcore: float):
+def tau_conv(simog):
     """Convective time scale."""
     grid = simog.grid
     d_rad = grid.r_grid.cell_widths()
-    core_mask = grid.r_grid.cell_centers() < rcore
+    core_mask = grid.r_grid.cell_centers() < simog.prof1d.params["rcore"]
     return (
         ProfGetter("vrms")(simog).collapse(
             lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]), axis="x1")
         ).array().mean()
 
 
-def plot_prof(simog: SimArrayOnGrid, var: str, profs1d: Prof1d) -> None:
+def plot_prof(simog: MusicData, var: str, profs1d: Prof1d) -> None:
     """Plot radial profile of density."""
     figdir = Path('figures')
     figdir.mkdir(parents=True, exist_ok=True)
@@ -84,15 +82,9 @@ if __name__ == "__main__":
     simfold = Path("transient")
     compute_tconv = False
 
-    sim = MusicSim.from_dump_file_names(
-        sorted(simfold.glob('*.music')),
-        MusicDumpInfo(num_space_dims=2, num_velocities=2, num_scalars=1),
-        [PeriodicArrayBC(), PeriodicArrayBC()])
-    simog = SimArrayOnGrid(sim)
+    simog = MusicData(Path("params.nml"))
 
-    profs1d = Prof1d(simfold / "..")
-
-    plot_prof(simog, "vel_2", profs1d)
+    plot_prof(simog, "vel_2", simog.prof1d)
 
     plot_tseries(simog, "v2")
     plot_tseries(simog, "vr2")
@@ -100,5 +92,5 @@ if __name__ == "__main__":
     plot_tseries(simog, "vel_2")
 
     if compute_tconv:
-        tconv = tau_conv(simog, profs1d.params["rcore"])
+        tconv = tau_conv(simog)
         print(f'Conv time {simfold.name}: {tconv:.2e}')

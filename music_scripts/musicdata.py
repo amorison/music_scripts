@@ -5,12 +5,13 @@ from functools import cached_property
 import typing
 
 import f90nml
+from pymusic.big_array import BigArray
+from pymusic.grid import Grid
 from pymusic.io import (
     MusicSim, MusicDumpInfo, PeriodicArrayBC, MusicDump,
     MusicNewFormatDumpFile, KnownMusicVariables
 )
 
-from .array_on_grid import SimArrayOnGrid, DumpArrayOnGrid
 from .prof1d import Prof1d
 from . import eos
 
@@ -23,7 +24,15 @@ if typing.TYPE_CHECKING:
 class Snap:
     mdat: MusicData
     idump: int
-    dump_arr: DumpArrayOnGrid
+    dump: MusicDump
+
+    @property
+    def grid(self) -> Grid:
+        return self.dump.grid
+
+    @cached_property
+    def big_array(self) -> BigArray:
+        return self.dump.big_array()
 
 
 class _SnapsView:
@@ -95,13 +104,20 @@ class MusicData:
         return [PeriodicArrayBC(), PeriodicArrayBC()]
 
     @cached_property
-    def sim_arr_on_grid(self) -> SimArrayOnGrid:
-        sim = MusicSim.from_dump_file_names(
+    def sim(self) -> MusicSim:
+        return MusicSim.from_dump_file_names(
             file_names=sorted(self.path.glob(self._out_pattern)),
             dump_info=self._dump_info,
             recenter_bc_list=self._recenter_bc(),
         )
-        return SimArrayOnGrid(sim)
+
+    @property
+    def grid(self) -> Grid:
+        return self.sim.grid
+
+    @cached_property
+    def big_array(self) -> BigArray:
+        return self.sim.big_array()
 
     @cached_property
     def prof1d(self) -> Prof1d:
@@ -149,4 +165,7 @@ class MusicData:
             self._recenter_bc(),
             KnownMusicVariables(),
         )
-        return Snap(self, idump, DumpArrayOnGrid(dump))
+        return Snap(self, idump, dump)
+
+    def __iter__(self) -> Iterator[Snap]:
+        return iter(self[:])
