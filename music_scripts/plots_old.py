@@ -7,20 +7,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pymusic.plotting import SinglePlotFigure
 
-from .derived_fields import (
-    ProfGetter, TimeAveragedProfGetter, TimeSeriesGetter
-)
+from .derived_fields import TimeSeriesGetter
 from .musicdata import MusicData
 from .plots import ProfPlot, TseriesPlot, WithScales
 
 
-def tau_conv(simog: MusicData) -> float:
+def tau_conv(mdat: MusicData) -> float:
     """Convective time scale."""
-    grid = simog.grid
+    grid = mdat.grid
     d_rad = grid.r_grid.cell_widths()
-    core_mask = grid.r_grid.cell_centers() < simog.prof1d.params["rcore"]
+    core_mask = grid.r_grid.cell_centers() < mdat.prof1d.params["rcore"]
     return (
-        ProfGetter("vrms")(simog).collapse(
+        mdat.rprof["vrms"].collapse(
             lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]), axis="x1")
         ).array().mean()
 
@@ -44,13 +42,13 @@ def plot_prof(mdat: MusicData, var: str) -> None:
     fig.save_to(figdir / f'{var}_prof.pdf')
 
 
-def plot_dprof(simog: MusicData, var: str) -> None:
+def plot_dprof(mdat: MusicData, var: str) -> None:
     """Plot radial gradient profile of var."""
     figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
 
-    rad = simog.sim.grid.r_grid.cell_centers()
-    var_prof = TimeAveragedProfGetter(var)(simog).array()
+    rad = mdat.sim.grid.r_grid.cell_centers()
+    var_prof = mdat.rprof_avg[var].array()
 
     grad = (var_prof[1:] - var_prof[:-1]) / (rad[1:] - rad[:-1])
     rad_grad = (rad[1:] + rad[:-1]) / 2
