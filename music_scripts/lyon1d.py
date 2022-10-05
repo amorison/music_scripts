@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 from .fort_pp import Rprof, RprofPlot
 
 if typing.TYPE_CHECKING:
-    from typing import BinaryIO, Union
+    from typing import BinaryIO, Dict, Tuple, Type, Union
     from os import PathLike
     from .config import Config
 
@@ -69,7 +69,9 @@ class Lyon1dData:
         with Path(filepath).open("rb") as fid:
             hdr = Header.read_from(fid)
             flds = list(fields(Lyon1dData))[1:]
-            type_count = {fld.name: (np.float64, 1) for fld in flds}
+            type_count: Dict[str, Tuple[Type, Union[int, np.integer]]] = {
+                fld.name: (np.float64, 1) for fld in flds
+            }
             type_count["yzi"] = (np.uint8, 1)
             type_count["chem"] = (np.float64, hdr.n_species)
             vals = {name: np.zeros((hdr.n_mesh, count), dtype=dtype).squeeze()
