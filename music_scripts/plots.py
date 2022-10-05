@@ -15,7 +15,6 @@ if typing.TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
-    from .derived_fields import TimeSeriesGetter
     from .musicdata import Snap, BaseMusicData
 
 
@@ -182,13 +181,13 @@ class ProfPlot(Plot):
 @dataclass(frozen=True)
 class TseriesPlot(Plot):
     music_data: MusicData
-    get_data: TimeSeriesGetter
+    var: str
 
     def draw_on(self, ax: Axes) -> None:
-        arr = self.get_data(self.music_data)
+        arr = self.music_data.tseries[self.var]
         time = np.array(arr.labels_along_axis("time"))
         tseries = arr.array()
-        ax.plot(time, tseries, label=self.get_data.var_name)
+        ax.plot(time, tseries, label=self.var)
 
 
 @dataclass(frozen=True)

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pymusic.plotting import SinglePlotFigure
 
-from .derived_fields import TimeSeriesGetter
 from .musicdata import MusicData
 from .plots import ProfPlot, TseriesPlot, WithScales
 
@@ -69,7 +68,7 @@ def plot_tseries(simog: MusicData, var: str) -> None:
     fig = SinglePlotFigure(
         plot=TseriesPlot(
             music_data=simog,
-            get_data=TimeSeriesGetter(var),
+            var=var,
         ),
     )
     fig.save_to(figdir / f"tseries_{var}.pdf")
