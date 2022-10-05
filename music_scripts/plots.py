@@ -8,13 +8,15 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pymusic.plotting import Plot
 
+from .musicdata import MusicData
+
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence, Union, Iterable, Tuple
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
-    from .derived_fields import TimeAveragedProfGetter, TimeSeriesGetter
-    from .musicdata import MusicData, Snap, BaseMusicData
+    from .derived_fields import TimeSeriesGetter
+    from .musicdata import Snap, BaseMusicData
 
 
 @dataclass(frozen=True)
@@ -158,7 +160,7 @@ class SphericalVectorPlot(Plot):
 @dataclass(frozen=True)
 class ProfPlot(Plot):
     music_data: BaseMusicData
-    get_data: TimeAveragedProfGetter
+    var: str
     markers: Sequence[float] = field(default_factory=list)
     length_scale: Optional[float] = None
 
@@ -168,7 +170,10 @@ class ProfPlot(Plot):
         if self.length_scale is not None:
             radius = radius / self.length_scale
             markers /= self.length_scale
-        profile = self.get_data(self.music_data).array()
+        if isinstance(self.music_data, MusicData):
+            profile = self.music_data.rprof_avg[self.var].array()
+        else:
+            profile = self.music_data.rprof[self.var].array()
         ax.plot(radius, profile)
         for marker in markers:
             ax.axvline(marker, linewidth=1, linestyle=":", color="k")

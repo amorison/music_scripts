@@ -11,7 +11,7 @@ from pymusic.io import (
     MusicNewFormatDumpFile, KnownMusicVariables
 )
 
-from .derived_fields import BaseMusicData
+from .derived_fields import BaseMusicData, _DataGetter, TimeAveragedProfGetter
 from .prof1d import Prof1d
 from . import eos
 
@@ -174,3 +174,7 @@ class MusicData(BaseMusicData):
 
     def __iter__(self) -> Iterator[Snap]:
         return iter(self[:])
+
+    @property
+    def rprof_avg(self) -> _DataGetter:
+        return _DataGetter(self, TimeAveragedProfGetter)

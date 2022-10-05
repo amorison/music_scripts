@@ -12,7 +12,6 @@ from .derived_fields import (
 )
 from .musicdata import MusicData
 from .plots import ProfPlot, TseriesPlot, WithScales
-from .prof1d import Prof1d
 
 
 def tau_conv(simog: MusicData) -> float:
@@ -26,7 +25,7 @@ def tau_conv(simog: MusicData) -> float:
         ).array().mean()
 
 
-def plot_prof(simog: MusicData, var: str, profs1d: Prof1d) -> None:
+def plot_prof(mdat: MusicData, var: str) -> None:
     """Plot radial profile of density."""
     figdir = Path('figures')
     figdir.mkdir(parents=True, exist_ok=True)
@@ -34,10 +33,10 @@ def plot_prof(simog: MusicData, var: str, profs1d: Prof1d) -> None:
     fig = SinglePlotFigure(
         plot=WithScales(
             plot=ProfPlot(
-                music_data=simog,
-                get_data=TimeAveragedProfGetter(var),
-                markers=[profs1d.params["rcore"]],
-                length_scale=profs1d.params["rad_surf"],
+                music_data=mdat,
+                var=var,
+                markers=[mdat.prof1d.params["rcore"]],
+                length_scale=mdat.prof1d.params["rad_surf"],
             ),
             yscale="log",
         ),
@@ -84,7 +83,7 @@ if __name__ == "__main__":
 
     simog = MusicData(Path("params.nml"))
 
-    plot_prof(simog, "vel_2", simog.prof1d)
+    plot_prof(simog, "vel_2")
 
     plot_tseries(simog, "v2")
     plot_tseries(simog, "vr2")
