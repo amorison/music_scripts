@@ -8,7 +8,6 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pymusic.plotting import Plot
 
-from .derived_fields import FieldGetter
 if typing.TYPE_CHECKING:
     from typing import Optional, Sequence, Union, Iterable, Tuple
     from matplotlib.axes import Axes
