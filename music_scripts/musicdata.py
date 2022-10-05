@@ -7,7 +7,8 @@ import typing
 import f90nml
 from pymusic.big_array import BigArray
 from pymusic.io import (
-    MusicSim, MusicDumpInfo, PeriodicArrayBC, MusicDump,
+    MusicSim, MusicDumpInfo, MusicDump,
+    PeriodicArrayBC, ReflectiveArrayBC,
     MusicNewFormatDumpFile, KnownMusicVariables
 )
 
@@ -21,6 +22,7 @@ if typing.TYPE_CHECKING:
     from pathlib import Path
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
     from pymusic.grid import Grid
+    from pymusic.io import ArrayBC
 
 
 @dataclass(frozen=True)
@@ -107,8 +109,14 @@ class MusicData(BaseMusicData):
             num_scalars=self.params["scalars"].get("nscalars", 0)
         )
 
-    def _recenter_bc(self) -> list:
-        return [PeriodicArrayBC(), PeriodicArrayBC()]
+    def _recenter_bc(self) -> Sequence[ArrayBC]:
+        # very crude way to handle boundary conditions for now
+        bcr = self.params["boundaryconditions"]["bc1"][0]
+        bct = self.params["boundaryconditions"]["bc3"][0]
+        return [
+            PeriodicArrayBC() if bcr == "periodic" else ReflectiveArrayBC(),
+            PeriodicArrayBC() if bct == "periodic" else ReflectiveArrayBC(),
+        ]
 
     @cached_property
     def sim(self) -> MusicSim:
