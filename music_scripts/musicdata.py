@@ -21,6 +21,7 @@ from . import eos
 if typing.TYPE_CHECKING:
     from pathlib import Path
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
+    from os import PathLike
     from pymusic.grid import Grid
     from pymusic.io import ArrayBC
 
@@ -71,8 +72,8 @@ class _SnapsView:
 class MusicData(BaseMusicData):
     """Data accessor of a MUSIC run."""
 
-    def __init__(self, parfile: Path):
-        self.parfile = parfile.resolve()
+    def __init__(self, parfile: Union[str, PathLike]):
+        self.parfile = Path(parfile).resolve()
 
     @property
     def path(self) -> Path:
