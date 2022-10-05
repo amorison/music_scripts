@@ -7,38 +7,24 @@ from pymusic.plotting import SinglePlotFigure, Plot
 from matplotlib import colors
 import numpy as np
 
-from .derived_fields import FieldGetter, ProfGetter
 from .musicdata import MusicData
 from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
 
 if typing.TYPE_CHECKING:
-    from typing import Sequence, Callable, List
-
-    from pymusic.big_array import BigArray
+    from typing import Sequence, List
 
     from .config import Config, Field
-    from .musicdata import BaseMusicData, Snap
+    from .musicdata import Snap
 
 
 def plot_field(
     snap: Snap,
     conf_field: Field,
 ) -> Sequence[Plot]:
-    var = conf_field.plot
     cmap = conf_field.cmap
-
-    field_getter: Callable[[BaseMusicData], BigArray]
-    if conf_field.perturbation:
-        def field_getter(bmdat: BaseMusicData) -> BigArray:
-            """Temperature perturbation."""
-            field = FieldGetter(var)(bmdat)
-            prof = ProfGetter(var)(bmdat).array()
-            return field.apply(lambda f: (f - prof[:, np.newaxis]) / f)
-        if cmap is None:
-            cmap = "RdBu_r"
-    else:
-        field_getter = FieldGetter(var)
+    if conf_field.perturbation and cmap is None:
+        cmap = "RdBu_r"
 
     normr = not conf_field.full_r
     mdat = snap.mdat
@@ -55,8 +41,8 @@ def plot_field(
 
     plots: List[Plot] = [
         ScalarPlot(
-            dump_arr=snap,
-            get_data=field_getter,
+            snap=snap,
+            var=conf_field.plot,
             cmap=cmap,
             norm=(None if not conf_field.perturbation
                   else colors.SymLogNorm(linthresh=1e-6)),
@@ -64,14 +50,15 @@ def plot_field(
             rbounds=(conf_field.rmin, conf_field.rmax),
             vbounds=(conf_field.vmin, conf_field.vmax),
             normalize_r=rtot,
+            perturbation=conf_field.perturbation,
         ),
     ]
     if conf_field.velarrow:
         plots.append(
             SphericalVectorPlot(
-                dump_arr=snap,
-                get_rvec=FieldGetter("vel_1"),
-                get_tvec=FieldGetter("vel_2"),
+                snap=snap,
+                vec_r="vel_1",
+                vec_t="vel_2",
             )
         )
     contours = [

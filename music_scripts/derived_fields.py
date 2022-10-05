@@ -16,10 +16,38 @@ from pymusic.big_array import DerivedFieldArray
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
 from pymusic.big_array import BigArray
 
-from .musicdata import BaseMusicData
-
 if TYPE_CHECKING:
-    from typing import Callable, Dict
+    from typing import Callable, Dict, Type
+    from pymusic.grid import Grid
+    from .eos import EoS
+
+
+class BaseMusicData(ABC):
+
+    """MUSIC simulation data wrapper, either a full sim or a single dump."""
+
+    @property
+    @abstractmethod
+    def grid(self) -> Grid:
+        """Grid object relevant for the wrapped data."""
+
+    @property
+    @abstractmethod
+    def big_array(self) -> BigArray:
+        """The data itself."""
+
+    @property
+    @abstractmethod
+    def eos(self) -> EoS:
+        """The relevant EoS."""
+
+    @property
+    def field(self) -> _DataGetter:
+        return _DataGetter(self, FieldGetter)
+
+    @property
+    def rprof(self) -> _DataGetter:
+        return _DataGetter(self, ProfGetter)
 
 
 T_contra = TypeVar("T_contra", contravariant=True)
@@ -177,3 +205,12 @@ def entropy(bmdat: BaseMusicData) -> BigArray:
 def vrms(bmdat: BaseMusicData) -> BigArray:
     """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
     return ProfGetter("vel_square")(bmdat).sqrt()
+
+
+@dataclass(frozen=True)
+class _DataGetter:
+    _bmdat: BaseMusicData
+    _fetcher: Type[DataFetcher]
+
+    def __getitem__(self, var: str) -> BigArray:
+        return self._fetcher(var)(self._bmdat)

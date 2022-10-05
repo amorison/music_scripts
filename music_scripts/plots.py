@@ -85,8 +85,8 @@ class RawCartesianScalarPlot(Plot):
 
 @dataclass(frozen=True)
 class ScalarPlot(Plot):
-    dump_arr: Snap
-    get_data: FieldGetter
+    snap: Snap
+    var: str
     cmap: Optional[str] = None
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
@@ -94,9 +94,14 @@ class ScalarPlot(Plot):
     rbounds: Tuple[Optional[float], Optional[float]] = (None, None)
     vbounds: Tuple[Optional[float], Optional[float]] = (None, None)
     normalize_r: Optional[float] = None
+    perturbation: bool = False
 
     def draw_on(self, ax: Axes) -> None:
-        grid = self.dump_arr.grid
+        field = self.snap.field[self.var].array()
+        if self.perturbation:
+            prof = self.snap.rprof[self.var].array()
+            field = (field - prof[:, np.newaxis]) / field
+        grid = self.snap.grid
         plot: Plot
         if hasattr(grid, "r_grid"):
             r_coord = grid.r_grid.face_points()
@@ -105,7 +110,7 @@ class ScalarPlot(Plot):
             plot = RawSphericalScalarPlot(
                 r_coord=r_coord,
                 t_coord=grid.theta_grid.face_points(),
-                data=self.get_data(self.dump_arr).array(),
+                data=field,
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
@@ -117,7 +122,7 @@ class ScalarPlot(Plot):
             plot = RawCartesianScalarPlot(
                 x_coord=grid.x_grid.face_points(),
                 y_coord=grid.y_grid.face_points(),
-                data=self.get_data(self.dump_arr).array(),
+                data=field,
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
@@ -128,17 +133,17 @@ class ScalarPlot(Plot):
 
 @dataclass(frozen=True)
 class SphericalVectorPlot(Plot):
-    dump_arr: Snap
-    get_rvec: FieldGetter
-    get_tvec: FieldGetter
+    snap: Snap
+    vec_r: str
+    vec_t: str
     arrow_stride: int = 16
 
     def draw_on(self, ax: Axes) -> None:
-        grid = self.dump_arr.grid
+        grid = self.snap.grid
         rad_c = grid.r_grid.cell_centers()
         theta_c = grid.theta_grid.cell_centers()
-        vel_r = self.get_rvec(self.dump_arr).array()
-        vel_t = self.get_tvec(self.dump_arr).array()
+        vel_r = self.snap.field[self.vec_r].array()
+        vel_t = self.snap.field[self.vec_t].array()
         radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
         vel_x = vel_r * np.sin(thetam) + vel_t * np.cos(thetam)
         vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)

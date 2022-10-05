@@ -1,48 +1,28 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 import typing
 
 import f90nml
 from pymusic.big_array import BigArray
-from pymusic.grid import Grid
 from pymusic.io import (
     MusicSim, MusicDumpInfo, PeriodicArrayBC, MusicDump,
     MusicNewFormatDumpFile, KnownMusicVariables
 )
 
+from .derived_fields import BaseMusicData
 from .prof1d import Prof1d
 from . import eos
 
 if typing.TYPE_CHECKING:
     from pathlib import Path
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
-
-
-class BaseMusicData(typing.Protocol):
-
-    """MUSIC simulation data wrapper, either a full sim or a single dump."""
-
-    @property
-    @abstractmethod
-    def grid(self) -> Grid:
-        """Grid object relevant for the wrapped data."""
-
-    @property
-    @abstractmethod
-    def big_array(self) -> BigArray:
-        """The data itself."""
-
-    @property
-    @abstractmethod
-    def eos(self) -> eos.EoS:
-        """The relevant EoS."""
+    from pymusic.grid import Grid
 
 
 @dataclass(frozen=True)
-class Snap:
+class Snap(BaseMusicData):
     mdat: MusicData
     idump: int
     dump: MusicDump
@@ -84,7 +64,7 @@ class _SnapsView:
                 yield self._mdat[item]
 
 
-class MusicData:
+class MusicData(BaseMusicData):
     """Data accessor of a MUSIC run."""
 
     def __init__(self, parfile: Path):

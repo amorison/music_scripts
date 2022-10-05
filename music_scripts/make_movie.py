@@ -9,7 +9,6 @@ from pymusic.plotting import (
 )
 
 from .musicdata import MusicData
-from .derived_fields import FieldGetter
 from .plots import ScalarPlot
 
 
@@ -18,8 +17,8 @@ def all_plots(mdat: MusicData, var: str) -> Iterator[Plot]:
         time = snap.dump.time
         yield WithPlotTitle(
             plot=ScalarPlot(
-                dump_arr=snap,
-                get_data=FieldGetter(var),
+                snap=snap,
+                var=var,
             ),
             title=f"{var} at time {time:.2e}"
         )
