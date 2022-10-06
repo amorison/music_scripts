@@ -42,6 +42,11 @@ class BaseMusicData(ABC):
         """The relevant EoS."""
 
     @property
+    @abstractmethod
+    def cartesian(self) -> bool:
+        """Whether the geometry is cartesian."""
+
+    @property
     def field(self) -> _DataGetter:
         return _DataGetter(self, FieldGetter)
 
@@ -102,6 +107,8 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
         field = FieldGetter(self.var_name)(bmdat)
+        if bmdat.cartesian:
+            return field.mean("x2")
         sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
         return field.collapse(sph_quad.average, axis="x2")
 
@@ -124,10 +131,13 @@ class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
     """Get a time series from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
+        prof = bmdat.rprof[self.var_name]
+        if bmdat.cartesian:
+            return prof.mean("x1")
         r_grid = bmdat.grid.r_grid
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
-        return ProfGetter(self.var_name)(bmdat).collapse(
+        return prof.collapse(
             lambda w: np.average(w, weights=d_rad * rad**2), axis="x1")
 
 

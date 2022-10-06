@@ -36,6 +36,10 @@ class Snap(BaseMusicData):
     def grid(self) -> Grid:
         return self.dump.grid
 
+    @property
+    def cartesian(self) -> bool:
+        return self.mdat.cartesian
+
     @cached_property
     def big_array(self) -> BigArray:
         return self.dump.big_array()
@@ -130,6 +134,10 @@ class MusicData(BaseMusicData):
     @property
     def grid(self) -> Grid:
         return self.sim.grid
+
+    @property
+    def cartesian(self) -> bool:
+        return self.params["geometry"]["cartesian"]
 
     @cached_property
     def big_array(self) -> BigArray:
