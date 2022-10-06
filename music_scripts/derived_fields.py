@@ -106,7 +106,7 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
     """Get a radial profile from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
-        field = FieldGetter(self.var_name)(bmdat)
+        field = bmdat.field[self.var_name]
         if bmdat.cartesian:
             return field.mean("x2")
         sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
@@ -119,7 +119,7 @@ class TimeAveragedProfGetter(DataFetcher[BaseMusicData, BigArray]):
     """Get a radial profile from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
-        field = ProfGetter(self.var_name)(bmdat)
+        field = bmdat.rprof[self.var_name]
         if "time" in bmdat.big_array.axes:
             field = field.mean("time")
         return field
@@ -214,7 +214,7 @@ def entropy(bmdat: BaseMusicData) -> BigArray:
 @ProfGetter.register
 def vrms(bmdat: BaseMusicData) -> BigArray:
     """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
-    return ProfGetter("vel_square")(bmdat).sqrt()
+    return bmdat.rprof["vel_square"].sqrt()
 
 
 @dataclass(frozen=True)
