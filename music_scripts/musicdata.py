@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cached_property
+from pathlib import Path
 import typing
 
 import f90nml
@@ -19,7 +20,6 @@ from .prof1d import Prof1d
 from . import eos
 
 if typing.TYPE_CHECKING:
-    from pathlib import Path
     from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
     from os import PathLike
     from pymusic.grid import Grid
