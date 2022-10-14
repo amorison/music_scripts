@@ -6,7 +6,7 @@ from pathlib import Path
 import typing
 
 import f90nml
-from pymusic.big_array import BigArray
+from pymusic.big_array import BigArray, CachedArray
 from pymusic.io import (
     MusicSim, MusicDumpInfo, MusicDump,
     PeriodicArrayBC, ReflectiveArrayBC,
@@ -42,7 +42,7 @@ class Snap(BaseMusicData):
 
     @cached_property
     def big_array(self) -> BigArray:
-        return self.dump.big_array()
+        return CachedArray(self.dump.big_array())
 
     @property
     def eos(self) -> eos.EoS:
