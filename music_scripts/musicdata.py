@@ -10,7 +10,8 @@ from pymusic.big_array import BigArray, CachedArray
 from pymusic.io import (
     MusicSim, MusicDumpInfo, MusicDump,
     PeriodicArrayBC, ReflectiveArrayBC,
-    MusicNewFormatDumpFile, KnownMusicVariables
+    MusicNewFormatDumpFile, KnownMusicVariables,
+    MusicDumpArray,
 )
 
 from .derived_fields import (
@@ -42,7 +43,7 @@ class Snap(BaseMusicData):
 
     @cached_property
     def big_array(self) -> BigArray:
-        return CachedArray(self.dump.big_array())
+        return CachedArray(MusicDumpArray(self.dump, False))
 
     @property
     def eos(self) -> eos.EoS:
@@ -184,7 +185,7 @@ class MusicData(BaseMusicData):
         dump_file = self._outfile(idump)
         if not dump_file.exists():
             raise IndexError(f"{dump_file} doesn't exist")
-        dump = MusicDump(
+        dump = MusicDump.from_file(
             MusicNewFormatDumpFile(dump_file, self._dump_info),
             self._recenter_bc(),
             KnownMusicVariables(),
