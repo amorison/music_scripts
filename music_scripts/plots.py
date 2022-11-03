@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import typing
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -18,11 +19,31 @@ if typing.TYPE_CHECKING:
     from .musicdata import Snap, BaseMusicData
 
 
+_LABELS = MappingProxyType({
+    "vel_1": "v_r",
+    "vel_2": r"v_\theta",
+    "vel_3": r"v_\phi",
+    "rho": r"\rho",
+    "e_int": "e_i",
+    "scalar_1": "He",
+    "temp": "T",
+    "press": "P",
+    "entropy": "S",
+})
+
+
+def _labelizer(var: str, perturbation: bool = False) -> str:
+    symbol = _LABELS.get(var, var)
+    return fr"$\delta {symbol}/{symbol}$" if perturbation else f"${symbol}$"
+
+
 @dataclass(frozen=True)
 class RawSphericalScalarPlot(Plot):
     r_coord: np.ndarray
     t_coord: np.ndarray
     data: np.ndarray
+    data_label: Optional[str] = None
+    r_norm: Optional[float] = None
     cmap: Optional[str] = None
     with_colorbar: bool = True
     norm: Optional[Normalize] = None
@@ -32,12 +53,15 @@ class RawSphericalScalarPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         # project from (r,t) to (x,z)
+        r_coord = self.r_coord
+        if self.r_norm is not None:
+            r_coord /= self.r_norm
         if self.costh:
             x_mesh = np.cos(self.t_coord)
-            z_mesh = self.r_coord
+            z_mesh = r_coord
         else:
             r_mesh, t_mesh = np.meshgrid(
-                self.r_coord, self.t_coord, indexing="ij")
+                r_coord, self.t_coord, indexing="ij")
             x_mesh = r_mesh * np.sin(t_mesh)
             z_mesh = r_mesh * np.cos(t_mesh)
 
@@ -49,13 +73,15 @@ class RawSphericalScalarPlot(Plot):
 
         if self.costh:
             ax.set_ylim(*self.rbounds)
+            ax.set_xlabel(r"$\cos\theta$")
+            ax.set_ylabel(r"$r/R_{\mathrm{star}}$" if self.r_norm else "$r$")
         else:
             ax.set_aspect("equal")
             ax.set_axis_off()
         if self.with_colorbar:
             cax = make_axes_locatable(ax).append_axes("right", size="3%",
                                                       pad=0.15)
-            ax.figure.colorbar(surf, cax=cax)
+            ax.figure.colorbar(surf, cax=cax, label=self.data_label)
 
 
 @dataclass(frozen=True)
@@ -105,12 +131,12 @@ class ScalarPlot(Plot):
         plot: Plot
         if hasattr(grid, "r_grid"):
             r_coord = grid.r_grid.face_points()
-            if self.normalize_r is not None:
-                r_coord /= self.normalize_r
             plot = RawSphericalScalarPlot(
                 r_coord=r_coord,
                 t_coord=grid.theta_grid.face_points(),
                 data=field,
+                data_label=_labelizer(self.var, self.perturbation),
+                r_norm=self.normalize_r,
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
                 norm=self.norm,
