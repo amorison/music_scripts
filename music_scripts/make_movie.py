@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Iterator
 
 from pymusic.plotting import (
-    FfmpegMp4Movie, SinglePlotFigure, Plot, WithPlotTitle,
+    FfmpegMp4Movie, Plot, WithPlotTitle,
 )
 
+from .figure import SinglePlotFigure
 from .musicdata import MusicData
 from .plots import ScalarPlot
 

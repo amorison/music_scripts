@@ -5,8 +5,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pymusic.plotting import SinglePlotFigure
 
+from .figure import SinglePlotFigure
 from .musicdata import MusicData
 from .plots import ProfPlot, TseriesPlot, WithScales
 

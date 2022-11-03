@@ -7,7 +7,9 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from pymusic.plotting import Plot, SinglePlotFigure
+from pymusic.plotting import Plot
+
+from .figure import SinglePlotFigure
 
 if typing.TYPE_CHECKING:
     from typing import Iterable

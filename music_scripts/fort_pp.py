@@ -4,10 +4,11 @@ from dataclasses import dataclass
 import dataclasses
 import typing
 
-from pymusic.plotting import SinglePlotFigure, Plot
+from pymusic.plotting import Plot
 import h5py
 import numpy as np
 
+from .figure import SinglePlotFigure
 from .plots import RawSphericalScalarPlot, SameAxesPlot
 
 if typing.TYPE_CHECKING:

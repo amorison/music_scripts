@@ -3,10 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 import typing
 
-from pymusic.plotting import SinglePlotFigure, Plot
+from pymusic.plotting import Plot
 from matplotlib import colors
 import numpy as np
 
+from .figure import SinglePlotFigure
 from .musicdata import MusicData
 from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
 from .fort_pp import Contour, ContourSphericalPlot, ContourPlot

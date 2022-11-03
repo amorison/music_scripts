@@ -3,10 +3,10 @@ from dataclasses import dataclass, fields
 from pathlib import Path
 import typing
 
-from pymusic.plotting import SinglePlotFigure
 import numpy as np
 from numpy.typing import NDArray
 
+from .figure import SinglePlotFigure
 from .fort_pp import Rprof, RprofPlot
 
 if typing.TYPE_CHECKING:
