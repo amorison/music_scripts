@@ -77,8 +77,7 @@ def plot_field(
 
 
 def cmd(conf: Config) -> None:
-    figdir = Path("figures")
-    figdir.mkdir(parents=True, exist_ok=True)
+    conf.core.figdir.mkdir(parents=True, exist_ok=True)
 
     var = conf.field.plot
     mdat = MusicData(conf.core.path)
@@ -87,4 +86,4 @@ def cmd(conf: Config) -> None:
         plots = plot_field(snap, conf.field)
         SinglePlotFigure(
             plot=SameAxesPlot(plots=plots, legend=False),
-        ).save_to(figdir / f"{var}_{snap.idump:08d}.png")
+        ).save_to(conf.core.figdir / f"{var}_{snap.idump:08d}.png")

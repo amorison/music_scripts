@@ -22,6 +22,8 @@ class Core(Section):
                             doc="path of music parameter file")
     dumps: Tuple[Union[int, slice], ...] = _idx.entry(
         default=(-1,), doc="sequence of dumps to process", cli_short="d")
+    figdir: Path = path_entry(path="figures", cli_short="O",
+                              doc="folder where produced figures are put")
 
 
 @dataclass
