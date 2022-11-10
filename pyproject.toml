@@ -20,11 +20,11 @@ requires-python = ">=3.8"
 dependencies = [
     "numpy>=1.16",
     "scipy>=1.0",
-    "pandas>=1.0",
     "f90nml>=1.4.3",
     "h5py>=3.0",
     "matplotlib>=3.0",
     "music_mesa_tables>=0.1",
+    "music_pykg>=0.1",
     "pymusic>=0.1.0",
     "loam>=0.7.0,<0.8.0",
 ]
@@ -48,7 +48,6 @@ module = [
     "h5py.*",
     "matplotlib.*",
     "mpl_toolkits.*",
-    "pandas.*",
     "scipy.*",
 ]
 ignore_missing_imports = true

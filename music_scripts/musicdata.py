@@ -6,6 +6,7 @@ from pathlib import Path
 import typing
 
 import f90nml
+from music_pykg.prof1d import Prof1d
 from pymusic.big_array import BigArray, CachedArray
 from pymusic.io import (
     MusicSim, MusicDumpInfo, MusicDump,
@@ -17,7 +18,6 @@ from pymusic.io import (
 from .derived_fields import (
     BaseMusicData, _DataGetter, TimeAveragedProfGetter, TimeSeriesGetter,
 )
-from .prof1d import Prof1d
 from . import eos
 
 if typing.TYPE_CHECKING:

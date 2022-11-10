@@ -6,8 +6,7 @@ import typing
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-
-from .prof1d import Prof1d
+from music_pykg.prof1d import Prof1d
 
 if typing.TYPE_CHECKING:
     from matplotlib.axes import Axes
