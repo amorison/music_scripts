@@ -36,8 +36,8 @@ mutools = "music_scripts.__main__:main"
 include = ["music_scripts"]
 namespaces = false
 
-[tools.setuptools.package-data]
-music_scripts = "py.typed"
+[tool.setuptools.package-data]
+music_scripts = ["py.typed"]
 
 [tool.mypy]
 disallow_untyped_defs = true
