@@ -67,7 +67,7 @@ class Plotting(Section):
 
 @dataclass
 class FieldPP(Section):
-    plot: str = entry(val="rho", cli_short="o", doc="variable to plot")
+    plot: str = entry(val="density", cli_short="o", doc="variable to plot")
 
 
 @dataclass
@@ -80,7 +80,7 @@ class ContourPP(Section):
 
 @dataclass
 class RprofPP(Section):
-    plot: str = entry(val="rho", cli_short="o", doc="variable to plot")
+    plot: str = entry(val="density", cli_short="o", doc="variable to plot")
     degree: int = entry(val=1, cli_short="D", doc="degree of rprof")
 
 

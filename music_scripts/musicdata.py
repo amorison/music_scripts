@@ -6,12 +6,13 @@ from pathlib import Path
 import typing
 
 import f90nml
+from music_pykg.format2 import MusicDumpInfo, MusicNewFormatDumpFile
+from music_pykg.known_variables import KnownMusicVariables
 from music_pykg.prof1d import Prof1d
 from pymusic.big_array import BigArray, CachedArray
 from pymusic.io import (
-    MusicSim, MusicDumpInfo, MusicDump,
+    MusicSim, MusicDump,
     PeriodicArrayBC, ReflectiveArrayBC,
-    MusicNewFormatDumpFile, KnownMusicVariables,
     MusicDumpArray,
 )
 
@@ -146,7 +147,7 @@ class MusicData(BaseMusicData):
 
     @cached_property
     def prof1d(self) -> Prof1d:
-        return Prof1d(self.path)
+        return Prof1d.with_path_hint(self.path)
 
     @cached_property
     def _len(self) -> int:

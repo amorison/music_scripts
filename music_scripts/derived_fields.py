@@ -161,7 +161,7 @@ def vel_square(bmdat: BaseMusicData) -> BigArray:
 def ekin(bmdat: BaseMusicData) -> BigArray:
     """Kinetic energy."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["rho", "vel_1", "vel_2"],
+        bmdat.big_array, "var", ["density", "vel_1", "vel_2"],
         lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
 
 

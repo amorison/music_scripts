@@ -18,13 +18,13 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-    "numpy>=1.16",
-    "scipy>=1.0",
+    "numpy>=1.21",
+    "scipy>=1.6",
     "f90nml>=1.4.3",
-    "h5py>=3.0",
-    "matplotlib>=3.0",
+    "h5py>=3.7",
+    "matplotlib>=3.6",
     "music_mesa_tables>=0.1",
-    "music_pykg>=0.1",
+    "music_pykg>=0.3,<0.4.0",
     "pymusic>=0.1.0",
     "loam>=0.7.0,<0.8.0",
 ]

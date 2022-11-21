@@ -71,7 +71,7 @@ if __name__ == "__main__":
     prof0 = get_chk_profile("post_transient.h5", 0, "t0")
     prof1 = get_chk_profile("post_transient.h5", 1, "t1")
     proff = get_chk_profile("post_es.h5", 7874, "tf")
-    profile1d = Prof1d(Path())
+    profile1d = Prof1d.with_path_hint(Path())
     prof1ds = get_prof1d_at(profile1d, prof0.rad)
 
     fig, axis = plt.subplots(nrows=5, sharex=True, figsize=(6, 14))
