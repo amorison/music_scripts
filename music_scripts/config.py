@@ -10,7 +10,7 @@ from loam.collections import TupleEntry, MaybeEntry
 from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
-from . import field, restart, plot_pendepth, fort_pp, lmax, lyon1d
+from . import field, restart, plot_pendepth, tseries, fort_pp, lmax, lyon1d
 
 
 _idx = TupleEntry(slice_or_int_parser)
@@ -42,6 +42,11 @@ class Field(Section):
     vmax: Optional[float] = MaybeEntry(float).entry(
         doc="max field value on plot")
     full_r: bool = command_flag("do not try to normalize r by rtot")
+
+
+@dataclass
+class Tseries(Section):
+    plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
 
 
 @dataclass
@@ -101,6 +106,7 @@ class Lyon1d(Section):
 class Config(ConfigBase):
     core: Core
     field: Field
+    tseries: Tseries
     restart: Restart
     fort_pp: FortPP
     plotting: Plotting
@@ -113,6 +119,7 @@ class Config(ConfigBase):
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
+    tseries=Subcmd("plot a time series", "core", func=tseries.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
     field_pp=Subcmd("plot a field from PP data",

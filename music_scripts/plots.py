@@ -29,6 +29,7 @@ _LABELS = MappingProxyType({
     "temp": "T",
     "press": "P",
     "entropy": "S",
+    "ekin": "E_k",
 })
 
 
@@ -214,6 +215,8 @@ class TseriesPlot(Plot):
         time = np.array(arr.labels_along_axis("time"))
         tseries = arr.array()
         ax.plot(time, tseries, label=self.var)
+        ax.set_xlabel("time")
+        ax.set_ylabel(_labelizer(self.var))
 
 
 @dataclass(frozen=True)
