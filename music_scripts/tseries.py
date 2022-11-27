@@ -4,7 +4,7 @@ import typing
 
 from .figure import SinglePlotFigure
 from .musicdata import MusicData
-from .plots import TseriesPlot
+from .plots import TseriesPlot, WithScales
 
 if typing.TYPE_CHECKING:
     from .config import Config
@@ -17,5 +17,8 @@ def cmd(conf: Config) -> None:
     mdat = MusicData(conf.core.path)
 
     SinglePlotFigure(
-        plot=TseriesPlot(mdat, var),
+        plot=WithScales(
+            plot=TseriesPlot(mdat, var),
+            yscale="log" if conf.plotting.log else "linear",
+        ),
     ).save_to(conf.core.figdir / f"tseries_{var}.pdf")

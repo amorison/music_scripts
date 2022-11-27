@@ -125,7 +125,7 @@ class Config(ConfigBase):
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
-    tseries=Subcmd("plot a time series", "core", func=tseries.cmd),
+    tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
