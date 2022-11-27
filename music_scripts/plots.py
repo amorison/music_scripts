@@ -203,6 +203,8 @@ class ProfPlot(Plot):
         ax.plot(radius, profile)
         for marker in markers:
             ax.axvline(marker, linewidth=1, linestyle=":", color="k")
+        ax.set_xlabel("radius" if self.length_scale is None else "normalized radius")
+        ax.set_ylabel(_labelizer(self.var))
 
 
 @dataclass(frozen=True)

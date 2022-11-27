@@ -10,7 +10,7 @@ from loam.collections import TupleEntry, MaybeEntry
 from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
-from . import field, restart, plot_pendepth, tseries, fort_pp, lmax, lyon1d
+from . import field, restart, plot_pendepth, tseries, rprof, fort_pp, lmax, lyon1d
 
 
 _idx = TupleEntry(slice_or_int_parser)
@@ -46,6 +46,11 @@ class Field(Section):
 
 @dataclass
 class Tseries(Section):
+    plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
+
+
+@dataclass
+class Prof(Section):
     plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
 
 
@@ -107,6 +112,7 @@ class Config(ConfigBase):
     core: Core
     field: Field
     tseries: Tseries
+    rprof: Prof
     restart: Restart
     fort_pp: FortPP
     plotting: Plotting
@@ -120,6 +126,7 @@ class Config(ConfigBase):
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     tseries=Subcmd("plot a time series", "core", func=tseries.cmd),
+    rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
     field_pp=Subcmd("plot a field from PP data",
