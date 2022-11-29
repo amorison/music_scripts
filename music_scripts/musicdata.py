@@ -6,7 +6,7 @@ from pathlib import Path
 import typing
 
 import f90nml
-from music_pykg.format2 import MusicDumpInfo, MusicNewFormatDumpFile
+from music_pykg.format2 import MusicNewFormatDumpFile
 from music_pykg.known_variables import KnownMusicVariables
 from music_pykg.prof1d import Prof1d
 from pymusic.big_array import BigArray, CachedArray
@@ -108,14 +108,6 @@ class MusicData(BaseMusicData):
             self.params["io"]["dataoutput"] + f"{idump:08}.music"
         )
 
-    @property
-    def _dump_info(self) -> MusicDumpInfo:
-        return MusicDumpInfo(
-            num_space_dims=2,
-            num_velocities=2,
-            num_scalars=self.params["scalars"].get("nscalars", 0)
-        )
-
     def _recenter_bc(self) -> Sequence[ArrayBC]:
         # very crude way to handle boundary conditions for now
         bcr = self.params["boundaryconditions"]["bc1"][0]
@@ -129,7 +121,6 @@ class MusicData(BaseMusicData):
     def sim(self) -> MusicSim:
         return MusicSim.from_dump_file_names(
             file_names=sorted(self.path.glob(self._out_pattern)),
-            dump_info=self._dump_info,
             recenter_bc_list=self._recenter_bc(),
         )
 
@@ -187,7 +178,7 @@ class MusicData(BaseMusicData):
         if not dump_file.exists():
             raise IndexError(f"{dump_file} doesn't exist")
         dump = MusicDump.from_file(
-            MusicNewFormatDumpFile(dump_file, self._dump_info),
+            MusicNewFormatDumpFile(dump_file),
             self._recenter_bc(),
             KnownMusicVariables(),
         )
