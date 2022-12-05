@@ -110,7 +110,7 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
         if bmdat.cartesian:
             return field.mean("x2")
         sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
-        return field.collapse(sph_quad.average, axis="x2")
+        return field.collapse(sph_quad.average, axis="x2").slabbed("time", 10)
 
 
 @dataclass(frozen=True)
@@ -138,7 +138,7 @@ class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
         return prof.collapse(
-            lambda w: np.average(w, weights=d_rad * rad**2), axis="x1")
+            lambda w: np.average(w, weights=d_rad * rad**2), axis="x1").slabbed("time", 10)
 
 
 @FieldGetter.register
