@@ -10,7 +10,10 @@ from loam.collections import TupleEntry, MaybeEntry
 from loam.parsers import slice_or_int_parser
 from loam.tools import command_flag, path_entry
 
-from . import field, restart, plot_pendepth, tseries, rprof, fort_pp, lmax, lyon1d
+from . import (
+    field, restart, renumber, plot_pendepth,
+    tseries, rprof, fort_pp, lmax, lyon1d,
+)
 
 
 _idx = TupleEntry(slice_or_int_parser)
@@ -59,6 +62,14 @@ class Restart(Section):
     batch: Tuple[str, ...] = TupleEntry(str).entry(
         doc="batch files to use for restart", cli_short="b",
         cli_zsh_comprule="_files")
+
+
+@dataclass
+class Renumber(Section):
+    path_in: Path = path_entry(path=".", cli_short="P",
+                               doc="directory containing MUSIC files")
+    path_out: Path = path_entry(path="renumbered", cli_short="O",
+                                doc="output directory")
 
 
 @dataclass
@@ -114,6 +125,7 @@ class Config(ConfigBase):
     tseries: Tseries
     rprof: Prof
     restart: Restart
+    renumber: Renumber
     fort_pp: FortPP
     plotting: Plotting
     field_pp: FieldPP
@@ -128,6 +140,7 @@ SUB_CMDS = dict(
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
+    renumber=Subcmd("renumber MUSIC output file", func=renumber.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
     field_pp=Subcmd("plot a field from PP data",
                     "fort_pp", "plotting",
