@@ -108,7 +108,7 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
         field = bmdat.field[self.var_name]
         if bmdat.cartesian:
-            return field.mean("x2")
+            return field.mean("x2").slabbed("time", 10)
         sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
         return field.collapse(sph_quad.average, axis="x2").slabbed("time", 10)
 
