@@ -208,6 +208,23 @@ class ProfPlot(Plot):
 
 
 @dataclass(frozen=True)
+class RiverPlot(Plot):
+    music_data: MusicData
+    var: str
+
+    def draw_on(self, ax: Axes) -> None:
+        profile = self.music_data.rprof[self.var]
+        time = profile.labels_along_axis("time")
+        x_1 = profile.labels_along_axis("x1")
+        surf = ax.pcolormesh(
+            time, x_1, profile.array().T,
+            shading="nearest", rasterized=True)
+        cax = make_axes_locatable(ax).append_axes("right", size="3%",
+                                                  pad=0.15)
+        ax.figure.colorbar(surf, cax=cax)
+
+
+@dataclass(frozen=True)
 class TseriesPlot(Plot):
     music_data: MusicData
     var: str

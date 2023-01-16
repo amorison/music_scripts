@@ -12,7 +12,7 @@ from loam.tools import command_flag, path_entry
 
 from . import (
     field, restart, renumber, plot_pendepth,
-    tseries, rprof, fort_pp, lmax, lyon1d,
+    tseries, rprof, river, fort_pp, lmax, lyon1d,
 )
 
 
@@ -54,6 +54,11 @@ class Tseries(Section):
 
 @dataclass
 class Prof(Section):
+    plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
+
+
+@dataclass
+class River(Section):
     plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
 
 
@@ -124,6 +129,7 @@ class Config(ConfigBase):
     field: Field
     tseries: Tseries
     rprof: Prof
+    river: River
     restart: Restart
     renumber: Renumber
     fort_pp: FortPP
@@ -139,6 +145,7 @@ SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", func=field.cmd),
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
+    river=Subcmd("plot a river plot (time, radius)", "core", func=river.cmd),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     renumber=Subcmd("renumber MUSIC output file", func=renumber.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
