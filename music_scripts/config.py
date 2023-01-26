@@ -44,6 +44,7 @@ class Field(Section):
         doc="min field value on plot")
     vmax: Optional[float] = MaybeEntry(float).entry(
         doc="max field value on plot")
+    no_rmarks: bool = command_flag("do not plot radial marks")
     full_r: bool = command_flag("do not try to normalize r by rtot")
 
 

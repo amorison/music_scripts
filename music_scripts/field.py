@@ -38,6 +38,8 @@ def plot_field(
         renv = 0.0
         rcore = 0.0
     rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
+    if conf_field.no_rmarks:
+        rschwarz = []
 
     plots: List[Plot] = [
         ScalarPlot(
