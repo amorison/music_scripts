@@ -24,7 +24,7 @@ dependencies = [
     "h5py>=3.7",
     "matplotlib>=3.6",
     "music_mesa_tables>=0.1",
-    "music_pykg>=0.4,<0.5",
+    "music_pykg>=3.0,<4.0",
     "pymusic>=0.1.0",
     "loam>=0.7.0,<0.8.0",
 ]
