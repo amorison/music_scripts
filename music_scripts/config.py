@@ -75,6 +75,7 @@ class Renumber(Section):
                                doc="directory containing MUSIC files")
     path_out: Path = path_entry(path="renumbered", cli_short="O",
                                 doc="output directory")
+    ifirst: int = entry(val=1, cli_short="i", doc="index to start from")
 
 
 @dataclass
