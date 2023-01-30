@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 import typing
+from abc import ABC, abstractmethod
 
-from pymusic.big_array import DerivedFieldArray
 import music_mesa_tables as mmt
+from pymusic.big_array import DerivedFieldArray
 
 if typing.TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -38,13 +38,13 @@ class MesaCstMetalEos(EoS):
         self._eos = mmt.CstMetalEos(metallicity)
 
     def _derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
-        def calculator(
-            rho: NDArray, e_int: NDArray, he_frac: NDArray
-        ) -> NDArray:
+        def calculator(rho: NDArray, e_int: NDArray, he_frac: NDArray) -> NDArray:
             state = mmt.CstMetalState(self._eos, he_frac, rho, e_int)
-            return 10**state.compute(var)
+            return 10 ** state.compute(var)
+
         return DerivedFieldArray(
-            array, "var", ["density", "e_spec_int", "scalar_1"], calculator)
+            array, "var", ["density", "e_spec_int", "scalar_1"], calculator
+        )
 
 
 class MesaCstCompoEos(EoS):
@@ -56,5 +56,6 @@ class MesaCstCompoEos(EoS):
     def _derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
         def calculator(rho: NDArray, e_int: NDArray) -> NDArray:
             state = mmt.CstCompoState(self._eos, rho, e_int)
-            return 10**state.compute(var)
+            return 10 ** state.compute(var)
+
         return DerivedFieldArray(array, "var", ["density", "e_spec_int"], calculator)

@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import typing
 
-from pymusic.plotting import Plot
-from matplotlib import colors
 import numpy as np
+from matplotlib import colors
+from pymusic.plotting import Plot
 
 from .figure import SinglePlotFigure
+from .fort_pp import Contour, ContourPlot, ContourSphericalPlot
 from .musicdata import MusicData
-from .plots import ScalarPlot, SphericalVectorPlot, SameAxesPlot
-from .fort_pp import Contour, ContourSphericalPlot, ContourPlot
+from .plots import SameAxesPlot, ScalarPlot, SphericalVectorPlot
 
 if typing.TYPE_CHECKING:
-    from typing import Sequence, List
+    from typing import List, Sequence
 
     from .config import Config, Field
     from .musicdata import Snap
@@ -46,8 +46,11 @@ def plot_field(
             snap=snap,
             var=conf_field.plot,
             cmap=cmap,
-            norm=(None if not conf_field.perturbation
-                  else colors.SymLogNorm(linthresh=1e-6)),
+            norm=(
+                None
+                if not conf_field.perturbation
+                else colors.SymLogNorm(linthresh=1e-6)
+            ),
             costh=conf_field.costh,
             rbounds=(conf_field.rmin, conf_field.rmax),
             vbounds=(conf_field.vmin, conf_field.vmax),
@@ -67,7 +70,8 @@ def plot_field(
         Contour(
             "rschwarz",
             np.full_like(theta := snap.grid.theta_grid.cell_centers(), rad),
-            theta if not conf_field.costh else np.cos(theta))
+            theta if not conf_field.costh else np.cos(theta),
+        )
         for rad in rschwarz
     ]
     if conf_field.costh:

@@ -1,7 +1,8 @@
 from __future__ import annotations
+
+import typing
 from dataclasses import dataclass, fields
 from pathlib import Path
-import typing
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,8 +11,9 @@ from .figure import SinglePlotFigure
 from .fort_pp import Rprof, RprofPlot
 
 if typing.TYPE_CHECKING:
-    from typing import BinaryIO, Dict, Tuple, Type, Union
     from os import PathLike
+    from typing import BinaryIO, Dict, Tuple, Type, Union
+
     from .config import Config
 
 
@@ -74,8 +76,10 @@ class Lyon1dData:
             }
             type_count["yzi"] = (np.uint8, 1)
             type_count["chem"] = (np.float64, hdr.n_species)
-            vals = {name: np.zeros((hdr.n_mesh, count), dtype=dtype).squeeze()
-                    for name, (dtype, count) in type_count.items()}
+            vals = {
+                name: np.zeros((hdr.n_mesh, count), dtype=dtype).squeeze()
+                for name, (dtype, count) in type_count.items()
+            }
             for irow in range(hdr.n_mesh):
                 for fld in flds:
                     dtype, count = type_count[fld.name]

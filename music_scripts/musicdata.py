@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import typing
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-import typing
 
 import f90nml
 from music_pykg.format2 import MusicNewFormatDumpFile
@@ -11,19 +11,25 @@ from music_pykg.known_variables import KnownMusicVariables
 from music_pykg.prof1d import Prof1d
 from pymusic.big_array import BigArray, CachedArray
 from pymusic.io import (
-    MusicSim, MusicDump,
-    PeriodicArrayBC, ReflectiveArrayBC,
+    MusicDump,
     MusicDumpArray,
+    MusicSim,
+    PeriodicArrayBC,
+    ReflectiveArrayBC,
 )
 
-from .derived_fields import (
-    BaseMusicData, _DataGetter, TimeAveragedProfGetter, TimeSeriesGetter,
-)
 from . import eos
+from .derived_fields import (
+    BaseMusicData,
+    TimeAveragedProfGetter,
+    TimeSeriesGetter,
+    _DataGetter,
+)
 
 if typing.TYPE_CHECKING:
-    from typing import Mapping, Any, Union, Tuple, Sequence, Iterator
     from os import PathLike
+    from typing import Any, Iterator, Mapping, Sequence, Tuple, Union
+
     from pymusic.grid import Grid
     from pymusic.io import ArrayBC
 
@@ -69,8 +75,7 @@ class _SnapsView:
         for item in self._items:
             if isinstance(item, slice):
                 idx = item.indices(len(self._mdat))
-                yield from (self._mdat[i] for i in range(*idx)
-                            if self._exists(i))
+                yield from (self._mdat[i] for i in range(*idx) if self._exists(i))
             elif self._exists(item):
                 yield self._mdat[item]
 
@@ -104,9 +109,7 @@ class MusicData(BaseMusicData):
         return self.params["io"]["dataoutput"] + "*.music"
 
     def _outfile(self, idump: int) -> Path:
-        return self.path / (
-            self.params["io"]["dataoutput"] + f"{idump:08}.music"
-        )
+        return self.path / (self.params["io"]["dataoutput"] + f"{idump:08}.music")
 
     def _recenter_bc(self) -> Sequence[ArrayBC]:
         # very crude way to handle boundary conditions for now

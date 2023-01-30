@@ -4,7 +4,7 @@ import typing
 from dataclasses import dataclass
 
 import matplotlib.figure as mplf
-from pymusic.plotting import Plot, Figure
+from pymusic.plotting import Figure, Plot
 
 if typing.TYPE_CHECKING:
     from typing import Tuple

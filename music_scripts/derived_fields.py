@@ -11,14 +11,14 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 import numpy as np
-
-from pymusic.big_array import DerivedFieldArray
+from pymusic.big_array import BigArray, DerivedFieldArray
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
-from pymusic.big_array import BigArray
 
 if TYPE_CHECKING:
     from typing import Callable, Dict, Type
+
     from pymusic.grid import Grid
+
     from .eos import EoS
 
 
@@ -67,15 +67,12 @@ class _DCWithVarName:
 
 
 class DataFetcher(ABC, Generic[T_contra, U_co], _DCWithVarName):
-
     def __init_subclass__(cls) -> None:
         # TYPE SAFETY: mypy doesn't seem to understand __init_subclass__
         cls._handlers: Dict[str, Callable[[T_contra], U_co]] = {}  # type: ignore
 
     @classmethod
-    def register(
-        cls, thunk: Callable[[T_contra], U_co]
-    ) -> Callable[[T_contra], U_co]:
+    def register(cls, thunk: Callable[[T_contra], U_co]) -> Callable[[T_contra], U_co]:
         cls._handlers[thunk.__name__] = thunk  # type: ignore
         return thunk
 
@@ -138,31 +135,41 @@ class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
         return prof.collapse(
-            lambda w: np.average(w, weights=d_rad * rad**2), axis="x1").slabbed("time", 10)
+            lambda w: np.average(w, weights=d_rad * rad**2), axis="x1"
+        ).slabbed("time", 10)
 
 
 @FieldGetter.register
 def vel_ampl(bmdat: BaseMusicData) -> BigArray:
     """Norm of velocity vector."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: np.sqrt(vel_1**2 + vel_2**2))
+        bmdat.big_array,
+        "var",
+        ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: np.sqrt(vel_1**2 + vel_2**2),
+    )
 
 
 @FieldGetter.register
 def vel_square(bmdat: BaseMusicData) -> BigArray:
     """Square of velocity amplitude."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: vel_1**2 + vel_2**2)
+        bmdat.big_array,
+        "var",
+        ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: vel_1**2 + vel_2**2,
+    )
 
 
 @FieldGetter.register
 def ekin(bmdat: BaseMusicData) -> BigArray:
     """Kinetic energy."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["density", "vel_1", "vel_2"],
-        lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2))
+        bmdat.big_array,
+        "var",
+        ["density", "vel_1", "vel_2"],
+        lambda rho, vel_1, vel_2: 0.5 * rho * (vel_1**2 + vel_2**2),
+    )
 
 
 @FieldGetter.register
@@ -181,16 +188,22 @@ def vt_abs(bmdat: BaseMusicData) -> BigArray:
 def vr_normalized(bmdat: BaseMusicData) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: np.sqrt(vel_1**2 / (vel_1**2 + vel_2**2)))
+        bmdat.big_array,
+        "var",
+        ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: np.sqrt(vel_1**2 / (vel_1**2 + vel_2**2)),
+    )
 
 
 @FieldGetter.register
 def vt_normalized(bmdat: BaseMusicData) -> BigArray:
     """Radial velocity normalized by velocity amplitude."""
     return DerivedFieldArray(
-        bmdat.big_array, "var", ["vel_1", "vel_2"],
-        lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)))
+        bmdat.big_array,
+        "var",
+        ["vel_1", "vel_2"],
+        lambda vel_1, vel_2: np.sqrt(vel_2**2 / (vel_1**2 + vel_2**2)),
+    )
 
 
 @FieldGetter.register

@@ -6,14 +6,16 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from pymusic.plotting import Plot, MatrixOfPlotsFigure
+from pymusic.plotting import MatrixOfPlotsFigure, Plot
 
 from .fort_pp import FortPpCheckpoint
 from .plots import SameAxesPlot
 
 if typing.TYPE_CHECKING:
     from typing import List
+
     from matplotlib.axes import Axes
+
     from .config import Config
 
 
@@ -29,8 +31,7 @@ class SeriesPlot(Plot):
     tseries: TimeSeries
 
     def draw_on(self, ax: Axes) -> None:
-        ax.plot(self.tseries.time, self.tseries.values,
-                label=self.tseries.name)
+        ax.plot(self.tseries.time, self.tseries.values, label=self.tseries.name)
         ax.set_xlabel("time")
         ax.set_ylabel(self.tseries.name)
 
@@ -42,8 +43,10 @@ class SeriesHist(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         if self.group_by_unique:
-            ax.bar(*np.unique(self.tseries.values, return_counts=True),
-                   label=self.tseries.name)
+            ax.bar(
+                *np.unique(self.tseries.values, return_counts=True),
+                label=self.tseries.name,
+            )
         else:
             ax.hist(self.tseries.values, label=self.tseries.name)
         ax.set_xlabel(self.tseries.name)
@@ -66,8 +69,10 @@ class LMax:
                 chk = FortPpCheckpoint(master_h5=h5f, idump=idump)
                 r_schwarz = chk.pp_param("r_schwarz_preset").item()
                 time[i] = chk.param("time").item()
-                values[i] = chk.contour_field(
-                    f"pen_depth_{self.criteria}").radius.max() - r_schwarz
+                values[i] = (
+                    chk.contour_field(f"pen_depth_{self.criteria}").radius.max()
+                    - r_schwarz
+                )
                 if self.normalize_dr:
                     dr = np.diff(chk.pp_grid("rad")).mean()
                     values[i] = np.rint(values[i] / dr)
@@ -89,12 +94,11 @@ def cmd(conf: Config) -> None:
             criteria=criteria,
             normalize_dr=conf.lmax.normdr,
         ).series()
-        all_plots.append(SeriesHist(
-            tseries=lmax,
-            group_by_unique=conf.lmax.normdr
-        ))
+        all_plots.append(SeriesHist(tseries=lmax, group_by_unique=conf.lmax.normdr))
         series_plots.append(SeriesPlot(tseries=lmax))
     all_plots.append(SameAxesPlot(plots=series_plots))
     MatrixOfPlotsFigure(
-        plots=all_plots, nrows=1, ncols=len(all_plots),
+        plots=all_plots,
+        nrows=1,
+        ncols=len(all_plots),
     ).save_to("lmax_hist.pdf")

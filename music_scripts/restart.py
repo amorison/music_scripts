@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
 import shlex
 import subprocess
 import typing
+from pathlib import Path
 
 import f90nml
 
@@ -23,15 +23,15 @@ def restart_batch(batchfile: Path) -> None:
 
     params = Path(content_parts[-4])
     nml = f90nml.read(str(params))
-    old_input = nml['io']['input']
-    old_output = nml['io']['dataoutput']
+    old_input = nml["io"]["input"]
+    old_output = nml["io"]["dataoutput"]
     new_input = str(max(Path().glob(f"{old_output}*.music")))
     new_output = old_output[:-3] + f"{out_number+1:02d}_"
     print(f"{params}: {old_input} > {new_input}")
     print(f"{params}: {old_output} > {new_output}")
 
     confirm = input("Confirm (y/N)? ")
-    if confirm.lower() != 'y':
+    if confirm.lower() != "y":
         return
 
     content = content.replace(old_music_out, new_music_out, 1)

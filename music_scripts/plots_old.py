@@ -17,14 +17,19 @@ def tau_conv(mdat: MusicData) -> float:
     d_rad = grid.r_grid.cell_widths()
     core_mask = grid.r_grid.cell_centers() < mdat.prof1d.params["rcore"]
     return (
-        mdat.rprof["vrms"].collapse(
-            lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]), axis="x1")
-        ).array().mean()
+        (
+            mdat.rprof["vrms"].collapse(
+                lambda vrms: np.sum(d_rad[core_mask] / vrms[core_mask]), axis="x1"
+            )
+        )
+        .array()
+        .mean()
+    )
 
 
 def plot_prof(mdat: MusicData, var: str) -> None:
     """Plot radial profile of density."""
-    figdir = Path('figures')
+    figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
 
     fig = SinglePlotFigure(
@@ -38,7 +43,7 @@ def plot_prof(mdat: MusicData, var: str) -> None:
             yscale="log",
         ),
     )
-    fig.save_to(figdir / f'{var}_prof.pdf')
+    fig.save_to(figdir / f"{var}_prof.pdf")
 
 
 def plot_dprof(mdat: MusicData, var: str) -> None:
@@ -54,15 +59,15 @@ def plot_dprof(mdat: MusicData, var: str) -> None:
 
     plt.plot(rad_grad, grad)
 
-    plt.xlabel('radius')
+    plt.xlabel("radius")
     plt.ylabel(var)
-    plt.savefig(figdir / f'{var}_grad_prof.pdf', bbox_inches='tight')
+    plt.savefig(figdir / f"{var}_grad_prof.pdf", bbox_inches="tight")
     plt.close()
 
 
 def plot_tseries(simog: MusicData, var: str) -> None:
     """Plot time series."""
-    figdir = Path('figures')
+    figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
 
     fig = SinglePlotFigure(
@@ -89,4 +94,4 @@ if __name__ == "__main__":
 
     if compute_tconv:
         tconv = tau_conv(simog)
-        print(f'Conv time {simfold.name}: {tconv:.2e}')
+        print(f"Conv time {simfold.name}: {tconv:.2e}")

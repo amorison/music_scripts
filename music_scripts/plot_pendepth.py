@@ -13,7 +13,9 @@ from .figure import SinglePlotFigure
 
 if typing.TYPE_CHECKING:
     from typing import Iterable
+
     from matplotlib.axes import Axes
+
     from .config import Config
 
 
@@ -51,10 +53,7 @@ def schwarz_series_in_file(h5file: Path) -> SchwarzSeries:
 
 
 def schwarz_series_from_set(h5files: Iterable[Path]) -> SchwarzSeries:
-    return reduce(
-        SchwarzSeries.append,
-        map(schwarz_series_in_file, h5files)
-    )
+    return reduce(SchwarzSeries.append, map(schwarz_series_in_file, h5files))
 
 
 def cmd(conf: Config) -> None:

@@ -12,30 +12,34 @@ from pymusic.plotting import Plot
 from .musicdata import MusicData
 
 if typing.TYPE_CHECKING:
-    from typing import Optional, Sequence, Union, Iterable, Tuple
+    from typing import Iterable, Optional, Sequence, Tuple, Union
+
     from matplotlib.axes import Axes
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
-    from .musicdata import Snap, BaseMusicData
+
+    from .musicdata import BaseMusicData, Snap
 
 
-_LABELS = MappingProxyType({
-    "vel_1": "v_r",
-    "vel_2": r"v_\theta",
-    "vel_3": r"v_\phi",
-    "density": r"\rho",
-    "e_spec_int": "e_i",
-    "scalar_1": "He",
-    "temp": "T",
-    "press": "P",
-    "entropy": "S",
-    "ekin": "E_k",
-})
+_LABELS = MappingProxyType(
+    {
+        "vel_1": "v_r",
+        "vel_2": r"v_\theta",
+        "vel_3": r"v_\phi",
+        "density": r"\rho",
+        "e_spec_int": "e_i",
+        "scalar_1": "He",
+        "temp": "T",
+        "press": "P",
+        "entropy": "S",
+        "ekin": "E_k",
+    }
+)
 
 
 def _labelizer(var: str, perturbation: bool = False) -> str:
     symbol = _LABELS.get(var, var)
-    return fr"$\delta {symbol}/{symbol}$" if perturbation else f"${symbol}$"
+    return rf"$\delta {symbol}/{symbol}$" if perturbation else f"${symbol}$"
 
 
 @dataclass(frozen=True)
@@ -61,16 +65,21 @@ class RawSphericalScalarPlot(Plot):
             x_mesh = np.cos(self.t_coord)
             z_mesh = r_coord
         else:
-            r_mesh, t_mesh = np.meshgrid(
-                r_coord, self.t_coord, indexing="ij")
+            r_mesh, t_mesh = np.meshgrid(r_coord, self.t_coord, indexing="ij")
             x_mesh = r_mesh * np.sin(t_mesh)
             z_mesh = r_mesh * np.cos(t_mesh)
 
         surf = ax.pcolormesh(
-            x_mesh, z_mesh, self.data, cmap=self.cmap,
+            x_mesh,
+            z_mesh,
+            self.data,
+            cmap=self.cmap,
             norm=self.norm,
-            vmin=self.vbounds[0], vmax=self.vbounds[1],
-            shading="flat", rasterized=True)
+            vmin=self.vbounds[0],
+            vmax=self.vbounds[1],
+            shading="flat",
+            rasterized=True,
+        )
 
         if self.costh:
             ax.set_ylim(*self.rbounds)
@@ -80,8 +89,7 @@ class RawSphericalScalarPlot(Plot):
             ax.set_aspect("equal")
             ax.set_axis_off()
         if self.with_colorbar:
-            cax = make_axes_locatable(ax).append_axes("right", size="3%",
-                                                      pad=0.15)
+            cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
             ax.figure.colorbar(surf, cax=cax, label=self.data_label)
 
 
@@ -97,16 +105,21 @@ class RawCartesianScalarPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         surf = ax.pcolormesh(
-            self.x_coord, self.y_coord, self.data, cmap=self.cmap,
+            self.x_coord,
+            self.y_coord,
+            self.data,
+            cmap=self.cmap,
             norm=self.norm,
-            vmin=self.vbounds[0], vmax=self.vbounds[1],
-            shading="flat", rasterized=True)
+            vmin=self.vbounds[0],
+            vmax=self.vbounds[1],
+            shading="flat",
+            rasterized=True,
+        )
 
         ax.set_aspect("equal")
         ax.set_axis_off()
         if self.with_colorbar:
-            cax = make_axes_locatable(ax).append_axes("right", size="3%",
-                                                      pad=0.15)
+            cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
             ax.figure.colorbar(surf, cax=cax)
 
 
@@ -171,14 +184,18 @@ class SphericalVectorPlot(Plot):
         theta_c = grid.theta_grid.cell_centers()
         vel_r = self.snap.field[self.vec_r].array()
         vel_t = self.snap.field[self.vec_t].array()
-        radm, thetam = np.meshgrid(rad_c, theta_c, indexing='ij')
+        radm, thetam = np.meshgrid(rad_c, theta_c, indexing="ij")
         vel_x = vel_r * np.sin(thetam) + vel_t * np.cos(thetam)
         vel_z = vel_r * np.cos(thetam) - vel_t * np.sin(thetam)
         xc_mesh = radm * np.sin(thetam)
         zc_mesh = radm * np.cos(thetam)
         sset = slice(None, None, self.arrow_stride)
-        ax.quiver(xc_mesh[sset, sset], zc_mesh[sset, sset],
-                  vel_x[sset, sset], vel_z[sset, sset])
+        ax.quiver(
+            xc_mesh[sset, sset],
+            zc_mesh[sset, sset],
+            vel_x[sset, sset],
+            vel_z[sset, sset],
+        )
         ax.set_aspect("equal")
         ax.set_axis_off()
 
@@ -217,10 +234,9 @@ class RiverPlot(Plot):
         time = profile.labels_along_axis("time")
         x_1 = profile.labels_along_axis("x1")
         surf = ax.pcolormesh(
-            time, x_1, profile.array().T,
-            shading="nearest", rasterized=True)
-        cax = make_axes_locatable(ax).append_axes("right", size="3%",
-                                                  pad=0.15)
+            time, x_1, profile.array().T, shading="nearest", rasterized=True
+        )
+        cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
         ax.figure.colorbar(surf, cax=cax)
 
 

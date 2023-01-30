@@ -1,11 +1,12 @@
 from __future__ import annotations
+
+import typing
 from dataclasses import dataclass
 from pathlib import Path
-import typing
 
 import h5py
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from music_pykg.prof1d import Prof1d
 
 if typing.TYPE_CHECKING:
@@ -25,8 +26,7 @@ class ProfData:
             rad=self.rad,
             label=f"({self.label} - {other.label}) / {other.label}",
             pressure=(self.pressure - other.pressure) / other.pressure,
-            temperature=(self.temperature -
-                         other.temperature) / other.temperature,
+            temperature=(self.temperature - other.temperature) / other.temperature,
         )
 
 
@@ -50,7 +50,8 @@ def get_prof1d_at(profile1d: Prof1d, rad: np.ndarray) -> ProfData:
         label="1D",
         rad=rad,
         pressure=np.interp(rad, radc[:-1], profs["P"].values[:-1]),
-        temperature=np.interp(rad, radc[:-1], profs["T"].values[:-1]))
+        temperature=np.interp(rad, radc[:-1], profs["T"].values[:-1]),
+    )
 
 
 def draw_prof_on(

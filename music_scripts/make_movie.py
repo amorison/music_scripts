@@ -4,9 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterator
 
-from pymusic.plotting import (
-    FfmpegMp4Movie, Plot, WithPlotTitle,
-)
+from pymusic.plotting import FfmpegMp4Movie, Plot, WithPlotTitle
 
 from .figure import SinglePlotFigure
 from .musicdata import MusicData
@@ -21,15 +19,13 @@ def all_plots(mdat: MusicData, var: str) -> Iterator[Plot]:
                 snap=snap,
                 var=var,
             ),
-            title=f"{var} at time {time:.2e}"
+            title=f"{var} at time {time:.2e}",
         )
 
 
 def main(mdat: MusicData, var: str) -> None:
     movie = FfmpegMp4Movie(
-        figures=tuple(
-            SinglePlotFigure(plot) for plot in all_plots(mdat, var)
-        ),
+        figures=tuple(SinglePlotFigure(plot) for plot in all_plots(mdat, var)),
         frames_dir=Path(f"frames_{var}"),
     )
     try:
