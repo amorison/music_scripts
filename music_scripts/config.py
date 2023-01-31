@@ -54,7 +54,6 @@ class Field(Section):
     )
     vmin: Optional[float] = MaybeEntry(float).entry(doc="min field value on plot")
     vmax: Optional[float] = MaybeEntry(float).entry(doc="max field value on plot")
-    no_rmarks: bool = command_flag("do not plot radial marks")
     full_r: bool = command_flag("do not try to normalize r by rtot")
 
 
@@ -105,6 +104,7 @@ class Plotting(Section):
         doc="add contours at constant values"
     )
     log: bool = command_flag("set log scale")
+    no_rmarks: bool = command_flag("do not plot radial marks")
 
 
 @dataclass
@@ -160,7 +160,7 @@ class Config(ConfigBase):
 
 
 SUB_CMDS = dict(
-    field=Subcmd("plot a scalar field", "core", func=field.cmd),
+    field=Subcmd("plot a scalar field", "core", "plotting", func=field.cmd),
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     river=Subcmd("plot a river plot (time, radius)", "core", func=river.cmd),

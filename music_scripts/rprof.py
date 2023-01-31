@@ -25,6 +25,8 @@ def cmd(conf: Config) -> None:
         renv = 0.0
         rcore = 0.0
     rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
+    if conf.plotting.no_rmarks:
+        rschwarz = []
 
     plot = ProfPlot(
         music_data=mdat,

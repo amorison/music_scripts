@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
 def plot_field(
     snap: Snap,
     conf_field: Field,
+    no_rmarks: bool = False,
 ) -> Sequence[Plot]:
     cmap = conf_field.cmap
     if conf_field.perturbation and cmap is None:
@@ -38,7 +39,7 @@ def plot_field(
         renv = 0.0
         rcore = 0.0
     rschwarz = [rad for rad in (renv, rcore) if rad > 0.0]
-    if conf_field.no_rmarks:
+    if no_rmarks:
         rschwarz = []
 
     plots: List[Plot] = [
@@ -88,7 +89,7 @@ def cmd(conf: Config) -> None:
     mdat = MusicData(conf.core.path)
 
     for snap in mdat[conf.core.dumps]:
-        plots = plot_field(snap, conf.field)
+        plots = plot_field(snap, conf.field, conf.plotting.no_rmarks)
         SinglePlotFigure(
             plot=SameAxesPlot(plots=plots, legend=False),
         ).save_to(conf.core.figdir / f"{var}_{snap.idump:08d}.png")
