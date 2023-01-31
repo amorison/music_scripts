@@ -28,14 +28,13 @@ def cmd(conf: Config) -> None:
     if conf.plotting.no_rmarks:
         rschwarz = []
 
-    plot = ProfPlot(
-        music_data=mdat,
-        var=var,
-        markers=rschwarz,
-        length_scale=rtot,
-    )
-
     for snap in mdat[conf.core.dumps]:
+        plot = ProfPlot(
+            music_data=snap,
+            var=var,
+            markers=rschwarz,
+            length_scale=rtot,
+        )
         SinglePlotFigure(
             plot=WithScales(
                 plot=plot,
