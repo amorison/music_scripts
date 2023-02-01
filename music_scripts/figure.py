@@ -7,19 +7,17 @@ import matplotlib.figure as mplf
 from pymusic.plotting import Figure, Plot
 
 if typing.TYPE_CHECKING:
-    from os import PathLike
-    from typing import Tuple, Union
+    from typing import Tuple
 
 
 @dataclass(frozen=True)
 class SinglePlotFigure(Figure):
     plot: Plot
     figsize: Tuple[float, float] = (6.4, 4.8)
-    dpi: int = 200
 
-    def save_to(self, file_name: Union[str, PathLike]) -> None:
+    def figure(self) -> mplf.Figure:
         fig = mplf.Figure(figsize=self.figsize)
         ax = fig.add_subplot()
         self.plot.draw_on(ax)
         fig.set_tight_layout(True)
-        fig.savefig(str(file_name), dpi=self.dpi, bbox_inches="tight")
+        return fig
