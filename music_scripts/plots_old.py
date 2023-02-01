@@ -13,9 +13,9 @@ from .plots import ProfPlot, TseriesPlot, WithScales
 
 def tau_conv(mdat: MusicData) -> float:
     """Convective time scale."""
-    grid = mdat.grid
-    d_rad = grid.r_grid.cell_widths()
-    core_mask = grid.r_grid.cell_centers() < mdat.prof1d.params["rcore"]
+    r_grid = mdat.grid.grids[0]
+    d_rad = r_grid.cell_widths()
+    core_mask = r_grid.cell_centers() < mdat.prof1d.params["rcore"]
     return (
         (
             mdat.rprof["vrms"].collapse(
@@ -51,7 +51,7 @@ def plot_dprof(mdat: MusicData, var: str) -> None:
     figdir = Path("figures")
     figdir.mkdir(parents=True, exist_ok=True)
 
-    rad = mdat.sim.grid.r_grid.cell_centers()
+    rad = mdat.grid.grids[0].cell_centers()
     var_prof = mdat.rprof_avg[var].array()
 
     grad = (var_prof[1:] - var_prof[:-1]) / (rad[1:] - rad[:-1])

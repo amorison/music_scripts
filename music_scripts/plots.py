@@ -141,13 +141,12 @@ class ScalarPlot(Plot):
         if self.perturbation:
             prof = self.snap.rprof[self.var].array()
             field = (field - prof[:, np.newaxis]) / field
-        grid = self.snap.grid
+        grids = self.snap.grid.grids
         plot: Plot
-        if hasattr(grid, "r_grid"):
-            r_coord = grid.r_grid.face_points()
+        if not self.snap.cartesian:
             plot = RawSphericalScalarPlot(
-                r_coord=r_coord,
-                t_coord=grid.theta_grid.face_points(),
+                r_coord=grids[0].face_points(),
+                t_coord=grids[1].face_points(),
                 data=field,
                 data_label=_labelizer(self.var, self.perturbation),
                 r_norm=self.normalize_r,
@@ -160,8 +159,8 @@ class ScalarPlot(Plot):
             )
         else:
             plot = RawCartesianScalarPlot(
-                x_coord=grid.x_grid.face_points(),
-                y_coord=grid.y_grid.face_points(),
+                x_coord=grids[0].face_points(),
+                y_coord=grids[1].face_points(),
                 data=field,
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
@@ -179,9 +178,9 @@ class SphericalVectorPlot(Plot):
     arrow_stride: int = 16
 
     def draw_on(self, ax: Axes) -> None:
-        grid = self.snap.grid
-        rad_c = grid.r_grid.cell_centers()
-        theta_c = grid.theta_grid.cell_centers()
+        grids = self.snap.grid.grids
+        rad_c = grids[0].cell_centers()
+        theta_c = grids[1].cell_centers()
         vel_r = self.snap.field[self.vec_r].array()
         vel_t = self.snap.field[self.vec_t].array()
         radm, thetam = np.meshgrid(rad_c, theta_c, indexing="ij")
@@ -208,7 +207,7 @@ class ProfPlot(Plot):
     length_scale: Optional[float] = None
 
     def draw_on(self, ax: Axes) -> None:
-        radius = self.music_data.grid.r_grid.cell_centers()
+        radius = self.music_data.grid.grids[0].cell_centers()
         markers = np.array(self.markers)
         if self.length_scale is not None:
             radius = radius / self.length_scale

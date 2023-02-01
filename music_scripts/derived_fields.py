@@ -107,7 +107,7 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
         if bmdat.cartesian:
             prof = field.mean("x2")
         else:
-            sph_quad = SphericalMidpointQuad1D(bmdat.grid.theta_grid)
+            sph_quad = SphericalMidpointQuad1D(bmdat.grid.grids[1])
             prof = field.collapse(sph_quad.average, axis="x2")
         if "time" in field.axes:
             return prof.slabbed("time", 10)
@@ -135,7 +135,7 @@ class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
         prof = bmdat.rprof[self.var_name]
         if bmdat.cartesian:
             return prof.mean("x1")
-        r_grid = bmdat.grid.r_grid
+        r_grid = bmdat.grid.grids[0]
         rad = r_grid.cell_centers()
         d_rad = r_grid.cell_widths()
         return prof.collapse(

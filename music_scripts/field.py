@@ -70,7 +70,7 @@ def plot_field(
     contours = [
         Contour(
             "rschwarz",
-            np.full_like(theta := snap.grid.theta_grid.cell_centers(), rad),
+            np.full_like(theta := snap.grid.grids[1].cell_centers(), rad),
             theta if not conf_field.costh else np.cos(theta),
         )
         for rad in rschwarz
