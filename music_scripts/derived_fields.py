@@ -236,6 +236,18 @@ def press(bmdat: BaseMusicData) -> BigArray:
 
 
 @FieldGetter.register
+def log_pgas(bmdat: BaseMusicData) -> BigArray:
+    """Log of pressure."""
+    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogPgas)
+
+
+@FieldGetter.register
+def pgas(bmdat: BaseMusicData) -> BigArray:
+    """Pressure."""
+    return bmdat.field["log_pgas"].apply(lambda v: 10**v)
+
+
+@FieldGetter.register
 def entropy(bmdat: BaseMusicData) -> BigArray:
     """Entropy."""
     return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogEntropy).apply(
