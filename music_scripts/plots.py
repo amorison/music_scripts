@@ -33,6 +33,7 @@ _LABELS = MappingProxyType(
         "press": "P",
         "entropy": "S",
         "ekin": "E_k",
+        "adiab_grad": r"\nabla_{\mathrm{ad}}",
     }
 )
 

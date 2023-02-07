@@ -243,6 +243,12 @@ def entropy(bmdat: BaseMusicData) -> BigArray:
     )
 
 
+@FieldGetter.register
+def adiab_grad(bmdat: BaseMusicData) -> BigArray:
+    """Adiabatic gradient dlnT / dlnP as constant S."""
+    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.DTempDPresScst)
+
+
 @ProfGetter.register
 def vrms(bmdat: BaseMusicData) -> BigArray:
     """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
