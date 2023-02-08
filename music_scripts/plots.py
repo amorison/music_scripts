@@ -160,8 +160,8 @@ class ScalarPlot(Plot):
             )
         else:
             plot = RawCartesianScalarPlot(
-                x_coord=grids[0].face_points(),
-                y_coord=grids[1].face_points(),
+                x_coord=grids[1].face_points(),
+                y_coord=grids[0].face_points(),
                 data=field,
                 cmap=self.cmap,
                 with_colorbar=self.with_colorbar,
