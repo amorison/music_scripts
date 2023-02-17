@@ -27,7 +27,7 @@ _LABELS = MappingProxyType(
         "vel_2": r"v_\theta",
         "vel_3": r"v_\phi",
         "density": r"\rho",
-        "e_spec_int": "e_i",
+        "e_int_spec": "e_i",
         "scalar_1": "He",
         "temp": "T",
         "press": "P",

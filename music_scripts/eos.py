@@ -31,7 +31,7 @@ class MesaCstMetalEos(EoS):
             return state.compute(var)
 
         return DerivedFieldArray(
-            array, "var", ["density", "e_spec_int", "scalar_1"], calculator
+            array, "var", ["density", "e_int_spec", "scalar_1"], calculator
         )
 
 
@@ -46,4 +46,4 @@ class MesaCstCompoEos(EoS):
             state = mmt.CstCompoState(self._eos, rho, e_int)
             return state.compute(var)
 
-        return DerivedFieldArray(array, "var", ["density", "e_spec_int"], calculator)
+        return DerivedFieldArray(array, "var", ["density", "e_int_spec"], calculator)
