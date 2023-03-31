@@ -114,6 +114,35 @@ class RprofPlot(Plot):
 
 
 @dataclass(frozen=True)
+class Rprof_Area:
+    name: str
+    degree: int
+    values_bot: np.ndarray
+    values_top: np.ndarray
+    radius: np.ndarray
+
+
+@dataclass(frozen=True)
+class AreaPlot(Plot):
+    rprof_area: Rprof_Area
+    marks: Tuple[float, ...]
+    scale: str = "linear"
+    alpha: float = 0.5
+
+    def draw_on(self, ax: Axes) -> None:
+        ax.fill_between(
+            self.rprof_area.radius,
+            self.rprof_area.values_bot,
+            self.rprof_area.values_top,
+            label=self.rprof_area.name,
+            alpha=self.alpha,
+        )
+        for mark in self.marks:
+            ax.axvline(mark)
+        ax.set_yscale(self.scale)
+
+
+@dataclass(frozen=True)
 class FortPpCheckpoint:
     master_h5: Union[str, PathLike, h5py.Group]
     idump: int
@@ -184,6 +213,41 @@ class FortPpCheckpoint:
         return rprof
 
 
+@dataclass(frozen=True)
+class FortPpTseries:
+    checkpoints: List[FortPpCheckpoint]
+
+    def pp_grid(self, direction: str) -> np.ndarray:
+        return self.checkpoints[0].pp_grid(direction)
+
+    def _rprof_stack(self, name: str, degree: int) -> Rprof:
+        rprofs = [chk.rprof(name, degree) for chk in self.checkpoints]
+        return np.vstack([r.values for r in rprofs])
+
+    def rprof(self, name: str, degree: int) -> Rprof:
+        mean = np.nanmean(self._rprof_stack(name, degree), axis=0)
+        return Rprof(name=name, degree=degree, radius=self.pp_grid("rad"), values=mean)
+
+    def rprof_std(self, name: str, degree: int) -> Rprof:
+        std = np.nanstd(self._rprof_stack(name, degree), axis=0)
+        return Rprof_Area(
+            name=f"std({name})",
+            degree=degree,
+            radius=self.pp_grid("rad"),
+            values_top=self.rprof(name, degree).values + std,
+            values_bot=self.rprof(name, degree).values - std,
+        )
+
+    def rprof_range(self, name: str, degree: int) -> Rprof:
+        return Rprof_Area(
+            name=f"range({name})",
+            degree=degree,
+            radius=self.pp_grid("rad"),
+            values_top=np.nanmax(self._rprof_stack(name, degree), axis=0),
+            values_bot=np.nanmin(self._rprof_stack(name, degree), axis=0),
+        )
+
+
 def field_cmd(conf: Config) -> None:
     checkpoint = FortPpCheckpoint(
         master_h5=conf.fort_pp.postfile, idump=conf.fort_pp.idump
@@ -244,6 +308,47 @@ def contour_cmd(conf: Config) -> None:
             legend=legend,
         ),
     ).save_to(f"contour_{varstr}{over_str}.pdf")
+
+
+def rprof_tave_cmd(conf: Config) -> None:
+    checkpoints = FortPpTseries(
+        [
+            FortPpCheckpoint(master_h5=conf.fort_pp.postfile, idump=idump)
+            for idump in range(
+                conf.fort_pp.idump,
+                conf.rprof_tave_pp.edump + conf.rprof_tave_pp.sdump,
+                conf.rprof_tave_pp.sdump,
+            )
+        ]
+    )
+    var = conf.rprof_pp.plot
+    rprof = checkpoints.rprof(var, conf.rprof_pp.degree)
+    plots = [
+        RprofPlot(
+            rprof=rprof,
+            marks=conf.plotting.rmarks,
+            scale="log" if conf.plotting.log else "linear",
+        ),
+    ]
+
+    for error, alpha in zip(conf.rprof_tave_pp.error, [0.3, 0.5]):
+        if error == "range":
+            rprof_area = checkpoints.rprof_range(var, conf.rprof_pp.degree)
+        elif error == "std":
+            rprof_area = checkpoints.rprof_std(var, conf.rprof_pp.degree)
+        else:
+            raise ValueError("unrecognised 'error' value")
+
+        plots.append(
+            AreaPlot(
+                rprof_area=rprof_area,
+                marks=conf.plotting.rmarks,
+                scale="log" if conf.plotting.log else "linear",
+                alpha=alpha,
+            )
+        )
+
+    SinglePlotFigure(SameAxesPlot(plots)).save_to(f"rprof_tave_{var}.pdf")
 
 
 def rprof_cmd(conf: Config) -> None:
