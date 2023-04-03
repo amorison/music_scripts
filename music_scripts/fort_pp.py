@@ -348,7 +348,7 @@ def rprof_tave_cmd(conf: Config) -> None:
             )
         )
 
-    SinglePlotFigure(SameAxesPlot(plots)).save_to(f"rprof_tave_{var}.pdf")
+    SinglePlotFigure(SameAxesPlot(plots)).save_to(f"rprof_deg_{conf.rprof_pp.degree:d}_tave_{var}.pdf")
 
 
 def rprof_cmd(conf: Config) -> None:
