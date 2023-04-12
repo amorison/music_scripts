@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import typing
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from functools import cached_property
 
 import music_mesa_tables as mmt
 from pymusic.big_array import DerivedFieldArray
@@ -19,11 +21,15 @@ class EoS(ABC):
         """Build an array with the desired state variable."""
 
 
+@dataclass(frozen=True)
 class MesaCstMetalEos(EoS):
     """MESA EoS at constant metallicity."""
 
-    def __init__(self, metallicity: float):
-        self._eos = mmt.CstMetalEos(metallicity)
+    metallicity: float
+
+    @cached_property
+    def _eos(self) -> mmt.CstMetalEos:
+        return mmt.CstMetalEos(self.metallicity)
 
     def derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
         def calculator(rho: NDArray, e_int: NDArray, he_frac: NDArray) -> NDArray:
@@ -35,11 +41,16 @@ class MesaCstMetalEos(EoS):
         )
 
 
+@dataclass(frozen=True)
 class MesaCstCompoEos(EoS):
     """MESA EoS at constant metallicity and helium fraction."""
 
-    def __init__(self, metallicity: float, he_frac: float):
-        self._eos = mmt.CstCompoEos(metallicity, he_frac)
+    metallicity: float
+    he_frac: float
+
+    @cached_property
+    def _eos(self) -> mmt.CstCompoEos:
+        return mmt.CstCompoEos(self.metallicity, self.he_frac)
 
     def derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
         def calculator(rho: NDArray, e_int: NDArray) -> NDArray:
