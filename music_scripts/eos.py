@@ -102,3 +102,55 @@ class MesaCstCompoEos(EoS):
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
+
+
+@dataclass(frozen=True)
+class IdealGasMix2(EoS):
+    """Mix of two ideal gases."""
+
+    gamma1: float
+    gamma2: float
+    mu1: float
+    mu2: float
+    c1_scalar: int
+    rgas: float = 8.314462618e7  # cgs
+
+    @cached_property
+    def _c1var(self) -> str:
+        return f"scalar_{self.c1_scalar}"
+
+    def _mu(self, c1: NDArray) -> NDArray:
+        return 1 / (c1 / self.mu1 + (1 - c1) / self.mu2)
+
+    def _gm1(self, c1: NDArray) -> NDArray:
+        """gamma - 1 of mix."""
+        n1 = c1 / self.mu1
+        x1 = n1 / (n1 + (1 - c1) / self.mu2)
+        inv_gm1 = x1 / (self.gamma1 - 1) + (1 - x1) / (self.gamma2 - 1)
+        return 1 / inv_gm1
+
+    def _adgrad(self, c1: NDArray) -> NDArray:
+        gm1 = self._gm1(c1)
+        return gm1 / (gm1 + 1)
+
+    def temperature(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["e_int_spec", self._c1var],
+            lambda e_int, c1: self._gm1(c1) * e_int * self._mu(c1) / self.rgas,
+        )
+
+    def pressure(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density", "e_int_spec", self._c1var],
+            lambda rho, e_int, c1: self._gm1(c1) * rho * e_int,
+        )
+
+    def pressure_gas(self, array: BigArray) -> BigArray:
+        return self.pressure(array)
+
+    def adiab_grad(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(array, "var", [self._c1var], self._adgrad)

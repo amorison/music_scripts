@@ -97,13 +97,22 @@ class MusicData(BaseMusicData):
 
     @cached_property
     def eos(self) -> eos.EoS:
-        eos_name = self.params["microphysics"].get("eos", "mesa")
+        mphys = self.params["microphysics"]
+        eos_name = mphys.get("eos", "mesa")
         if eos_name == "mesa":
             metallicity = self.params["physics"]["zz"]
             if self.params["scalars"].get("nscalars", 0) > 0:
                 he_scalar = self.params["scalars"].get("helium_scalar", 1)
                 return eos.MesaCstMetalEos(metallicity, he_scalar)
             return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
+        elif eos_name == "ideal_gas_mix2":
+            return eos.IdealGasMix2(
+                gamma1=mphys["ideal_gas_mix2_gamma1"],
+                gamma2=mphys["ideal_gas_mix2_gamma2"],
+                mu1=mphys["ideal_gas_mix2_mu1"],
+                mu2=mphys["ideal_gas_mix2_mu2"],
+                c1_scalar=mphys["ideal_gas_mix2_mass_frac_1_scalar"],
+            )
         else:
             raise NotImplementedError(f"EoS: {eos_name}")
 
