@@ -97,12 +97,16 @@ class MusicData(BaseMusicData):
 
     @cached_property
     def eos(self) -> eos.EoS:
-        metallicity = self.params["physics"]["zz"]
-        if self.params["scalars"].get("nscalars", 0) > 0:
-            # soon to be deprecated logic in MUSIC, this always meant variable
-            # He content in scalar_1, enough for now but should be revisited
-            return eos.MesaCstMetalEos(metallicity)
-        return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
+        eos_name = self.params["microphysics"].get("eos", "mesa")
+        if eos_name == "mesa":
+            metallicity = self.params["physics"]["zz"]
+            if self.params["scalars"].get("nscalars", 0) > 0:
+                # soon to be deprecated logic in MUSIC, this always meant variable
+                # He content in scalar_1, enough for now but should be revisited
+                return eos.MesaCstMetalEos(metallicity)
+            return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
+        else:
+            raise NotImplementedError(f"EoS: {eos_name}")
 
     @property
     def _out_pattern(self) -> str:
