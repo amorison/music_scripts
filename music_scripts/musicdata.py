@@ -101,9 +101,8 @@ class MusicData(BaseMusicData):
         if eos_name == "mesa":
             metallicity = self.params["physics"]["zz"]
             if self.params["scalars"].get("nscalars", 0) > 0:
-                # soon to be deprecated logic in MUSIC, this always meant variable
-                # He content in scalar_1, enough for now but should be revisited
-                return eos.MesaCstMetalEos(metallicity)
+                he_scalar = self.params["scalars"].get("helium_scalar", 1)
+                return eos.MesaCstMetalEos(metallicity, he_scalar)
             return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
         else:
             raise NotImplementedError(f"EoS: {eos_name}")

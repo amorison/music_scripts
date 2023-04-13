@@ -26,6 +26,7 @@ class MesaCstMetalEos(EoS):
     """MESA EoS at constant metallicity."""
 
     metallicity: float
+    he_scalar: int
 
     @cached_property
     def _eos(self) -> mmt.CstMetalEos:
@@ -37,7 +38,10 @@ class MesaCstMetalEos(EoS):
             return state.compute(var)
 
         return DerivedFieldArray(
-            array, "var", ["density", "e_int_spec", "scalar_1"], calculator
+            array,
+            "var",
+            ["density", "e_int_spec", f"scalar_{self.he_scalar}"],
+            calculator,
         )
 
 
