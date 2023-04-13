@@ -17,8 +17,20 @@ class EoS(ABC):
     """Equation of state."""
 
     @abstractmethod
-    def derive_arr(self, array: BigArray, var: mmt.StateVar) -> BigArray:
-        """Build an array with the desired state variable."""
+    def temperature(self, array: BigArray) -> BigArray:
+        ...
+
+    @abstractmethod
+    def pressure(self, array: BigArray) -> BigArray:
+        ...
+
+    @abstractmethod
+    def pressure_gas(self, array: BigArray) -> BigArray:
+        ...
+
+    @abstractmethod
+    def adiab_grad(self, array: BigArray) -> BigArray:
+        """Adiabatic gradient dlnT / dlnP as constant S."""
 
 
 @dataclass(frozen=True)
@@ -44,6 +56,20 @@ class MesaCstMetalEos(EoS):
             calculator,
         )
 
+    def temperature(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogTemperature).apply(
+            lambda v: 10**v
+        )
+
+    def pressure(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogPressure).apply(lambda v: 10**v)
+
+    def pressure_gas(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogPgas).apply(lambda v: 10**v)
+
+    def adiab_grad(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
+
 
 @dataclass(frozen=True)
 class MesaCstCompoEos(EoS):
@@ -62,3 +88,17 @@ class MesaCstCompoEos(EoS):
             return state.compute(var)
 
         return DerivedFieldArray(array, "var", ["density", "e_int_spec"], calculator)
+
+    def temperature(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogTemperature).apply(
+            lambda v: 10**v
+        )
+
+    def pressure(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogPressure).apply(lambda v: 10**v)
+
+    def pressure_gas(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.LogPgas).apply(lambda v: 10**v)
+
+    def adiab_grad(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.DTempDPresScst)

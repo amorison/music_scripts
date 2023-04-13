@@ -10,7 +10,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-import music_mesa_tables as mmt
 import numpy as np
 from pymusic.big_array import BigArray, DerivedFieldArray
 from pymusic.math.spherical_quadrature import SphericalMidpointQuad1D
@@ -212,53 +211,27 @@ def vt_normalized(bmdat: BaseMusicData) -> BigArray:
 
 
 @FieldGetter.register
-def log_temp(bmdat: BaseMusicData) -> BigArray:
-    """Log of temperature."""
-    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogTemperature)
-
-
-@FieldGetter.register
 def temp(bmdat: BaseMusicData) -> BigArray:
     """Temperature."""
-    return bmdat.field["log_temp"].apply(lambda v: 10**v)
-
-
-@FieldGetter.register
-def log_press(bmdat: BaseMusicData) -> BigArray:
-    """Log of pressure."""
-    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogPressure)
+    return bmdat.eos.temperature(bmdat.big_array)
 
 
 @FieldGetter.register
 def press(bmdat: BaseMusicData) -> BigArray:
     """Pressure."""
-    return bmdat.field["log_press"].apply(lambda v: 10**v)
-
-
-@FieldGetter.register
-def log_pgas(bmdat: BaseMusicData) -> BigArray:
-    """Log of pressure."""
-    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogPgas)
+    return bmdat.eos.pressure(bmdat.big_array)
 
 
 @FieldGetter.register
 def pgas(bmdat: BaseMusicData) -> BigArray:
-    """Pressure."""
-    return bmdat.field["log_pgas"].apply(lambda v: 10**v)
-
-
-@FieldGetter.register
-def entropy(bmdat: BaseMusicData) -> BigArray:
-    """Entropy."""
-    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.LogEntropy).apply(
-        lambda v: 10**v
-    )
+    """Gas pressure."""
+    return bmdat.eos.pressure_gas(bmdat.big_array)
 
 
 @FieldGetter.register
 def adiab_grad(bmdat: BaseMusicData) -> BigArray:
     """Adiabatic gradient dlnT / dlnP as constant S."""
-    return bmdat.eos.derive_arr(bmdat.big_array, mmt.StateVar.DTempDPresScst)
+    return bmdat.eos.adiab_grad(bmdat.big_array)
 
 
 @ProfGetter.register
