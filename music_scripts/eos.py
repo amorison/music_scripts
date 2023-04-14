@@ -32,6 +32,10 @@ class EoS(ABC):
     def adiab_grad(self, array: BigArray) -> BigArray:
         """Adiabatic gradient dlnT / dlnP as constant S."""
 
+    @abstractmethod
+    def heat_cap_p(self, array: BigArray) -> BigArray:
+        """Heat capacity at constant pressure."""
+
 
 @dataclass(frozen=True)
 class MesaCstMetalEos(EoS):
@@ -70,6 +74,20 @@ class MesaCstMetalEos(EoS):
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
 
+    def heat_cap_p(self, array: BigArray) -> BigArray:
+        def calculator(rho: NDArray, e_int: NDArray, he_frac: NDArray) -> NDArray:
+            state = mmt.CstMetalState(self._eos, he_frac, rho, e_int)
+            temp = 10 ** state.compute(mmt.StateVar.LogTemperature)
+            c_v = e_int / (temp * state.compute(mmt.StateVar.DTempDEnerDcst))
+            return c_v * state.compute(mmt.StateVar.Gamma)
+
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density", "e_int_spec", f"scalar_{self.he_scalar}"],
+            calculator,
+        )
+
 
 @dataclass(frozen=True)
 class MesaCstCompoEos(EoS):
@@ -103,6 +121,15 @@ class MesaCstCompoEos(EoS):
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
 
+    def heat_cap_p(self, array: BigArray) -> BigArray:
+        def calculator(rho: NDArray, e_int: NDArray) -> NDArray:
+            state = mmt.CstCompoState(self._eos, rho, e_int)
+            temp = 10 ** state.compute(mmt.StateVar.LogTemperature)
+            c_v = e_int / (temp * state.compute(mmt.StateVar.DTempDEnerDcst))
+            return c_v * state.compute(mmt.StateVar.Gamma)
+
+        return DerivedFieldArray(array, "var", ["density", "e_int_spec"], calculator)
+
 
 @dataclass(frozen=True)
 class IdealGasMix2(EoS):
@@ -133,6 +160,10 @@ class IdealGasMix2(EoS):
         gm1 = self._gm1(c1)
         return gm1 / (gm1 + 1)
 
+    def _cp(self, c1: NDArray) -> NDArray:
+        gm1 = self._gm1(c1)
+        return (gm1 + 1) * self.rgas / (gm1 * self._mu(c1))
+
     def temperature(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(
             array,
@@ -154,3 +185,6 @@ class IdealGasMix2(EoS):
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(array, "var", [self._c1var], self._adgrad)
+
+    def heat_cap_p(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(array, "var", [self._c1var], self._cp)

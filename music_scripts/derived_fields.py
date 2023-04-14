@@ -234,6 +234,20 @@ def adiab_grad(bmdat: BaseMusicData) -> BigArray:
     return bmdat.eos.adiab_grad(bmdat.big_array)
 
 
+@FieldGetter.register
+def enthalpy_flux(bmdat: BaseMusicData) -> BigArray:
+    temp_field = bmdat.field["temp"].array()
+    temp_prof = bmdat.rprof["temp"].array()
+    delta_temp = temp_field - temp_prof[:, np.newaxis]
+    c_p = bmdat.eos.heat_cap_p(bmdat.big_array).array()
+    return DerivedFieldArray(
+        bmdat.big_array,
+        "var",
+        ["density", "vel_1"],
+        lambda rho, v_r: rho * c_p * v_r * delta_temp,
+    )
+
+
 @ProfGetter.register
 def vrms(bmdat: BaseMusicData) -> BigArray:
     """Vrms defined as vrms(r, t) = sqrt(mean_theta(v2))."""
