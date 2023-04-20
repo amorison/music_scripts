@@ -14,4 +14,4 @@ def cmd(conf: Config) -> None:
     print("Run in:", mdat.path)
     if conf.info.tconv:
         tconv = tau_conv(mdat)
-        print("Convective timescale:", tconv)
+        print(f"Convective timescale: {tconv:e}")
