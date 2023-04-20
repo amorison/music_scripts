@@ -73,6 +73,11 @@ class River(Section):
 
 
 @dataclass
+class Info(Section):
+    tconv: bool = command_flag(doc="convective timescale")
+
+
+@dataclass
 class Restart(Section):
     batch: Tuple[str, ...] = TupleEntry(str).entry(
         doc="batch files to use for restart", cli_short="b", cli_zsh_comprule="_files"
@@ -148,6 +153,7 @@ class Config(ConfigBase):
     tseries: Tseries
     rprof: Prof
     river: River
+    info: Info
     restart: Restart
     renumber: Renumber
     fort_pp: FortPP
