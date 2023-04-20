@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 from .globdiag import tau_conv
