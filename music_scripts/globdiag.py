@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from typing import Union
+
 import numpy as np
 
-from .musicdata import MusicData
+from .musicdata import MusicData, _SnapsView
 
 
-def tau_conv(mdat: MusicData) -> float:
+def tau_conv(mdat: Union[MusicData, _SnapsView]) -> float:
     """Convective time scale."""
     r_grid = mdat.grid.grids[0]
     d_rad = r_grid.cell_widths()

@@ -57,7 +57,7 @@ class Snap(BaseMusicData):
         return self.mdat.eos
 
 
-class _SnapsView:
+class _SnapsView(BaseMusicData):
     """Iterator over snapshots."""
 
     def __init__(self, mdat: MusicData, items: Sequence[Union[int, slice]]):
@@ -71,13 +71,47 @@ class _SnapsView:
             return False
         return True
 
-    def __iter__(self) -> Iterator[Snap]:
+    def _idumps(self) -> Iterator[int]:
         for item in self._items:
             if isinstance(item, slice):
                 idx = item.indices(len(self._mdat))
-                yield from (self._mdat[i] for i in range(*idx) if self._exists(i))
-            elif self._exists(item):
-                yield self._mdat[item]
+                yield from range(*idx)
+            else:
+                yield self._mdat._normalize_idump(item)
+
+    @cached_property
+    def sim(self) -> MusicSim:
+        return MusicSim.from_dump_file_names(
+            file_names=sorted(
+                file
+                for idump in self._idumps()
+                if (file := self._mdat._outfile(idump)).exists()
+            ),
+            recenter_bc_list=self._mdat._recenter_bc(),
+        )
+
+    def __iter__(self) -> Iterator[Snap]:
+        return (self._mdat[idump] for idump in self._idumps() if self._exists(idump))
+
+    @property
+    def grid(self) -> Grid:
+        return self.sim.grid
+
+    @cached_property
+    def big_array(self) -> BigArray:
+        return self.sim.big_array()
+
+    @cached_property
+    def eos(self) -> eos.EoS:
+        return self._mdat.eos
+
+    @cached_property
+    def cartesian(self) -> bool:
+        return self._mdat.params["geometry"]["cartesian"]
+
+    @cached_property
+    def prof1d(self) -> Prof1d:
+        return self._mdat.prof1d
 
 
 class MusicData(BaseMusicData):

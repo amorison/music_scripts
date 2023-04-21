@@ -171,7 +171,7 @@ SUB_CMDS = dict(
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     river=Subcmd("plot a river plot (time, radius)", "core", func=river.cmd),
-    info=Subcmd("general info about a run", "core", func=info.cmd),
+    info=Subcmd("general info about a run", "core", func=info.cmd, dumps=()),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     renumber=Subcmd("renumber MUSIC output file", func=renumber.cmd),
     pendepth=Subcmd("plot penetration depth", func=plot_pendepth.cmd),
