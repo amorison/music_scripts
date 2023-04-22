@@ -237,6 +237,7 @@ def adiab_grad(bmdat: BaseMusicData) -> BigArray:
 @FieldGetter.register
 def enthalpy_flux(bmdat: BaseMusicData) -> BigArray:
     temp_field = bmdat.field["temp"].array()
+    # FIXME: handle time axis
     temp_prof = bmdat.rprof["temp"].array()
     delta_temp = temp_field - temp_prof[:, np.newaxis]
     c_p = bmdat.eos.heat_cap_p(bmdat.big_array).array()
