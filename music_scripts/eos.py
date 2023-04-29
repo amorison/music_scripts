@@ -29,6 +29,10 @@ class EoS(ABC):
         ...
 
     @abstractmethod
+    def enthalpy(self, array: BigArray) -> BigArray:
+        ...
+
+    @abstractmethod
     def adiab_grad(self, array: BigArray) -> BigArray:
         """Adiabatic gradient dlnT / dlnP as constant S."""
 
@@ -70,6 +74,19 @@ class MesaCstMetalEos(EoS):
 
     def pressure_gas(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.LogPgas).apply(lambda v: 10**v)
+
+    def enthalpy(self, array: BigArray) -> BigArray:
+        def calc(rho: NDArray, e_int: NDArray, he_frac: NDArray) -> NDArray:
+            state = mmt.CstMetalState(self._eos, he_frac, rho, e_int)
+            press = 10 ** state.compute(mmt.StateVar.LogPressure)
+            return e_int + press / rho
+
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density", "e_int_spec", f"scalar_{self.he_scalar}"],
+            calc,
+        )
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
@@ -117,6 +134,19 @@ class MesaCstCompoEos(EoS):
 
     def pressure_gas(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.LogPgas).apply(lambda v: 10**v)
+
+    def enthalpy(self, array: BigArray) -> BigArray:
+        def calc(rho: NDArray, e_int: NDArray) -> NDArray:
+            state = mmt.CstCompoState(self._eos, rho, e_int)
+            press = 10 ** state.compute(mmt.StateVar.LogPressure)
+            return e_int + press / rho
+
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density", "e_int_spec"],
+            calc,
+        )
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
@@ -182,6 +212,14 @@ class IdealGasMix2(EoS):
 
     def pressure_gas(self, array: BigArray) -> BigArray:
         return self.pressure(array)
+
+    def enthalpy(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["e_int_spec", self._c1var],
+            lambda e_int, c1: (self._gm1(c1) + 1.0) * e_int,
+        )
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(array, "var", [self._c1var], self._adgrad)
