@@ -21,14 +21,14 @@ def restart_batch(batchfile: Path) -> None:
     new_music_out = old_music_out[:-6] + f"{out_number+1:02d}.out"
     print(f"{batchfile}: {old_music_out} > {new_music_out}")
 
-    params = Path(content_parts[-4])
+    params = Path(content_parts[-5])
     nml = f90nml.read(str(params))
     old_input = nml["io"]["input"]
-    old_output = nml["io"]["dataoutput"]
-    new_input = str(max(Path().glob(f"{old_output}*.music")))
-    new_output = old_output[:-3] + f"{out_number+1:02d}_"
+
+    output = nml["io"]["dataoutput"]
+    new_input = str(max(Path().glob(f"{output}*.music")))
+
     print(f"{params}: {old_input} > {new_input}")
-    print(f"{params}: {old_output} > {new_output}")
 
     confirm = input("Confirm (y/N)? ")
     if confirm.lower() != "y":
@@ -37,7 +37,6 @@ def restart_batch(batchfile: Path) -> None:
     content = content.replace(old_music_out, new_music_out, 1)
     batchfile.write_text(content)
     params_content = params.read_text()
-    params_content = params_content.replace(old_output, new_output, 1)
     params_content = params_content.replace(old_input, new_input, 1)
     params.write_text(params_content)
     subprocess.run(shlex.split(f"sbatch '{batchfile}'"), check=True)
