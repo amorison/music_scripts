@@ -8,7 +8,13 @@ from pathlib import Path
 import f90nml
 
 if typing.TYPE_CHECKING:
+    from typing import Iterable
+
     from .config import Config
+
+
+def find_ends_with(haystack: Iterable[str], needle: str) -> str:
+    return next(filter(lambda s: s.endswith(needle), haystack))
 
 
 def restart_batch(batchfile: Path) -> None:
@@ -16,12 +22,12 @@ def restart_batch(batchfile: Path) -> None:
     content = batchfile.read_text()
     content_parts = content.strip().split()
 
-    old_music_out = content_parts[-2]
+    old_music_out = find_ends_with(content_parts, ".out")
     out_number = int(old_music_out[-6:-4])
     new_music_out = old_music_out[:-6] + f"{out_number+1:02d}.out"
     print(f"{batchfile}: {old_music_out} > {new_music_out}")
 
-    params = Path(content_parts[-5])
+    params = Path(find_ends_with(content_parts, ".nml"))
     nml = f90nml.read(str(params))
     old_input = nml["io"]["input"]
 
