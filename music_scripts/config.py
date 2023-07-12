@@ -13,6 +13,7 @@ from loam.tools import command_flag, path_entry
 from . import (
     field,
     fort_pp,
+    igw,
     info,
     lmax,
     lyon1d,
@@ -56,6 +57,15 @@ class Field(Section):
     vmin: Optional[float] = MaybeEntry(float).entry(doc="min field value on plot")
     vmax: Optional[float] = MaybeEntry(float).entry(doc="max field value on plot")
     full_r: bool = command_flag("do not try to normalize r by rtot")
+
+
+@dataclass
+class Igw(Section):
+    field: str = entry(val="vel_1", doc="field to use to compute spectrum")
+    ells: Tuple[int, ...] = TupleEntry(int).entry(
+        default=(1, 2, 3, 5, 10, 15),
+        doc="angular degrees",
+    )
 
 
 @dataclass
@@ -151,6 +161,7 @@ class Lyon1d(Section):
 class Config(ConfigBase):
     core: Core
     field: Field
+    igw: Igw
     tseries: Tseries
     rprof: Prof
     river: River
@@ -168,6 +179,7 @@ class Config(ConfigBase):
 
 SUB_CMDS = dict(
     field=Subcmd("plot a scalar field", "core", "plotting", func=field.cmd),
+    igw=Subcmd("compute spectrum", "core", func=igw.cmd),
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     river=Subcmd("plot a river plot (time, radius)", "core", func=river.cmd),
