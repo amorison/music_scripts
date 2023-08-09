@@ -33,6 +33,14 @@ class EoS(ABC):
         ...
 
     @abstractmethod
+    def gamma(self, array: BigArray) -> BigArray:
+        """Adiabatic index Cp/Cv."""
+
+    @abstractmethod
+    def gamma_1(self, array: BigArray) -> BigArray:
+        """First adiabatic index dlnP / dlnD at constant S."""
+
+    @abstractmethod
     def adiab_grad(self, array: BigArray) -> BigArray:
         """Adiabatic gradient dlnT / dlnP as constant S."""
 
@@ -87,6 +95,12 @@ class MesaCstMetalEos(EoS):
             ["density", "e_int_spec", f"scalar_{self.he_scalar}"],
             calc,
         )
+
+    def gamma(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.Gamma)
+
+    def gamma_1(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.Gamma1)
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
@@ -147,6 +161,12 @@ class MesaCstCompoEos(EoS):
             ["density", "e_int_spec"],
             calc,
         )
+
+    def gamma(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.Gamma)
+
+    def gamma_1(self, array: BigArray) -> BigArray:
+        return self.derive_arr(array, mmt.StateVar.Gamma1)
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return self.derive_arr(array, mmt.StateVar.DTempDPresScst)
@@ -220,6 +240,17 @@ class IdealGasMix2(EoS):
             ["e_int_spec", self._c1var],
             lambda e_int, c1: (self._gm1(c1) + 1.0) * e_int,
         )
+
+    def gamma(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            [self._c1var],
+            lambda c1: self._gm1(c1) + 1,
+        )
+
+    def gamma_1(self, array: BigArray) -> BigArray:
+        return self.gamma(array)
 
     def adiab_grad(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(array, "var", [self._c1var], self._adgrad)

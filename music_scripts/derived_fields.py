@@ -241,6 +241,18 @@ def enthalpy(bmdat: BaseMusicData) -> BigArray:
 
 
 @FieldGetter.register
+def gamma(bmdat: BaseMusicData) -> BigArray:
+    """Heat capacity ratio."""
+    return bmdat.eos.gamma(bmdat.big_array)
+
+
+@FieldGetter.register
+def gamma1(bmdat: BaseMusicData) -> BigArray:
+    """First adiabatic index dlnP / dlnD at constant S."""
+    return bmdat.eos.gamma_1(bmdat.big_array)
+
+
+@FieldGetter.register
 def enthalpy_flux(bmdat: BaseMusicData) -> BigArray:
     temp_field = bmdat.field["temp"].array()
     # FIXME: handle time axis
