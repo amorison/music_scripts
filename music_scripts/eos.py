@@ -8,6 +8,8 @@ from functools import cached_property
 import music_mesa_tables as mmt
 from pymusic.big_array import DerivedFieldArray
 
+from .constants import GAS_CONSTANT
+
 if typing.TYPE_CHECKING:
     from numpy.typing import NDArray
     from pymusic.big_array import BigArray
@@ -190,7 +192,6 @@ class IdealGasMix2(EoS):
     mu1: float
     mu2: float
     c1_scalar: int
-    rgas: float = 8.314462618e7  # cgs
 
     @cached_property
     def _c1var(self) -> str:
@@ -212,14 +213,14 @@ class IdealGasMix2(EoS):
 
     def _cp(self, c1: NDArray) -> NDArray:
         gm1 = self._gm1(c1)
-        return (gm1 + 1) * self.rgas / (gm1 * self._mu(c1))
+        return (gm1 + 1) * GAS_CONSTANT / (gm1 * self._mu(c1))
 
     def temperature(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(
             array,
             "var",
             ["e_int_spec", self._c1var],
-            lambda e_int, c1: self._gm1(c1) * e_int * self._mu(c1) / self.rgas,
+            lambda e_int, c1: self._gm1(c1) * e_int * self._mu(c1) / GAS_CONSTANT,
         )
 
     def pressure(self, array: BigArray) -> BigArray:
