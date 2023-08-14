@@ -27,6 +27,14 @@ class FgongModel:
         return self._fgong.R
 
     @cached_property
+    def luminosity_tot(self) -> float:
+        return self._fgong.L
+
+    @cached_property
+    def mass_tot(self) -> float:
+        return self._fgong.M
+
+    @cached_property
     def bv_freq(self) -> NDArray[np.floating]:
         n2 = np.flip(self._fgong.N2)
         return np.sqrt(np.maximum(n2, 0.0)) / (2 * np.pi)
