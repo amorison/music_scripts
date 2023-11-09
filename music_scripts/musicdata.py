@@ -131,21 +131,24 @@ class MusicData(BaseMusicData):
 
     @cached_property
     def eos(self) -> eos.EoS:
-        mphys = self.params["microphysics"]
-        eos_name = mphys.get("eos", "mesa")
+        eos_name = self.params["microphysics"].get("eos", "mesa")
         if eos_name == "mesa":
-            metallicity = self.params["physics"]["zz"]
-            if self.params["scalars"].get("nscalars", 0) > 0:
-                he_scalar = self.params["scalars"].get("helium_scalar", 1)
+            abd = self.params["abundances"]
+            metallicity = abd.get("metals_mass_fraction", 0.02)
+            he_scalar = abd.get("helium_scalar", 0)
+            if he_scalar > 0:
                 return eos.MesaCstMetalEos(metallicity, he_scalar)
-            return eos.MesaCstCompoEos(metallicity, self.params["physics"]["yy"])
+            return eos.MesaCstCompoEos(
+                metallicity, abd.get("helium_mass_fraction", 0.28)
+            )
         elif eos_name == "ideal_gas_mix2":
+            eos_nml = self.params["eos_ideal_mix2"]
             return eos.IdealGasMix2(
-                gamma1=mphys["ideal_gas_mix2_gamma1"],
-                gamma2=mphys["ideal_gas_mix2_gamma2"],
-                mu1=mphys["ideal_gas_mix2_mu1"],
-                mu2=mphys["ideal_gas_mix2_mu2"],
-                c1_scalar=mphys["ideal_gas_mix2_mass_frac_1_scalar"],
+                gamma1=eos_nml["gamma1"],
+                gamma2=eos_nml["gamma2"],
+                mu1=eos_nml["mu1"],
+                mu2=eos_nml["mu2"],
+                c1_scalar=eos_nml["mass_frac_1_scalar"],
             )
         else:
             raise NotImplementedError(f"EoS: {eos_name}")
