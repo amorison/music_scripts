@@ -94,6 +94,8 @@ def cmd(conf: Config) -> None:
             criteria=criteria,
             normalize_dr=conf.lmax.normdr,
         ).series()
+        mean = lmax.values.mean()
+        print(f"mean lmax {criteria}: {mean}")
         all_plots.append(SeriesHist(tseries=lmax, group_by_unique=conf.lmax.normdr))
         series_plots.append(SeriesPlot(tseries=lmax))
     all_plots.append(SameAxesPlot(plots=series_plots))
