@@ -26,7 +26,7 @@ dependencies = [
     "tomso>=0.2.1",
     "music_mesa_tables>=0.2",
     "music_pykg>=4.0,<4.1",
-    "pymusic>=0.1.0",
+    "pymusic>=1.1.0,<2.0",
     "loam>=0.8.0,<0.9.0",
 ]
 

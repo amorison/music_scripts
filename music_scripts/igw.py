@@ -4,9 +4,9 @@ import typing
 
 import h5py
 import numpy as np
+import pymusic.spec as pms
 from pymusic.big_array import CachedArray, FFTPowerSpectrumArray, SphHarm1DArray
 from pymusic.math import SphericalMidpointQuad1D
-from pymusic.spec import BlackmanWindow, NuFFT1D, SphericalHarmonicsTransform1D
 
 from .musicdata import MusicData
 
@@ -26,9 +26,16 @@ def cmd(conf: Config) -> None:
     times = np.array(fld.labels_along_axis("time"))
     d_time = np.mean(np.diff(times))
 
-    fft = NuFFT1D(window=BlackmanWindow(), sampling_period=d_time, spacing_tol=0.1)
+    fft = pms.NuFFT1D(
+        window=pms.NormalizedWindow(
+            window=pms.BlackmanWindow(),
+            normalization=pms.PreservePower(),
+        ),
+        sampling_period=d_time,
+        spacing_tol=0.1,
+    )
 
-    sh_xform = SphericalHarmonicsTransform1D(
+    sh_xform = pms.SphericalHarmonicsTransform1D(
         quad=SphericalMidpointQuad1D(theta_grid=subsim.grid.grids[1]),
         ell_max=max(conf.igw.ells),
         tol=0.15,
@@ -36,16 +43,16 @@ def cmd(conf: Config) -> None:
 
     power_spec = CachedArray(
         FFTPowerSpectrumArray(
-            SphHarm1DArray(
+            array=SphHarm1DArray(
                 array=fld,
                 sph_harm_xform=sh_xform,
                 theta_axis="x2",
                 ell_axis="ell",
                 ells=conf.igw.ells,
             ).slabbed("time", 200),
-            fft,
-            "time",
-            "freq",
+            fft1d=fft,
+            axis="time",
+            freq_axis="freq",
         ).slabbed("x1", 256)
     )
 
@@ -55,7 +62,9 @@ def cmd(conf: Config) -> None:
 
     ells_str = "_".join(map(str, conf.igw.ells))
     dstart, dstop, dstep = dumps.indices(len(mdat))
-    oname = f"igw_{conf.igw.field}_ell_{ells_str}_dumps_{dstart}:{dstop}:{dstep}.h5"
+    oname = (
+        f"spectrum_{conf.igw.field}_ell_{ells_str}_dumps_{dstart}:{dstop}:{dstep}.h5"
+    )
 
     with h5py.File(oname, "w") as hf:
         hf.create_dataset("spectrum", data=power_spec.array())
