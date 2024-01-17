@@ -48,9 +48,10 @@ def cmd(conf: Config) -> None:
         )
     print("rout/rstar:", rfaces[-1] / rstar)
 
-    print("dump 1 at t={:e}".format(t0 := mdat[1].dump.time))
-    print("dump {} at t={:e}".format(mdat[-1].idump, tf := mdat[-1].dump.time))
-    print("duration: {:e}".format(tf - t0))
+    # FIXME: duration needs to be computed over the view
+    # print("dump 1 at t={:e}".format(t0 := mdat[1].dump.time))
+    # print("dump {} at t={:e}".format(mdat[-1].idump, tf := mdat[-1].dump.time))
+    # print("duration: {:e}".format(tf - t0))
 
     if conf.info.tconv:
         tconv = tau_conv(view)
