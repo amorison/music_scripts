@@ -177,6 +177,17 @@ def ekin(bmdat: BaseMusicData) -> BigArray:
 
 
 @FieldGetter.register
+def ekin_r(bmdat: BaseMusicData) -> BigArray:
+    """Radial component of kinetic energy."""
+    return DerivedFieldArray(
+        bmdat.big_array,
+        "var",
+        ["density", "vel_1"],
+        lambda rho, vel_1: 0.5 * rho * vel_1**2,
+    )
+
+
+@FieldGetter.register
 def vr_abs(bmdat: BaseMusicData) -> BigArray:
     """Absolute vr."""
     return DerivedFieldArray(bmdat.big_array, "var", ["vel_1"], np.abs)
