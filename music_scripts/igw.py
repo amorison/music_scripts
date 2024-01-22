@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import typing
+from dataclasses import dataclass
+from functools import cached_property
 
 import h5py
 import numpy as np
@@ -11,7 +13,87 @@ from pymusic.math import SphericalMidpointQuad1D
 from .musicdata import MusicData
 
 if typing.TYPE_CHECKING:
+    from pathlib import Path
+
+    from numpy.typing import NDArray
+
     from .config import Config
+    from .fgong import FgongModel
+
+
+@dataclass(frozen=True)
+class _SpecData:
+    spectrum: NDArray[np.floating]
+    freqs: NDArray[np.floating]
+    rads: NDArray[np.floating]
+    ells: NDArray[np.integer]
+
+
+@dataclass(frozen=True)
+class SpectrumAnalysis:
+    spectrum_h5: Path
+    fgong: FgongModel
+
+    @cached_property
+    def _data(self) -> _SpecData:
+        with h5py.File(self.spectrum_h5, "r") as h5f:
+            return _SpecData(
+                spectrum=h5f.get("spectrum")[()],
+                freqs=h5f.get("frequency")[()],
+                rads=h5f.get("radius")[()],
+                ells=h5f.get("ell")[()],
+            )
+
+    @property
+    def spectrum(self) -> NDArray[np.floating]:
+        """Spectrum indexed by (freq, rad, ell)."""
+        return self._data.spectrum
+
+    @property
+    def freqs(self) -> NDArray[np.floating]:
+        """Frequencies."""
+        return self._data.freqs
+
+    @property
+    def rads(self) -> NDArray[np.floating]:
+        """Radial positions."""
+        return self._data.rads
+
+    @property
+    def ells(self) -> NDArray[np.integer]:
+        """Harmonic degrees."""
+        return self._data.ells
+
+    @cached_property
+    def density(self) -> NDArray[np.floating]:
+        """Density profile."""
+        return np.interp(self.rads, self.fgong.radius, self.fgong.density)
+
+    @cached_property
+    def bv_freq(self) -> NDArray[np.floating]:
+        """Brunt-Vaisala frequency profile."""
+        return np.interp(self.rads, self.fgong.radius, self.fgong.bv_freq)
+
+    @cached_property
+    def k_h(self) -> NDArray[np.floating]:
+        """Horizontal wavenumber, indexed by (rad, ell)."""
+        ell = np.sqrt(self.ells * (self.ells + 1))
+        return ell[np.newaxis, :] / self.rads[:, np.newaxis]
+
+    @cached_property
+    def luminosity(self) -> NDArray[np.floating]:
+        """Wave luminosity, indexed by (freq, rad, ell)."""
+        # indexed by (rad)
+        rad_kh = 2 * np.pi * self.rads**2 * self.density
+        # indexed by (rad, ell)
+        rad_kh = rad_kh[:, np.newaxis] / self.k_h
+        # indexed by (freq, rad)
+        freq = np.sqrt(
+            np.maximum(
+                self.bv_freq[np.newaxis, :] ** 2 - self.freqs[:, np.newaxis] ** 2, 0.0
+            )
+        )
+        return rad_kh[np.newaxis, :, :] * freq[:, :, np.newaxis] * self.spectrum
 
 
 def cmd(conf: Config) -> None:
