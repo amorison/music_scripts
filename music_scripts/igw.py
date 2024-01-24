@@ -9,6 +9,7 @@ import numpy as np
 import pymusic.spec as pms
 from pymusic.big_array import CachedArray, FFTPowerSpectrumArray, SphHarm1DArray
 from pymusic.math import SphericalMidpointQuad1D
+from scipy.integrate import cumulative_trapezoid
 
 from .musicdata import MusicData
 
@@ -94,6 +95,104 @@ class SpectrumAnalysis:
             )
         )
         return rad_kh[np.newaxis, :, :] * freq[:, :, np.newaxis] * self.spectrum
+
+    def theory_with_excitation_radius(self, r_e: float) -> LinearTheory:
+        return LinearTheory(self, r_e * self.fgong.r_star)
+
+
+@dataclass(frozen=True)
+class LinearTheory:
+    spec: SpectrumAnalysis
+    r_e: float
+
+    @cached_property
+    def _ire(self) -> int:
+        return int(np.searchsorted(self.spec.fgong.radius, self.r_e)) + 1
+
+    @property
+    def radius(self) -> NDArray[np.floating]:
+        return self.spec.fgong.radius[self._ire :]
+
+    @property
+    def density(self) -> NDArray[np.floating]:
+        return self.spec.fgong.density[self._ire :]
+
+    @property
+    def bv_freq(self) -> NDArray[np.floating]:
+        return self.spec.fgong.bv_freq[self._ire :]
+
+    @property
+    def diffusivity(self) -> NDArray[np.floating]:
+        return self.spec.fgong.diffusivity[self._ire :]
+
+    @cached_property
+    def k_h(self) -> NDArray[np.floating]:
+        """Wavenumber, indexed by (rad, ell)."""
+        ell = np.sqrt(self.spec.ells * (self.spec.ells + 1))
+        return ell[np.newaxis, :] / self.radius[:, np.newaxis]
+
+    @cached_property
+    def damping(self) -> NDArray[np.floating]:
+        """Damping coefficient, indexed by (freq, rad, ell)."""
+        # indexed by (freq, rad)
+        freq = np.sqrt(
+            np.maximum(
+                self.bv_freq[np.newaxis, :] ** 2 - self.spec.freqs[:, np.newaxis] ** 2,
+                1e-12,
+            )
+        )
+        # indexed by (freq, rad, ell)
+        integrand = (
+            self.diffusivity[np.newaxis, :, np.newaxis]
+            * self.k_h[np.newaxis, :, :] ** 3
+            * self.bv_freq[np.newaxis, :, np.newaxis] ** 4
+            / self.spec.freqs[:, np.newaxis, np.newaxis] ** 4
+            / freq[:, :, np.newaxis]
+        )
+        return cumulative_trapezoid(
+            y=integrand,
+            x=self.radius,
+            initial=0.0,
+            axis=1,
+        )
+
+    @cached_property
+    def _ire_spec(self) -> int:
+        return int(np.searchsorted(self.spec.rads, self.radius[0]))
+
+    @cached_property
+    def wave_lum(self) -> NDArray[np.floating]:
+        """Predicted wave luminosity."""
+        lwave0 = self.spec.luminosity[:, (self._ire_spec,), :]
+        return lwave0 * np.exp(-self.damping)
+
+    @cached_property
+    def v_r_no_damping(self) -> NDArray[np.floating]:
+        """Predicted v_r without damping."""
+        # indexed by (freq, rad, ell)
+        v_r0 = np.sqrt(
+            np.max(
+                self.spec.spectrum[:, self._ire_spec : self._ire_spec + 5, :],
+                axis=1,
+                keepdims=True,
+            )
+        )
+        # indexed by (freq, rad)
+        freq = self.spec.freqs[:, np.newaxis]
+        freq_ratio = (self.bv_freq[np.newaxis, :] ** 2 - freq**2) / (
+            self.bv_freq[0] ** 2 - freq**2
+        )
+        return (
+            v_r0
+            * (self.radius[0] / self.radius[np.newaxis, :, np.newaxis]) ** (3 / 2)
+            * (self.density[0] / self.density[np.newaxis, :, np.newaxis]) ** (1 / 2)
+            * freq_ratio[:, :, np.newaxis] ** (-1 / 4)
+        )
+
+    @cached_property
+    def v_r(self) -> NDArray[np.floating]:
+        """Predicted v_r with damping."""
+        return self.v_r_no_damping * np.exp(-self.damping / 2)
 
 
 def cmd(conf: Config) -> None:
