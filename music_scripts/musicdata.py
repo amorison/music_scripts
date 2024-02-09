@@ -164,9 +164,11 @@ class MusicData(BaseMusicData):
         # very crude way to handle boundary conditions for now
         bcr = self.params["boundaryconditions"]["bc1"][0]
         bct = self.params["boundaryconditions"]["bc3"][0]
+        bcp = self.params["boundaryconditions"].get("bc5", ["periodic"])[0]
         return [
             PeriodicArrayBC() if bcr == "periodic" else ReflectiveArrayBC(),
             PeriodicArrayBC() if bct == "periodic" else ReflectiveArrayBC(),
+            PeriodicArrayBC() if bcp == "periodic" else ReflectiveArrayBC(),
         ]
 
     @cached_property
