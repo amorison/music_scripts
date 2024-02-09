@@ -22,6 +22,7 @@ from . import (
     restart,
     river,
     rprof,
+    to_vtk,
     tseries,
 )
 
@@ -81,6 +82,11 @@ class Prof(Section):
 @dataclass
 class River(Section):
     plot: str = entry(val="ekin", cli_short="o", doc="variable to plot")
+
+
+@dataclass
+class Vtk(Section):
+    vtk_dir: Path = path_entry(path="vtk", cli_short="V", doc="output directory")
 
 
 @dataclass
@@ -165,6 +171,7 @@ class Config(ConfigBase):
     tseries: Tseries
     rprof: Prof
     river: River
+    vtk: Vtk
     info: Info
     restart: Restart
     renumber: Renumber
@@ -183,6 +190,7 @@ SUB_CMDS = dict(
     tseries=Subcmd("plot a time series", "core", "plotting", func=tseries.cmd),
     rprof=Subcmd("plot a radial profile", "core", "plotting", func=rprof.cmd),
     river=Subcmd("plot a river plot (time, radius)", "core", func=river.cmd),
+    vtk=Subcmd("convert music files to VTK", "core", func=to_vtk.cmd),
     info=Subcmd("general info about a run", "core", func=info.cmd, dumps=()),
     restart=Subcmd("restart a MUSIC run from batch file", func=restart.cmd),
     renumber=Subcmd("renumber MUSIC output file", func=renumber.cmd),

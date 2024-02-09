@@ -25,6 +25,7 @@ dependencies = [
     "f90nml>=1.4.3",
     "h5py>=3.7",
     "matplotlib>=3.6",
+    "pyevtk>=1.6",
     "tomso>=0.2.1",
     "music_mesa_tables>=0.2",
     "music_pykg>=4.0,<4.1",
@@ -51,6 +52,7 @@ module = [
     "h5py.*",
     "matplotlib.*",
     "mpl_toolkits.*",
+    "pyevtk.*",
     "scipy.*",
     "tomso.*",
 ]
