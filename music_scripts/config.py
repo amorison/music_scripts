@@ -151,6 +151,17 @@ class RprofPP(Section):
 
 
 @dataclass
+class RprofTavePP(Section):
+    error: Tuple[str] = TupleEntry(str).entry(
+        default="std",
+        cli_short="E",
+        doc="type of time variation, will plot the union of '', 'std','range'",
+    )
+    edump: int = entry(val=1, cli_short="e", doc="start dump number to process")
+    sdump: int = entry(val=1, cli_short="s", doc="stide of dumps")
+
+
+@dataclass
 class Lmax(Section):
     normdr: bool = command_flag("normalize lmax by average dr")
 
@@ -180,6 +191,7 @@ class Config(ConfigBase):
     field_pp: FieldPP
     contour_pp: ContourPP
     rprof_pp: RprofPP
+    rprof_tave_pp: RprofTavePP
     lmax: Lmax
     lyon1d: Lyon1d
 
@@ -206,6 +218,13 @@ SUB_CMDS = dict(
     ),
     rprof_pp=Subcmd(
         "plot a rprof field from PP data", "fort_pp", "plotting", func=fort_pp.rprof_cmd
+    ),
+    rprof_tave_pp=Subcmd(
+        "plot a time-averaged rprof field from PP data",
+        "fort_pp",
+        "rprof_pp",
+        "plotting",
+        func=fort_pp.rprof_tave_cmd,
     ),
     lyon1d=Subcmd("plot 1D data from Lyon model", func=lyon1d.cmd),
     lmax=Subcmd("plot lmax histogram", "fort_pp", func=lmax.cmd),
