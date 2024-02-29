@@ -19,7 +19,7 @@ if typing.TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .config import Config
-    from .fgong import FgongModel
+    from .lyon1d import Lyon1dStruc
 
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ class _SpecData:
 @dataclass(frozen=True)
 class SpectrumAnalysis:
     spectrum_h5: Path
-    fgong: FgongModel
+    struc: Lyon1dStruc
 
     @cached_property
     def _data(self) -> _SpecData:
@@ -68,12 +68,12 @@ class SpectrumAnalysis:
     @cached_property
     def density(self) -> NDArray[np.floating]:
         """Density profile."""
-        return np.interp(self.rads, self.fgong.radius, self.fgong.density)
+        return np.interp(self.rads, self.struc.radius, self.struc.density)
 
     @cached_property
     def bv_freq(self) -> NDArray[np.floating]:
         """Brunt-Vaisala frequency profile."""
-        return np.interp(self.rads, self.fgong.radius, self.fgong.bv_freq)
+        return np.interp(self.rads, self.struc.radius, self.struc.bv_freq)
 
     @cached_property
     def k_h(self) -> NDArray[np.floating]:
@@ -97,7 +97,7 @@ class SpectrumAnalysis:
         return rad_kh[np.newaxis, :, :] * freq[:, :, np.newaxis] * self.spectrum
 
     def theory_with_excitation_radius(self, r_e: float) -> LinearTheory:
-        return LinearTheory(self, r_e * self.fgong.r_star)
+        return LinearTheory(self, r_e * self.struc.r_star)
 
 
 @dataclass(frozen=True)
@@ -107,23 +107,27 @@ class LinearTheory:
 
     @cached_property
     def _ire(self) -> int:
-        return int(np.searchsorted(self.spec.fgong.radius, self.r_e)) + 1
+        return int(np.searchsorted(self.spec.struc.radius, self.r_e)) + 1
 
     @property
     def radius(self) -> NDArray[np.floating]:
-        return self.spec.fgong.radius[self._ire :]
+        return self.spec.struc.radius[self._ire :]
 
     @property
     def density(self) -> NDArray[np.floating]:
-        return self.spec.fgong.density[self._ire :]
+        return self.spec.struc.density[self._ire :]
 
     @property
     def bv_freq(self) -> NDArray[np.floating]:
-        return self.spec.fgong.bv_freq[self._ire :]
+        return self.spec.struc.bv_freq[self._ire :]
+
+    @property
+    def bv_freq_thermal(self) -> NDArray[np.floating]:
+        return self.spec.struc.bv_freq_thermal[self._ire :]
 
     @property
     def diffusivity(self) -> NDArray[np.floating]:
-        return self.spec.fgong.diffusivity[self._ire :]
+        return self.spec.struc.heat_diffusivity[self._ire :]
 
     @cached_property
     def k_h(self) -> NDArray[np.floating]:
@@ -145,7 +149,8 @@ class LinearTheory:
         integrand = (
             self.diffusivity[np.newaxis, :, np.newaxis]
             * self.k_h[np.newaxis, :, :] ** 3
-            * self.bv_freq[np.newaxis, :, np.newaxis] ** 4
+            * self.bv_freq[np.newaxis, :, np.newaxis] ** 2
+            * self.bv_freq_thermal[np.newaxis, :, np.newaxis] ** 2
             / self.spec.freqs[:, np.newaxis, np.newaxis] ** 4
             / freq[:, :, np.newaxis]
         )
