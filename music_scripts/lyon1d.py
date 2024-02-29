@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import typing
 from dataclasses import dataclass, fields
+from functools import cached_property
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
+from . import constants as const
 from .figure import SinglePlotFigure
 from .fort_pp import Rprof, RprofPlot
 
@@ -101,6 +103,110 @@ class Lyon1dData:
             values=getattr(self, name),
             radius=self.radius,
         )
+
+
+@dataclass(frozen=True)
+class Lyon1dStruc:
+    file_path: Path
+    msun: float
+
+    @cached_property
+    def _data(self) -> NDArray[np.floating]:
+        return np.loadtxt(self.file_path)
+
+    @property
+    def mass_adim(self) -> NDArray[np.floating]:
+        return self._data[:, 1]
+
+    @property
+    def radius(self) -> NDArray[np.floating]:
+        return self._data[:, 2]
+
+    @property
+    def temperature(self) -> NDArray[np.floating]:
+        return self._data[:, 3]
+
+    @property
+    def density(self) -> NDArray[np.floating]:
+        return self._data[:, 4]
+
+    @property
+    def pressure(self) -> NDArray[np.floating]:
+        return self._data[:, 5]
+
+    @property
+    def opacity(self) -> NDArray[np.floating]:
+        return self._data[:, 7]
+
+    @property
+    def luminosity(self) -> NDArray[np.floating]:
+        return self._data[:, 8]
+
+    @property
+    def height_press(self) -> NDArray[np.floating]:
+        return self._data[:, 13]
+
+    @property
+    def nabla_adiab(self) -> NDArray[np.floating]:
+        """d ln(temp) / d ln(press) at constant entropy"""
+        return self._data[:, 19]
+
+    @property
+    def heat_capacity(self) -> NDArray[np.floating]:
+        return self._data[:, 23]
+
+    @property
+    def nabla(self) -> NDArray[np.floating]:
+        """d ln(temp) / d ln(press)"""
+        return self._data[:, 24]
+
+    @property
+    def delta(self) -> NDArray[np.floating]:
+        """-d ln(density) / d ln(temp) at constant pressure, mu"""
+        return self._data[:, 25]
+
+    @property
+    def bv_freq(self) -> NDArray[np.floating]:
+        return np.sqrt(np.maximum(self._data[:, 32], 0.0)) / (2 * np.pi)
+
+    @cached_property
+    def mass(self) -> NDArray[np.floating]:
+        return self.mass_adim * self.msun * const.SUN_MASS
+
+    @cached_property
+    def gravity(self) -> NDArray[np.floating]:
+        return const.GRAVITATIONAL_CONSTANT * self.mass / self.radius**2
+
+    @cached_property
+    def heat_conductivity(self) -> NDArray[np.floating]:
+        return (
+            16
+            * const.STEFAN_BOLTZMANN
+            * self.temperature**3
+            / (3 * self.opacity * self.density)
+        )
+
+    @cached_property
+    def heat_diffusivity(self) -> NDArray[np.floating]:
+        return self.heat_conductivity / (self.density * self.heat_capacity)
+
+    @cached_property
+    def bv_freq_thermal(self) -> NDArray[np.floating]:
+        bvt2 = (
+            self.gravity
+            * self.delta
+            * (self.nabla_adiab - self.nabla)
+            / self.height_press
+        )
+        return np.sqrt(np.maximum(bvt2, 0.0)) / (2 * np.pi)
+
+    @property
+    def r_star(self) -> float:
+        return self.radius[-1]
+
+    @property
+    def luminosity_tot(self) -> float:
+        return self.luminosity[-1]
 
 
 def cmd(conf: Config) -> None:
