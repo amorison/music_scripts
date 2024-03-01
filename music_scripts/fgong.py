@@ -35,9 +35,9 @@ class FgongModel:
         return self._fgong.M
 
     @cached_property
-    def bv_freq(self) -> NDArray[np.floating]:
+    def bv_ang_freq(self) -> NDArray[np.floating]:
         n2 = np.flip(self._fgong.N2)
-        return np.sqrt(np.maximum(n2, 0.0)) / (2 * np.pi)
+        return np.sqrt(np.maximum(n2, 0.0))
 
     @cached_property
     def radius(self) -> NDArray[np.floating]:

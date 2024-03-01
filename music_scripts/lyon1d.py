@@ -166,8 +166,8 @@ class Lyon1dStruc:
         return self._data[:, 25]
 
     @property
-    def bv_freq(self) -> NDArray[np.floating]:
-        return np.sqrt(np.maximum(self._data[:, 32], 0.0)) / (2 * np.pi)
+    def bv_ang_freq(self) -> NDArray[np.floating]:
+        return np.sqrt(np.maximum(self._data[:, 32], 0.0))
 
     @cached_property
     def mass(self) -> NDArray[np.floating]:
@@ -191,14 +191,14 @@ class Lyon1dStruc:
         return self.heat_conductivity / (self.density * self.heat_capacity)
 
     @cached_property
-    def bv_freq_thermal(self) -> NDArray[np.floating]:
+    def bv_ang_freq_thermal(self) -> NDArray[np.floating]:
         bvt2 = (
             self.gravity
             * self.delta
             * (self.nabla_adiab - self.nabla)
             / self.height_press
         )
-        return np.sqrt(np.maximum(bvt2, 0.0)) / (2 * np.pi)
+        return np.sqrt(np.maximum(bvt2, 0.0))
 
     @property
     def r_star(self) -> float:

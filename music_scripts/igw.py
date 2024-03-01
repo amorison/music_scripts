@@ -55,6 +55,11 @@ class SpectrumAnalysis:
         """Frequencies."""
         return self._data.freqs
 
+    @cached_property
+    def ang_freqs(self) -> NDArray[np.floating]:
+        """Angular frequencies."""
+        return 2 * np.pi * self.freqs
+
     @property
     def rads(self) -> NDArray[np.floating]:
         """Radial positions."""
@@ -71,9 +76,9 @@ class SpectrumAnalysis:
         return np.interp(self.rads, self.struc.radius, self.struc.density)
 
     @cached_property
-    def bv_freq(self) -> NDArray[np.floating]:
-        """Brunt-Vaisala frequency profile."""
-        return np.interp(self.rads, self.struc.radius, self.struc.bv_freq)
+    def bv_ang_freq(self) -> NDArray[np.floating]:
+        """Brunt-Vaisala angular frequency profile."""
+        return np.interp(self.rads, self.struc.radius, self.struc.bv_ang_freq)
 
     @cached_property
     def k_h(self) -> NDArray[np.floating]:
@@ -91,7 +96,9 @@ class SpectrumAnalysis:
         # indexed by (freq, rad)
         freq = np.sqrt(
             np.maximum(
-                self.bv_freq[np.newaxis, :] ** 2 - self.freqs[:, np.newaxis] ** 2, 0.0
+                self.bv_ang_freq[np.newaxis, :] ** 2
+                - self.ang_freqs[:, np.newaxis] ** 2,
+                0.0,
             )
         )
         return rad_kh[np.newaxis, :, :] * freq[:, :, np.newaxis] * self.spectrum
@@ -118,12 +125,12 @@ class LinearTheory:
         return self.spec.struc.density[self._ire :]
 
     @property
-    def bv_freq(self) -> NDArray[np.floating]:
-        return self.spec.struc.bv_freq[self._ire :]
+    def bv_ang_freq(self) -> NDArray[np.floating]:
+        return self.spec.struc.bv_ang_freq[self._ire :]
 
     @property
-    def bv_freq_thermal(self) -> NDArray[np.floating]:
-        return self.spec.struc.bv_freq_thermal[self._ire :]
+    def bv_ang_freq_thermal(self) -> NDArray[np.floating]:
+        return self.spec.struc.bv_ang_freq_thermal[self._ire :]
 
     @property
     def diffusivity(self) -> NDArray[np.floating]:
@@ -141,7 +148,8 @@ class LinearTheory:
         # indexed by (freq, rad)
         freq = np.sqrt(
             np.maximum(
-                self.bv_freq[np.newaxis, :] ** 2 - self.spec.freqs[:, np.newaxis] ** 2,
+                self.bv_ang_freq[np.newaxis, :] ** 2
+                - self.spec.ang_freqs[:, np.newaxis] ** 2,
                 1e-12,
             )
         )
@@ -149,9 +157,9 @@ class LinearTheory:
         integrand = (
             self.diffusivity[np.newaxis, :, np.newaxis]
             * self.k_h[np.newaxis, :, :] ** 3
-            * self.bv_freq[np.newaxis, :, np.newaxis] ** 2
-            * self.bv_freq_thermal[np.newaxis, :, np.newaxis] ** 2
-            / self.spec.freqs[:, np.newaxis, np.newaxis] ** 4
+            * self.bv_ang_freq[np.newaxis, :, np.newaxis] ** 2
+            * self.bv_ang_freq_thermal[np.newaxis, :, np.newaxis] ** 2
+            / self.spec.ang_freqs[:, np.newaxis, np.newaxis] ** 4
             / freq[:, :, np.newaxis]
         )
         return cumulative_trapezoid(
@@ -183,9 +191,9 @@ class LinearTheory:
             )
         )
         # indexed by (freq, rad)
-        freq = self.spec.freqs[:, np.newaxis]
-        freq_ratio = (self.bv_freq[np.newaxis, :] ** 2 - freq**2) / (
-            self.bv_freq[0] ** 2 - freq**2
+        freq = self.spec.ang_freqs[:, np.newaxis]
+        freq_ratio = (self.bv_ang_freq[np.newaxis, :] ** 2 - freq**2) / (
+            self.bv_ang_freq[0] ** 2 - freq**2
         )
         return (
             v_r0
