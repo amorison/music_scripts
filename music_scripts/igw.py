@@ -90,7 +90,7 @@ class SpectrumAnalysis:
     def luminosity(self) -> NDArray[np.floating]:
         """Wave luminosity, indexed by (freq, rad, ell)."""
         # indexed by (rad)
-        rad_kh = 2 * np.pi * self.rads**2 * self.density
+        rad_kh = 4 * np.pi * self.rads**2 * self.density
         # indexed by (rad, ell)
         rad_kh = rad_kh[:, np.newaxis] / self.k_h
         # indexed by (freq, rad)
