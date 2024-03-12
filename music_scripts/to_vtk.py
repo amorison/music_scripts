@@ -15,13 +15,18 @@ if typing.TYPE_CHECKING:
     from .musicdata import Snap
 
 
-def music_to_vtk(snaps: Iterable[Snap], vtk_path: Path) -> None:
+def music_to_vtk(
+    snaps: Iterable[Snap],
+    vtk_path: Path,
+    extra_vars: Iterable[str],
+) -> None:
     """Convert music files to vtk, assuming constant grid."""
     vtk_path.mkdir(parents=True)
 
     # grid information
     first_snap = next(iter(snaps))
-    all_vars = first_snap.big_array.labels_along_axis("var")
+    all_vars = set(first_snap.big_array.labels_along_axis("var"))
+    all_vars.update(extra_vars)
 
     x1 = first_snap.grid.grids[0].cell_centers()
     x2 = first_snap.grid.grids[1].cell_centers()
@@ -78,4 +83,5 @@ def cmd(conf: Config) -> None:
     music_to_vtk(
         mdat[conf.core.dumps],
         conf.vtk.vtk_dir,
+        conf.vtk.extra_vars,
     )
