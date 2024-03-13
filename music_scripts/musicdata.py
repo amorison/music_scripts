@@ -150,6 +150,12 @@ class MusicData(BaseMusicData):
                 mu2=eos_nml["mu2"],
                 c1_scalar=eos_nml["mass_frac_1_scalar"],
             )
+        elif eos_name == "ideal_gas":
+            eos_nml = self.params["eos_ideal"]
+            return eos.IdealGas(
+                gamma_=eos_nml["gamma"],
+                mu=eos_nml["mu"],
+            )
         else:
             raise NotImplementedError(f"EoS: {eos_name}")
 

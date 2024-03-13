@@ -258,3 +258,67 @@ class IdealGasMix2(EoS):
 
     def heat_cap_p(self, array: BigArray) -> BigArray:
         return DerivedFieldArray(array, "var", [self._c1var], self._cp)
+
+
+@dataclass(frozen=True)
+class IdealGas(EoS):
+    """Ideal gas."""
+
+    gamma_: float
+    mu: float
+
+    def temperature(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["e_int_spec"],
+            lambda e_int: (self.gamma_ - 1) * self.mu / GAS_CONSTANT * e_int,
+        )
+
+    def pressure(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density", "e_int_spec"],
+            lambda rho, e_int: (self.gamma_ - 1) * rho * e_int,
+        )
+
+    def pressure_gas(self, array: BigArray) -> BigArray:
+        return self.pressure(array)
+
+    def enthalpy(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["e_int_spec"],
+            lambda e_int: self.gamma_ * e_int,
+        )
+
+    def gamma(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density"],
+            lambda rho: rho.full_like(self.gamma_),
+        )
+
+    def gamma_1(self, array: BigArray) -> BigArray:
+        return self.gamma(array)
+
+    def adiab_grad(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density"],
+            lambda rho: rho.full_like((self.gamma_ - 1) / self.gamma_),
+        )
+
+    def heat_cap_p(self, array: BigArray) -> BigArray:
+        return DerivedFieldArray(
+            array,
+            "var",
+            ["density"],
+            lambda rho: rho.full_like(
+                self.gamma_ * GAS_CONSTANT / ((self.gamma_ - 1) * self.mu)
+            ),
+        )
