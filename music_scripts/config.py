@@ -87,7 +87,7 @@ class River(Section):
 @dataclass
 class Vtk(Section):
     vtk_dir: Path = path_entry(path="vtk", cli_short="V", doc="output directory")
-    extra_vars: tuple[str, ...] = TupleEntry(str).entry(
+    extra_vars: Tuple[str, ...] = TupleEntry(str).entry(
         doc="additional variables in VTK file", cli_short="E"
     )
 
