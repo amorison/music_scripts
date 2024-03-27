@@ -68,3 +68,7 @@ class FgongModel:
     @cached_property
     def diffusivity(self) -> NDArray[np.floating]:
         return self.conductivity / (self.density * self.heat_capacity_press)
+
+    @cached_property
+    def pressure_scale_height(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.Hp)
