@@ -215,14 +215,12 @@ class MusicData(BaseMusicData):
         return idump
 
     @typing.overload
-    def __getitem__(self, idump: int) -> Snap:
-        ...
+    def __getitem__(self, idump: int) -> Snap: ...
 
     @typing.overload
     def __getitem__(
         self, idump: Union[slice, Tuple[Union[int, slice], ...]]
-    ) -> _SnapsView:
-        ...
+    ) -> _SnapsView: ...
 
     def __getitem__(
         self, idump: Union[int, slice, Tuple[Union[int, slice], ...]]

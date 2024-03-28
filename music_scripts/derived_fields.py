@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
 
 class BaseMusicData(ABC):
-
     """MUSIC simulation data wrapper, either a full sim or a single dump."""
 
     @property
@@ -90,7 +89,6 @@ class DataFetcher(ABC, Generic[T_contra, U_co], _DCWithVarName):
 
 @dataclass(frozen=True)
 class FieldGetter(DataFetcher[BaseMusicData, BigArray]):
-
     """Get a field from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
@@ -99,7 +97,6 @@ class FieldGetter(DataFetcher[BaseMusicData, BigArray]):
 
 @dataclass(frozen=True)
 class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
-
     """Get a radial profile from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
@@ -116,7 +113,6 @@ class ProfGetter(DataFetcher[BaseMusicData, BigArray]):
 
 @dataclass(frozen=True)
 class TimeAveragedProfGetter(DataFetcher[BaseMusicData, BigArray]):
-
     """Get a radial profile from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
@@ -128,7 +124,6 @@ class TimeAveragedProfGetter(DataFetcher[BaseMusicData, BigArray]):
 
 @dataclass(frozen=True)
 class TimeSeriesGetter(DataFetcher[BaseMusicData, BigArray]):
-
     """Get a time series from MUSIC data."""
 
     def default_getter(self, bmdat: BaseMusicData) -> BigArray:
