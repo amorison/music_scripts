@@ -19,5 +19,5 @@ class SinglePlotFigure(Figure):
         fig = mplf.Figure(figsize=self.figsize)
         ax = fig.add_subplot()
         self.plot.draw_on(ax)
-        fig.set_tight_layout(True)
+        fig.tight_layout()
         return fig
