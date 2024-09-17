@@ -46,7 +46,8 @@ class Snap(BaseMusicData):
 
     @property
     def cartesian(self) -> bool:
-        return self.mdat.cartesian
+        # FIXME: MusicDump or Grid should surface this
+        return not self.dump._raw_dump._header.spherical
 
     @cached_property
     def big_array(self) -> BigArray:
@@ -107,7 +108,7 @@ class _SnapsView(BaseMusicData):
 
     @cached_property
     def cartesian(self) -> bool:
-        return self._mdat.params["geometry"]["cartesian"]
+        return self._mdat.cartesian
 
     @cached_property
     def prof1d(self) -> Prof1d:
@@ -190,7 +191,7 @@ class MusicData(BaseMusicData):
 
     @property
     def cartesian(self) -> bool:
-        return self.params["geometry"]["cartesian"]
+        return self[-1].cartesian
 
     @cached_property
     def big_array(self) -> BigArray:
