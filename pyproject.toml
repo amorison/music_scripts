@@ -46,7 +46,6 @@ disallow_untyped_defs = true
 module = [
     "f90nml.*",
     "h5py.*",
-    "matplotlib.*",
     "mpl_toolkits.*",
     "pyevtk.*",
     "scipy.*",

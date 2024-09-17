@@ -91,6 +91,7 @@ class RawSphericalScalarPlot(Plot):
             ax.set_aspect("equal")
             ax.set_axis_off()
         if self.with_colorbar:
+            assert ax.figure is not None
             cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
             ax.figure.colorbar(surf, cax=cax, label=self.data_label)
 
@@ -121,6 +122,7 @@ class RawCartesianScalarPlot(Plot):
         ax.set_aspect("equal")
         ax.set_axis_off()
         if self.with_colorbar:
+            assert ax.figure is not None
             cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
             ax.figure.colorbar(surf, cax=cax)
 
@@ -232,12 +234,13 @@ class RiverPlot(Plot):
 
     def draw_on(self, ax: Axes) -> None:
         profile = self.music_data.rprof[self.var]
-        time = profile.labels_along_axis("time")
-        x_1 = profile.labels_along_axis("x1")
+        time = np.array(profile.labels_along_axis("time"))
+        x_1 = np.array(profile.labels_along_axis("x1"))
         surf = ax.pcolormesh(
             time, x_1, profile.array().T, shading="nearest", rasterized=True
         )
         cax = make_axes_locatable(ax).append_axes("right", size="3%", pad=0.15)
+        assert ax.figure is not None
         ax.figure.colorbar(surf, cax=cax)
 
 
