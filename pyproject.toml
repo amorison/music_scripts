@@ -54,6 +54,12 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.uv]
+dev-dependencies = [
+    "mypy>=1.11.2",
+    "ruff>=0.6.5",
+]
+
 [tool.uv.sources]
 music_mesa_tables = { git = "ssh://git@github.com/amorison/music_mesa_tables.git" , subdirectory = "music-mesa-tables-py"}
 pymusic = { git = "ssh://git@bitbucket.org/glt/pymusic.git" }
