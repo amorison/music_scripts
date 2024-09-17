@@ -53,3 +53,7 @@ module = [
     "tomso.*",
 ]
 ignore_missing_imports = true
+
+[tool.uv.sources]
+music_mesa_tables = { git = "ssh://git@github.com/amorison/music_mesa_tables.git" , subdirectory = "music-mesa-tables-py"}
+pymusic = { git = "ssh://git@bitbucket.org/glt/pymusic.git" }
