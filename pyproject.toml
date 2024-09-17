@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
 
 [project]
 name = "music_scripts"
@@ -36,12 +36,8 @@ dependencies = [
 [project.scripts]
 mutools = "music_scripts.__main__:main"
 
-[tool.setuptools.packages.find]
+[tool.hatch.build.targets.sdist]
 include = ["music_scripts"]
-namespaces = false
-
-[tool.setuptools.package-data]
-music_scripts = ["py.typed"]
 
 [tool.mypy]
 disallow_untyped_defs = true
