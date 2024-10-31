@@ -68,6 +68,10 @@ class FgongModel:
         return np.flip(self._fgong.T)
 
     @cached_property
+    def pressure(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.P)
+
+    @cached_property
     def opacity(self) -> NDArray[np.floating]:
         return np.flip(self._fgong.kappa)
 
