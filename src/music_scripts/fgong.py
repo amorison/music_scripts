@@ -44,6 +44,18 @@ class FgongModel:
         return np.flip(self._fgong.r)
 
     @cached_property
+    def xmass(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.m)
+
+    @cached_property
+    def h_frac(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.X)
+
+    @cached_property
+    def metal_frac(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.Z)
+
+    @cached_property
     def density(self) -> NDArray[np.floating]:
         return np.flip(self._fgong.rho)
 
