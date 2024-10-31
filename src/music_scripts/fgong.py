@@ -48,6 +48,10 @@ class FgongModel:
         return np.flip(self._fgong.rho)
 
     @cached_property
+    def bv_freq2(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.N2)
+
+    @cached_property
     def temperature(self) -> NDArray[np.floating]:
         return np.flip(self._fgong.T)
 
