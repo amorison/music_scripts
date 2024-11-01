@@ -22,11 +22,11 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=1.21",
-    "scipy>=1.6",
-    "f90nml>=1.4.3",
-    "h5py>=3.7",
-    "matplotlib>=3.6",
+    "numpy>=2.1",
+    "scipy>=1.14",
+    "f90nml>=1.4.4",
+    "h5py>=3.12",
+    "matplotlib>=3.9",
     "pyevtk>=1.6",
     "tomso>=0.2.1",
     "music_mesa_tables~=0.2.2",
@@ -57,6 +57,6 @@ ignore_missing_imports = true
 
 [tool.uv]
 dev-dependencies = [
-    "mypy>=1.11.2",
-    "ruff>=0.6.5",
+    "mypy>=1.13",
+    "ruff>=0.7.2",
 ]
