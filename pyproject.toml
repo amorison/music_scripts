@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "music_scripts"
 version = "0.1.0"
 description = "MUSIC toolshed"
+readme = "README.md"
 authors = [{name = "Adrien Morison", email = "adrien.morison@gmail.com"}]
 license = {file = "LICENSE"}
 urls = {homepage = "https://github.com/amorison/music_scripts/"}
