@@ -72,6 +72,14 @@ class FgongModel:
         return np.flip(self._fgong.P)
 
     @cached_property
+    def luminosity(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.L_r)
+
+    @cached_property
+    def e_nuclear(self) -> NDArray[np.floating]:
+        return np.flip(self._fgong.epsilon)
+
+    @cached_property
     def opacity(self) -> NDArray[np.floating]:
         return np.flip(self._fgong.kappa)
 
