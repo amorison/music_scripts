@@ -38,6 +38,12 @@ dependencies = [
 [project.scripts]
 mutools = "music_scripts.__main__:main"
 
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "ruff>=0.7.2",
+]
+
 [tool.hatch.build.targets.sdist]
 include = ["music_scripts"]
 
@@ -54,9 +60,3 @@ module = [
     "tomso.*",
 ]
 ignore_missing_imports = true
-
-[tool.uv]
-dev-dependencies = [
-    "mypy>=1.13",
-    "ruff>=0.7.2",
-]
