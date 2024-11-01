@@ -26,8 +26,8 @@ dependencies = [
     "pyevtk>=1.6",
     "tomso>=0.2.1",
     "music_mesa_tables~=0.2.2",
-    "music_pykg~=6.0.0",
-    "pymusic~=2.0",
+    "music_pykg~=7.1",
+    "pymusic-astro~=3.0",
     "loam>=0.8.0,<0.9.0",
 ]
 
@@ -56,6 +56,3 @@ dev-dependencies = [
     "mypy>=1.11.2",
     "ruff>=0.6.5",
 ]
-
-[tool.uv.sources]
-pymusic = { git = "ssh://git@bitbucket.org/glt/pymusic.git" }
