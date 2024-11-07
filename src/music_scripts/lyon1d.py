@@ -66,7 +66,7 @@ class Lyon1dData:
     nabla_adiab: NDArray[np.float64]
     nabla: NDArray[np.float64]
     c_sound: NDArray[np.float64]
-    brunt_vaisala: NDArray[np.float64]
+    brunt_vaisala_bad_centering: NDArray[np.float64]
 
     @staticmethod
     def from_file(filepath: Union[str, PathLike]) -> Lyon1dData:
