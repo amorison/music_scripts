@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling>=1.25"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.7.20"]
+build-backend = "uv_build"
 
 [project]
 name = "music_scripts"
@@ -44,9 +44,6 @@ dev = [
     "mypy>=1.13",
     "ruff>=0.7.2",
 ]
-
-[tool.hatch.build.targets.sdist]
-include = ["music_scripts"]
 
 [tool.mypy]
 disallow_untyped_defs = true
