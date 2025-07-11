@@ -24,7 +24,7 @@ def restart_batch(batchfile: Path) -> None:
 
     old_music_out = find_ends_with(content_parts, ".out")
     out_number = int(old_music_out[-6:-4])
-    new_music_out = old_music_out[:-6] + f"{out_number+1:02d}.out"
+    new_music_out = old_music_out[:-6] + f"{out_number + 1:02d}.out"
     print(f"{batchfile}: {old_music_out} > {new_music_out}")
 
     params = Path(find_ends_with(content_parts, ".nml"))
